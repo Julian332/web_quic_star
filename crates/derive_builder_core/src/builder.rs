@@ -5,7 +5,7 @@ use quote::{ToTokens, TokenStreamExt};
 use syn::punctuated::Punctuated;
 use syn::{Path, TraitBound, TraitBoundModifier, TypeParamBound};
 
-use crate::{doc_comment_from, BuildMethod, BuilderField, BuilderPattern, Setter};
+use crate::{doc_comment_from, BuildMethod, BuilderField, BuilderPattern, Setter, ToSnakeCase};
 
 const ALLOC_NOT_ENABLED_ERROR: &str = r#"`alloc` is disabled within 'derive_builder', consider one of the following:
 * enable feature `alloc` on 'dervie_builder' if a `global_allocator` is present
@@ -119,6 +119,7 @@ pub struct Builder<'a> {
     ///
     /// Expects each entry to be terminated by a comma.
     pub fields: Vec<TokenStream>,
+    pub update_fields: Vec<TokenStream>,
     /// Builder field initializers, e.g. `foo: Default::default(),`
     ///
     /// Expects each entry to be terminated by a comma.
@@ -167,6 +168,7 @@ impl<'a> ToTokens for Builder<'a> {
             let bounded_generics = self.compute_impl_bounds();
             let (_, _, _) = bounded_generics.split_for_impl();
             let builder_fields = &self.fields;
+            let update_builder_fields = &self.update_fields;
             let _ = &self.field_initializers;
             let _ = &self.create_empty;
             let _ = &self.functions;
@@ -213,6 +215,21 @@ impl<'a> ToTokens for Builder<'a> {
                 #builder_doc_comment
                 #builder_vis struct #builder_ident #struct_generics #struct_where_clause {
                     #(#builder_fields)*
+                }
+            ));
+            let update_builder_ident = format_ident!("Update{builder_ident}");
+            let mut schema = builder_ident.to_string().to_snake_case();
+            schema.truncate(schema.len() - 8);
+            let schema = format_ident!("{schema}s");
+
+            tokens.append_all(quote!(
+                #[derive(AsChangeset)]
+                #derive_attr
+                #(#struct_attrs)*
+                #builder_doc_comment
+                #[diesel(table_name = crate::schema::#schema)]
+                #builder_vis struct #update_builder_ident #struct_generics #struct_where_clause {
+                    #(#update_builder_fields)*
                 }
             ));
 
@@ -370,6 +387,188 @@ impl<'a> Builder<'a> {
             generics
         } else {
             Default::default()
+        }
+    }
+
+    pub fn to_view_tokens(&self, tokens: &mut TokenStream) {
+        if self.enabled {
+            let _ = self.crate_root;
+            let builder_vis = &self.visibility;
+            let builder_ident = &self.ident;
+            let _ = &self.generate_error;
+            let _ = &self.generate_validation_error;
+            let _ = &self.no_alloc;
+            let _ = &self.std;
+            let _ = ALLOC_NOT_ENABLED_ERROR;
+            // Splitting because Generics doesn't output WhereClause, see dtolnay/syn#782
+            let (struct_generics, struct_where_clause) = (
+                self.generics,
+                self.generics.and_then(|g| g.where_clause.as_ref()),
+            );
+            let bounded_generics = self.compute_impl_bounds();
+            let (_, _, _) = bounded_generics.split_for_impl();
+            let builder_fields = &self.fields;
+            let update_builder_fields = &self.update_fields;
+            let _ = &self.field_initializers;
+            let _ = &self.create_empty;
+            let _ = &self.functions;
+
+            // Create the comma-separated set of derived traits for the builder
+            let derive_attr = {
+                let clone_trait: Path = parse_quote!(Clone);
+                let de_trait: Path = parse_quote!(Deserialize);
+                let se_trait: Path = parse_quote!(Serialize);
+                let json_schema_trait: Path = parse_quote!(JsonSchema);
+                let default_trait: Path = parse_quote!(Default);
+
+                let mut traits: Punctuated<&Path, Token![,]> = Default::default();
+                traits.push(&de_trait);
+                traits.push(&se_trait);
+                traits.push(&json_schema_trait);
+                traits.push(&default_trait);
+                if self.must_derive_clone {
+                    traits.push(&clone_trait);
+                }
+                traits.extend(self.derives);
+
+                if traits.is_empty() {
+                    quote!()
+                } else {
+                    quote!(#[derive(#traits)])
+                }
+            };
+
+            let struct_attrs = self.struct_attrs;
+            let _ = self.impl_attrs;
+
+            let builder_doc_comment = &self.doc_comment;
+
+            #[cfg(not(feature = "clippy"))]
+            tokens.append_all(quote!(#[allow(clippy::all)]));
+
+            // struct_attrs MUST come after derive_attr, otherwise attributes for a derived
+            // trait will appear before its derivation. As of rustc 1.59.0 this is a compiler
+            // warning; see https://github.com/rust-lang/rust/issues/79202
+            tokens.append_all(quote!(
+                #derive_attr
+                #(#struct_attrs)*
+                #builder_doc_comment
+                #builder_vis struct #builder_ident #struct_generics #struct_where_clause {
+                    #(#builder_fields)*
+                }
+            ));
+            let update_builder_ident = format_ident!("Update{builder_ident}");
+            let mut schema = builder_ident.to_string().to_snake_case();
+            schema.truncate(schema.len() - 8);
+            let schema = format_ident!("{schema}s");
+
+            tokens.append_all(quote!(
+                #[derive(AsChangeset)]
+                #derive_attr
+                #(#struct_attrs)*
+                #builder_doc_comment
+                #[diesel(table_name = crate::schema_view::#schema)]
+                #builder_vis struct #update_builder_ident #struct_generics #struct_where_clause {
+                    #(#update_builder_fields)*
+                }
+            ));
+
+            // #[cfg(not(feature = "clippy"))]
+            // tokens.append_all(quote!(#[allow(clippy::all)]));
+            //
+            // tokens.append_all(quote!(
+            //     #(#impl_attrs)*
+            //     #[allow(dead_code)]
+            //     impl #impl_generics #builder_ident #impl_ty_generics #impl_where_clause {
+            //         #(#functions)*
+            //
+            //         /// Create an empty builder, with all fields set to `None` or `PhantomData`.
+            //         fn #create_empty() -> Self {
+            //             Self {
+            //                 #(#builder_field_initializers)*
+            //             }
+            //         }
+            //     }
+            // ));
+
+            if self.impl_default {
+                // tokens.append_all(quote!(
+                //     impl #impl_generics #crate_root::export::core::default::Default for #builder_ident #impl_ty_generics #impl_where_clause {
+                //         fn default() -> Self {
+                //             Self::#create_empty()
+                //         }
+                //     }
+                // ));
+            }
+
+            // if self.no_alloc && self.generate_error && self.generate_validation_error {
+            //     let err = syn::Error::new_spanned(&self.ident, ALLOC_NOT_ENABLED_ERROR);
+            //     tokens.append_all(err.to_compile_error());
+            // } else if self.generate_error {
+            //     let builder_error_ident = format_ident!("{}Error", builder_ident);
+            //     let builder_error_doc = format!("Error type for {}", builder_ident);
+            //
+            //     let validation_error = if self.generate_validation_error {
+            //         quote!(
+            //             /// Custom validation error
+            //             ValidationError(#crate_root::export::core::string::String),
+            //         )
+            //     } else {
+            //         TokenStream::new()
+            //     };
+            //     let validation_from = if self.generate_validation_error {
+            //         quote!(
+            //             impl #crate_root::export::core::convert::From<#crate_root::export::core::string::String> for #builder_error_ident {
+            //                 fn from(s: #crate_root::export::core::string::String) -> Self {
+            //                     Self::ValidationError(s)
+            //                 }
+            //             }
+            //         )
+            //     } else {
+            //         TokenStream::new()
+            //     };
+            //     let validation_display = if self.generate_validation_error {
+            //         quote!(
+            //             Self::ValidationError(ref error) => write!(f, "{}", error),
+            //         )
+            //     } else {
+            //         TokenStream::new()
+            //     };
+            //
+            //     tokens.append_all(quote!(
+            //         #[doc=#builder_error_doc]
+            //         #[derive(Debug)]
+            //         #[non_exhaustive]
+            //         #builder_vis enum #builder_error_ident {
+            //             /// Uninitialized field
+            //             UninitializedField(&'static str),
+            //             #validation_error
+            //         }
+            //
+            //         impl #crate_root::export::core::convert::From<#crate_root::UninitializedFieldError> for #builder_error_ident {
+            //             fn from(s: #crate_root::UninitializedFieldError) -> Self {
+            //                 Self::UninitializedField(s.field_name())
+            //             }
+            //         }
+            //
+            //         #validation_from
+            //
+            //         impl #crate_root::export::core::fmt::Display for #builder_error_ident {
+            //             fn fmt(&self, f: &mut #crate_root::export::core::fmt::Formatter) -> #crate_root::export::core::fmt::Result {
+            //                 match self {
+            //                     Self::UninitializedField(ref field) => write!(f, "`{}` must be initialized", field),
+            //                     #validation_display
+            //                 }
+            //             }
+            //         }
+            //     ));
+            //
+            //     if self.std {
+            //         tokens.append_all(quote!(
+            //             impl std::error::Error for #builder_error_ident {}
+            //         ));
+            //     }
+            // }
         }
     }
 }

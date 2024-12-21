@@ -61,6 +61,15 @@ impl<'a> BuilderField<'a> {
         let crate_root = self.crate_root;
         quote! { #ident : #crate_root::export::core::default::Default::default(), }
     }
+    pub fn to_update_tokens(&self) -> TokenStream {
+        let ident = self.field_ident;
+        let _ = &self.field_visibility;
+        let ty = &self.field_type.with_crate_root_for_update(self.crate_root);
+        let attrs = self.attrs;
+        quote!(
+            #(#attrs)* pub #ident: #ty,
+        )
+    }
 }
 
 /// The type of a field in the builder struct
@@ -103,9 +112,23 @@ impl<'a> BuilderFieldType<'a> {
             field_type: self,
         }
     }
+    fn with_crate_root_for_update(
+        &'a self,
+        crate_root: &'a syn::Path,
+    ) -> UpdateBuilderFieldTypeWithCrateRoot<'a> {
+        UpdateBuilderFieldTypeWithCrateRoot {
+            crate_root,
+            field_type: self,
+        }
+    }
 }
 
 struct BuilderFieldTypeWithCrateRoot<'a> {
+    crate_root: &'a syn::Path,
+    field_type: &'a BuilderFieldType<'a>,
+}
+
+struct UpdateBuilderFieldTypeWithCrateRoot<'a> {
     crate_root: &'a syn::Path,
     field_type: &'a BuilderFieldType<'a>,
 }
@@ -116,6 +139,20 @@ impl<'a> ToTokens for BuilderFieldTypeWithCrateRoot<'a> {
         match self.field_type {
             BuilderFieldType::Optional(ty) => tokens.append_all(quote!(
                 #crate_root::export::core::option::Option<Filter<#ty>>
+            )),
+            BuilderFieldType::Precise(ty) => ty.to_tokens(tokens),
+            BuilderFieldType::Phantom(ty) => tokens.append_all(quote!(
+                #crate_root::export::core::marker::PhantomData<#ty>
+            )),
+        }
+    }
+}
+impl<'a> ToTokens for UpdateBuilderFieldTypeWithCrateRoot<'a> {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let crate_root = self.crate_root;
+        match self.field_type {
+            BuilderFieldType::Optional(ty) => tokens.append_all(quote!(
+                #crate_root::export::core::option::Option<#ty>
             )),
             BuilderFieldType::Precise(ty) => ty.to_tokens(tokens),
             BuilderFieldType::Phantom(ty) => tokens.append_all(quote!(

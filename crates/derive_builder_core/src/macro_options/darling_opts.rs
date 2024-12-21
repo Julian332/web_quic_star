@@ -667,6 +667,7 @@ impl Options {
             generics: Some(&self.generics),
             visibility: self.builder_vis(),
             fields: Vec::with_capacity(self.field_count()),
+            update_fields: Vec::with_capacity(self.field_count()),
             field_initializers: Vec::with_capacity(self.field_count()),
             functions: Vec::with_capacity(self.field_count()),
             generate_error: self

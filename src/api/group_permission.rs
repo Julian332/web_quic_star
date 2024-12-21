@@ -4,18 +4,18 @@
 #![allow(clippy::all)]
 
 use derive_builder::WebApiGen;
-use diesel::{AsChangeset, Identifiable, Insertable, Queryable, Selectable};
+use diesel::{AsChangeset, Identifiable, Insertable, QueryDsl, Queryable, RunQueryDsl, Selectable};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 #[allow(clippy::all)]
-#[derive(Deserialize, Serialize, JsonSchema, Default, Clone)]
 /// example:{group_id: 1,permission_id: 1}
-
+#[derive(Deserialize, Serialize, JsonSchema, Default, Clone)]
 pub struct GroupsPermissionBuilder {
     pub group_id: ::derive_builder::export::core::option::Option<Filter<i64>>,
     pub permission_id: ::derive_builder::export::core::option::Option<Filter<i64>>,
 }
+
 use crate::db_models::group_permission::GroupsPermission;
 use crate::db_models::ConnPool;
 use crate::framework::api::Compare;
@@ -24,6 +24,7 @@ use crate::framework::api::LOGIN_URL;
 use crate::framework::api_doc::{default_resp_docs, empty_resp_docs};
 use crate::framework::auth::AuthBackend;
 use crate::schema::groups_permissions::dsl::groups_permissions;
+use crate::AppRes;
 use aide::axum::routing::{delete_with, get_with, post_with, put_with};
 use aide::axum::ApiRouter;
 use axum::extract::Path;

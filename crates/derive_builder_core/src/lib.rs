@@ -49,6 +49,7 @@ pub(crate) use default_expression::DefaultExpression;
 pub(crate) use doc_comment::doc_comment_from;
 pub(crate) use initializer::{FieldConversion, Initializer};
 pub(crate) use options::{BuilderPattern, Each};
+use proc_macro2::TokenStream;
 use quote::TokenStreamExt;
 pub(crate) use setter::Setter;
 
@@ -74,6 +75,7 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
     let new_model = format_ident!("New{}", model);
     let mut builder = opts.as_builder();
     let builder_ident = opts.builder_ident();
+    let update_builder_ident = format_ident!("Update{builder_ident}",);
 
     let mut id_type = None;
     for field in opts.fields() {
@@ -215,7 +217,7 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
             pub async fn update_entity_by_id(
                 State(pool): State<ConnPool>,
                 Path(id_param): Path<#id_type>,
-                Json(new): Json<#new_model>,
+                Json(new): Json<#update_builder_ident>,
             ) -> Result<Json<#model>, AppError> {
                 let mut connection = pool.get()?;
                 let result = diesel::update(#schema_s.find(id_param))
@@ -289,7 +291,9 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
     // let x_header = quote! {};
 
     for field in opts.fields() {
-        builder.push_field(field.as_builder_field());
+        let x = field.as_builder_field();
+        builder.push_field(x.clone());
+        builder.update_fields.push(x.to_update_tokens())
         // builder.push_setter_fn(field.as_setter());
         // build_fn.push_initializer(field.as_initializer());
     }
@@ -477,14 +481,18 @@ pub fn query_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::Token
     // let x_header = quote! {};
 
     for field in opts.fields() {
-        builder.push_field(field.as_builder_field());
+        let x = field.as_builder_field();
+        builder.push_field(x.clone());
+        builder.update_fields.push(x.to_update_tokens())
+
         // builder.push_setter_fn(field.as_setter());
         // build_fn.push_initializer(field.as_initializer());
     }
 
     // builder.push_build_fn();
 
-    let mut stream = quote!(#builder);
+    let mut stream = TokenStream::new();
+    builder.to_view_tokens(&mut stream);
     stream.append_all(f);
     stream.into()
 }
