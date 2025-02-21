@@ -1,3 +1,4 @@
+#![allow(unused_imports)]
 use framework::api_doc::errors::AppError;
 use std::collections::HashMap;
 use std::panic;

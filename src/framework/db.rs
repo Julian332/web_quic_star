@@ -8,7 +8,7 @@ use r2d2::Pool;
 use std::env;
 #[derive(QueryableByName)]
 pub struct Count {
-    #[sql_type = "diesel::sql_types::BigInt"]
+    #[diesel(sql_type = diesel::sql_types::BigInt)]
     pub count: i64,
 }
 

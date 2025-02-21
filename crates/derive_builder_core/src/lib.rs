@@ -18,6 +18,7 @@
 // #![deny(warnings, missing_docs)]
 #![cfg_attr(test, recursion_limit = "100")]
 // #![feature(let_chains)]
+#![allow(warnings)]
 #[macro_use]
 extern crate darling;
 extern crate proc_macro;

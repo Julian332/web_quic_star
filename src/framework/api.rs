@@ -32,12 +32,6 @@ impl<T: Default> PageParam<T> {
 
 pub const LOGIN_URL: &str = "/auth/login";
 
-#[derive(QueryableByName)]
-pub struct Count {
-    #[sql_type = "diesel::sql_types::BigInt"]
-    pub count: i64,
-}
-
 #[derive(Deserialize, Serialize, JsonSchema, Clone, Default)]
 pub enum Compare {
     NotEqual,

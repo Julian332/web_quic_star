@@ -1,8 +1,9 @@
 use aide::OperationIo;
 use axum::{http::StatusCode, response::IntoResponse};
+use derive_more::{Display, Error};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
+use serde_json::Value;
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
 use uuid::Uuid;
@@ -22,6 +23,9 @@ pub struct AppError {
     error_origin_position: Option<String>,
 }
 
+#[allow(unused)]
+#[derive(Debug, Display, Error)]
+struct NoneError;
 // impl Deref for AppError {
 //     type Target = dyn StdError + Send + Sync + 'static;
 //
@@ -81,7 +85,6 @@ impl AppError {
         self
     }
 }
-
 
 impl<T: Error> From<T> for AppError {
     #[track_caller]

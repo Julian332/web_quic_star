@@ -1,5 +1,5 @@
 # 编码规范
-1. 不使用 unwrap, 针对result使用? 与 AppError 传递错误并处理,  只针对fatal 错误使用expect
+1. 不使用 unwrap, 针对result使用? 与 AppError 传递错误并处理, 对Option 使用ok_or(NoneError) 与? 传递错误,  只针对fatal 错误使用expect
 2. test 可以用unwrap
 3. 使用rustfmt 格式化后提交
 4. 使用clippy检查并且不要有warning , 如果有,留下解释
