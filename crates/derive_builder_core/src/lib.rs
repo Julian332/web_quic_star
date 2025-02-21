@@ -149,7 +149,7 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
         pub mod web {
             use crate::framework::api::{PageParam, PageRes};
             use super::*;
-            use crate::framework::api_doc::extractors::Json;
+            use axum::Json;
             use axum::extract::State;
             use diesel::r2d2::{ConnectionManager, Pool};
             use diesel::{ExpressionMethods,  QueryDsl, RunQueryDsl, SelectableHelper};
@@ -387,7 +387,7 @@ pub fn query_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::Token
         pub mod web {
             use crate::framework::api::{PageParam, PageRes};
             use super::*;
-            use crate::framework::api_doc::extractors::Json;
+            use axum::Json;
             use axum::extract::State;
             use diesel::r2d2::{ConnectionManager, Pool};
             use diesel::{ExpressionMethods,  QueryDsl, RunQueryDsl, SelectableHelper};

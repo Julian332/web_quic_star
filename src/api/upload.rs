@@ -1,5 +1,5 @@
 use crate::framework::api_doc::empty_resp_docs;
-use crate::framework::api_doc::extractors::Json;
+use axum::Json;
 use crate::framework::auth::AuthBackend;
 use crate::utils::file;
 use crate::AppRes;

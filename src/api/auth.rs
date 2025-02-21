@@ -1,6 +1,6 @@
 use crate::db_models::user::User;
 use crate::framework::api_doc::default_resp_docs;
-use crate::framework::api_doc::extractors::Json;
+use axum::Json;
 use crate::framework::auth::{AuthBackend, Credentials};
 use aide::axum::routing::post_with;
 use aide::axum::{ApiRouter, IntoApiResponse};

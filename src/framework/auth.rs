@@ -280,5 +280,7 @@ impl AuthzBackend for AuthBackend {
 
 impl_from!(diesel::result::Error);
 impl_from!(r2d2::Error);
+#[cfg(feature = "eth_mode")]
+impl_from!(alloy::primitives::SignatureError);
 #[cfg(feature = "solana_mode")]
 impl_from!(anchor_client::solana_sdk::signature::ParseSignatureError);

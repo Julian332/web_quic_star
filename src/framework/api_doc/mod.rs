@@ -13,7 +13,6 @@ use std::sync::Arc;
 pub mod axum_json_for_schema;
 pub mod docs;
 pub mod errors;
-pub mod extractors;
 
 pub fn default_resp_docs<Resp: JsonSchema + Serialize>(
     op: TransformOperation,

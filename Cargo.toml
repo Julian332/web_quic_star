@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-default = ["postgres"]
+default = ["postgres","solana_mode"]
 eth_mode = ["dep:alloy"]
 solana_mode = ["dep:anchor-client"]
 dev = []

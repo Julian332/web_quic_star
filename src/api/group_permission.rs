@@ -36,7 +36,7 @@ pub(crate) mod web {
     use crate::framework::api::PageParam;
     use crate::framework::api::PageRes;
     use crate::framework::api_doc::errors::AppError;
-    use crate::framework::api_doc::extractors::Json;
+    use axum::Json;
     use crate::framework::db::{LogicDeleteQuery, Paginate};
     use axum::extract::State;
     use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SelectableHelper};

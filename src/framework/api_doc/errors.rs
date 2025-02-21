@@ -1,4 +1,3 @@
-use crate::framework::api_doc::axum_json_for_schema::JsonSchemaRejection;
 use aide::OperationIo;
 use axum::{http::StatusCode, response::IntoResponse};
 use schemars::JsonSchema;
@@ -82,16 +81,7 @@ impl AppError {
         self
     }
 }
-impl From<JsonSchemaRejection> for AppError {
-    fn from(rejection: JsonSchemaRejection) -> Self {
-        match rejection {
-            JsonSchemaRejection::Json(j) => Self::new(j.to_string()),
-            JsonSchemaRejection::Serde(e) => Self::new(format!("serialize error{e}")),
-            JsonSchemaRejection::Schema(s) => Self::new("schema validation error".to_string())
-                .with_details(json!({ "schema_validation": s })),
-        }
-    }
-}
+
 
 impl<T: Error> From<T> for AppError {
     #[track_caller]

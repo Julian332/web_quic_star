@@ -1,3 +1,4 @@
+use std::fmt::Formatter;
 use aide::OperationIo;
 use alloy::primitives::Address;
 use schemars::gen::SchemaGenerator;
