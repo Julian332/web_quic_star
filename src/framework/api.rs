@@ -1,4 +1,3 @@
-use diesel::QueryableByName;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 

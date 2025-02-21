@@ -1,13 +1,8 @@
 use std::sync::Arc;
 
 use aide::{
-    axum::{
-        routing::{get, get_with},
-        ApiRouter, IntoApiResponse,
-    },
+    axum::{ApiRouter, IntoApiResponse},
     openapi::OpenApi,
-    redoc::Redoc,
-    scalar::Scalar,
 };
 use axum::{response::IntoResponse, Extension};
 
@@ -44,8 +39,8 @@ pub fn docs_routes() -> ApiRouter {
     let router: ApiRouter = ApiRouter::new()
         .api_route_with(
             "/",
-            get_with(
-                Scalar::new("/docs/private/api.json")
+            aide::axum::routing::get_with(
+                aide::scalar::Scalar::new("/docs/private/api.json")
                     .with_title("web_quic_star")
                     .axum_handler(),
                 |op| op.description("This documentation page."),
@@ -54,15 +49,15 @@ pub fn docs_routes() -> ApiRouter {
         )
         .api_route_with(
             "/redoc",
-            get_with(
-                Redoc::new("/docs/private/api.json")
+            aide::axum::routing::get_with(
+                aide::redoc::Redoc::new("/docs/private/api.json")
                     .with_title("web_quic_star")
                     .axum_handler(),
                 |op| op.description("This documentation page."),
             ),
             |p| p.security_requirement("ApiKey"),
         )
-        .route("/private/api.json", get(serve_docs));
+        .route("/private/api.json", aide::axum::routing::get(serve_docs));
     // .with_state(state);
 
     // Afterwards we disable response inference because
