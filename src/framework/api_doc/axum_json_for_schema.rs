@@ -21,7 +21,6 @@ use std::{
     collections::{HashMap, VecDeque},
 };
 
-use async_trait::async_trait;
 use axum::{
     body::Body,
     extract::{rejection::JsonRejection, FromRequest},
@@ -46,7 +45,24 @@ use serde_path_to_error::Segment;
 /// message.
 pub struct JsonValidator<T>(pub T);
 
-#[async_trait]
+//impl<S> FromRequest<S> for Bytes
+// where
+//     S: Send + Sync,
+// {
+//     type Rejection = BytesRejection;
+//
+//     async fn from_request(req: Request, _: &S) -> Result<Self, Self::Rejection> {
+//         let bytes = req
+//             .into_limited_body()
+//             .collect()
+//             .await
+//             .map_err(FailedToBufferBody::from_err)?
+//             .to_bytes();
+//
+//         Ok(bytes)
+//     }
+// }
+// #[async_trait]
 impl<S, T> FromRequest<S> for JsonValidator<T>
 where
     S: Send + Sync,
@@ -228,7 +244,7 @@ mod impl_aide {
         T: JsonSchema,
     {
         fn operation_input(
-            ctx: &mut aide::gen::GenContext,
+            ctx: &mut aide::generate::GenContext,
             operation: &mut aide::openapi::Operation,
         ) {
             axum::Json::<T>::operation_input(ctx, operation);
@@ -242,14 +258,14 @@ mod impl_aide {
         type Inner = <axum::Json<T> as aide::OperationOutput>::Inner;
 
         fn operation_response(
-            ctx: &mut aide::gen::GenContext,
+            ctx: &mut aide::generate::GenContext,
             op: &mut aide::openapi::Operation,
         ) -> Option<aide::openapi::Response> {
             axum::Json::<T>::operation_response(ctx, op)
         }
 
         fn inferred_responses(
-            ctx: &mut aide::gen::GenContext,
+            ctx: &mut aide::generate::GenContext,
             operation: &mut aide::openapi::Operation,
         ) -> Vec<(Option<u16>, aide::openapi::Response)> {
             axum::Json::<T>::inferred_responses(ctx, operation)

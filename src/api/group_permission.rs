@@ -195,7 +195,7 @@ pub fn group_permission_routes(conn_pool: ConnPool) -> ApiRouter {
     );
     let router_read = ApiRouter::new()
         .api_route(
-            "/get_entity_by_id/:group_id/:permission_id",
+            "/get_entity_by_id/{group_id}/{permission_id}",
             get_with(web::get_entity_by_id, default_resp_docs::<GroupsPermission>),
         )
         .api_route(
@@ -203,7 +203,7 @@ pub fn group_permission_routes(conn_pool: ConnPool) -> ApiRouter {
             post_with(web::get_entity_page, empty_resp_docs),
         );
     let router_delete = ApiRouter::new().api_route(
-        "/delete_entity_by_id/:group_id/:permission_id",
+        "/delete_entity_by_id/{group_id}/{permission_id}",
         delete_with(
             web::delete_entity_by_id,
             default_resp_docs::<GroupsPermission>,

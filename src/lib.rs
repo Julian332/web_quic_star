@@ -13,6 +13,8 @@ pub mod framework;
 pub mod scheduled_task;
 pub mod schema;
 pub mod schema_view;
+#[cfg(feature = "solana_mode")]
+pub mod subscribe;
 pub mod utils;
 
 type AppRes<T> = Result<T, AppError>;
@@ -46,7 +48,7 @@ pub fn set_log() {
                 .with_line_number(true),
         )
         .init();
-    aide::gen::on_error(|error| {
+    aide::generate::on_error(|error| {
         error!("{error}");
     });
 }

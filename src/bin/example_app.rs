@@ -19,7 +19,7 @@ async fn main() {
     let connection_pool = setup_connection_pool();
     set_scheduler(connection_pool.clone()).await;
 
-    aide::gen::extract_schemas(true);
+    aide::generate::extract_schemas(true);
 
     let app = ApiRouter::new()
         .nest_api_service("/auth", web_quick::api::auth::router())

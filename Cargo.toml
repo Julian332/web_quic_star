@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-default = ["dev", "postgres"]
+default = ["postgres"]
 eth_mode = ["dep:alloy"]
 solana_mode = ["dep:anchor-client"]
 dev = []
@@ -12,10 +12,10 @@ postgres = ["diesel/postgres", "diesel-dynamic-schema/postgres"]
 #mysql = ["diesel/mysql", "diesel-dynamic-schema/mysql", "diesel-derive-enum/mysql","dep:r2d2_mysql"]
 
 [dependencies]
-axum = { version = "^0.7.0", features = ["macros"] }
-axum-macros = "0.4.2"
-axum-login = { path = "crates/axum-login" }
-aide = { version = "0.13.4", features = ["redoc", "scalar", "axum", "axum-extra", "macros", "axum-headers", "axum-multipart"] }
+axum = { version = "0.8.1", features = ["macros"] }
+axum-macros = "0.5.0"
+axum-login = { path = "crates/axum_login/axum-login" }
+aide = { version = "0.14.1", features = ["redoc", "scalar", "axum", "axum-extra", "macros", "axum-tokio", "axum-multipart", "axum-json"] }
 tokio = { version = "1.40.0", features = ["full"] }
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 tracing = "0.1.40"
@@ -38,16 +38,15 @@ diesel-enum = { version = "0.2.1", features = [] }
 
 
 dotenvy = "0.15.7"
-alloy = { version = "0.6.2", features = ["full"], optional = true }
+alloy = { version = "0.9.2", features = ["full"], optional = true }
 reqwest = { version = "0.12.9", features = ["json"] }
 futures = "0.3.31"
 tokio-cron-scheduler = { version = "0.13.0", features = [] }
 derive_builder = { path = "crates/derive_builder" }
-async-trait = "0.1.83"
 http = "1.1.0"
-itertools = "0.13.0"
+itertools = "0.14.0"
 serde_path_to_error = "0.1.16"
-jsonschema = { version = "0.26.1", default-features = false }
+jsonschema = { version = "0.28.1", default-features = false }
 derive_more = { version = "1.0.0", features = ["default", "error", "display"] }
 
 anchor-client = { path = "crates/anchor/client", optional = true }
@@ -55,4 +54,5 @@ tokio-util = "0.7.12"
 sha2 = "0.10.8"
 
 [build-dependencies]
-
+[net]
+git-fetch-with-cli = false

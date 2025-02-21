@@ -1,3 +1,6 @@
 [submodule "crates/anchor"]
 	path = crates/anchor
 	url = https://github.com/coral-xyz/anchor.git
+[submodule "crates/axum_login"]
+	path = crates/axum_login
+	url = https://github.com/maxcountryman/axum-login.git

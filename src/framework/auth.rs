@@ -7,7 +7,6 @@ use crate::schema::groups::table as groups;
 use crate::schema::groups_permissions::{group_id, permission_id, table as groups_permissions};
 use crate::schema::permissions::table as permissions;
 use crate::schema::users::{table as users, username};
-use async_trait::async_trait;
 use axum_login::tower_sessions::cookie::time::Duration;
 use axum_login::tower_sessions::{Expiry, MemoryStore, SessionManagerLayer};
 use axum_login::{
@@ -102,7 +101,6 @@ impl Display for AuthError {
     }
 }
 
-#[async_trait]
 impl AuthnBackend for AuthBackend {
     type User = User;
     type Credentials = Credentials;
@@ -225,6 +223,7 @@ impl AuthnBackend for AuthBackend {
     }
 }
 #[test]
+#[cfg(feature = "solana_mode")]
 fn test1() {
     use anchor_client::solana_sdk::signature::Keypair;
     use anchor_client::solana_sdk::signer::Signer;
@@ -256,7 +255,7 @@ impl From<String> for AuthPermission {
     }
 }
 
-#[async_trait]
+// #[async_trait]
 impl AuthzBackend for AuthBackend {
     type Permission = AuthPermission;
 
