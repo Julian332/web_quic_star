@@ -13,7 +13,6 @@ postgres = ["diesel/postgres", "diesel-dynamic-schema/postgres"]
 
 [dependencies]
 axum = { version = "0.8.1", features = ["macros"] }
-axum-macros = "0.5.0"
 axum-login = { path = "crates/axum_login/axum-login" }
 aide = { version = "0.14.1", features = ["redoc", "scalar", "axum", "axum-extra", "macros", "axum-tokio", "axum-multipart", "axum-json"] }
 tokio = { version = "1.40.0", features = ["full"] }
@@ -38,16 +37,13 @@ diesel-enum = { version = "0.2.1", features = [] }
 
 
 dotenvy = "0.15.7"
-alloy = { version = "0.9.2", features = ["full"], optional = true }
+alloy = { version = "0.11.1", features = ["full"], optional = true }
 reqwest = { version = "0.12.9", features = ["json"] }
 futures = "0.3.31"
 tokio-cron-scheduler = { version = "0.13.0", features = [] }
 derive_builder = { path = "crates/derive_builder" }
 http = "1.1.0"
-itertools = "0.14.0"
-serde_path_to_error = "0.1.16"
-jsonschema = { version = "0.28.1", default-features = false }
-derive_more = { version = "1.0.0", features = ["default", "error", "display"] }
+derive_more = { version = "2.0.1", features = ["default", "error", "display"] }
 
 anchor-client = { path = "crates/anchor/client", optional = true }
 tokio-util = "0.7.12"
