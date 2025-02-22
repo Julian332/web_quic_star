@@ -3,7 +3,7 @@ use diesel::query_builder::{AstPass, Query, QueryFragment};
 use diesel::query_dsl::LoadQuery;
 use diesel::r2d2::ConnectionManager;
 use diesel::sql_types::BigInt;
-use diesel::{QueryId, QueryResult, QueryableByName, RunQueryDsl};
+use diesel::{Connection, QueryId, QueryResult, QueryableByName, RunQueryDsl};
 use r2d2::Pool;
 use std::env;
 #[derive(QueryableByName)]
@@ -49,9 +49,10 @@ pub struct Paginated<T> {
 }
 
 impl<T> Paginated<T> {
-    pub fn load_and_count_pages<'a, U>(self, conn: &mut Conn) -> QueryResult<(Vec<U>, i64)>
+    pub fn load_and_count_pages<'a, U, C>(self, conn: &mut C) -> QueryResult<(Vec<U>, i64)>
     where
-        Self: LoadQuery<'a, Conn, (U, i64)>,
+        Self: LoadQuery<'a, C, (U, i64)>,
+        C: Connection,
     {
         // let per_page = self.per_page;
         let results = self.load::<(U, i64)>(conn)?;
@@ -66,14 +67,14 @@ impl<T: Query> Query for Paginated<T> {
     type SqlType = (T::SqlType, BigInt);
 }
 
-impl<T> RunQueryDsl<Conn> for Paginated<T> {}
+impl<T, C: Connection> RunQueryDsl<C> for Paginated<T> {}
 
 impl<T> QueryFragment<DbType> for Paginated<T>
 where
     T: QueryFragment<DbType>,
 {
     fn walk_ast<'b>(&'b self, mut out: AstPass<'_, 'b, DbType>) -> QueryResult<()> {
-        out.push_sql("SELECT *, COUNT(1) OVER () FROM (");
+        out.push_sql("SELECT *, COUNT(1)  FROM (");
         self.query.walk_ast(out.reborrow())?;
         out.push_sql(") t  LIMIT ");
         out.push_bind_param::<BigInt, _>(&self.per_page)?;
@@ -102,7 +103,7 @@ impl<T: Query> Query for LogicDeleteStatement<T> {
     type SqlType = T::SqlType;
 }
 
-impl<T> RunQueryDsl<Conn> for LogicDeleteStatement<T> {}
+impl<T, C: Connection> RunQueryDsl<C> for LogicDeleteStatement<T> {}
 
 impl<T> QueryFragment<DbType> for LogicDeleteStatement<T>
 where

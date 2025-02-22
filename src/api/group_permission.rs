@@ -36,9 +36,9 @@ pub(crate) mod web {
     use crate::framework::api::PageParam;
     use crate::framework::api::PageRes;
     use crate::framework::api_doc::errors::AppError;
-    use axum::Json;
     use crate::framework::db::{LogicDeleteQuery, Paginate};
     use axum::extract::State;
+    use axum::Json;
     use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SelectableHelper};
 
     pub async fn create_entity(
@@ -57,21 +57,19 @@ pub(crate) mod web {
         State(pool): State<ConnPool>,
         Path(id_param): Path<(i64, i64)>,
     ) -> Result<Json<GroupsPermission>, AppError> {
-        let mut connection = pool.get()?;
         let result = groups_permissions
             .find(id_param)
             .select(GroupsPermission::as_select())
-            .get_result(&mut connection)?;
+            .get_result(&mut pool.get()?)?;
         Ok(Json(result))
     }
     pub async fn delete_entity_by_id(
         State(pool): State<ConnPool>,
         Path(id_param): Path<(i64, i64)>,
     ) -> Result<Json<GroupsPermission>, AppError> {
-        let mut connection = pool.get()?;
         let result = diesel::delete(groups_permissions.find(id_param))
             .returning(GroupsPermission::as_returning())
-            .get_result(&mut connection)?;
+            .get_result(&mut pool.get()?)?;
 
         Ok(Json(result))
     }

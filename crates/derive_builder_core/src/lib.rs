@@ -205,12 +205,11 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
                 State(pool): State<ConnPool>,
                 Json(new_entity): Json<#new_model>,
             ) -> Result<Json<#model>, AppError> {
-                let mut connection = pool.get()?;
 
                 let result = diesel::insert_into(#schema_s)
                     .values(new_entity)
                     .returning(#model::as_returning())
-                    .get_result(&mut connection)?;
+                    .get_result(&mut pool.get()?)?;
 
                 Ok(Json(result))
             }
@@ -220,11 +219,10 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
                 Path(id_param): Path<#id_type>,
                 Json(new): Json<#update_builder_ident>,
             ) -> Result<Json<#model>, AppError> {
-                let mut connection = pool.get()?;
                 let result = diesel::update(#schema_s.find(id_param))
                     .set(&new)
                     .returning(#model::as_returning())
-                    .get_result(&mut connection)?;
+                    .get_result(&mut pool.get()?)?;
                 Ok(Json(result))
             }
 
@@ -232,11 +230,10 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
                 State(pool): State<ConnPool>,
                 Path(id_param): Path<#id_type>,
             ) -> Result<Json<#model>, AppError> {
-                let mut connection = pool.get()?;
                 let result = #schema_s
                     .find(id_param)
                     .select(#model::as_select())
-                    .get_result(&mut connection)?;
+                    .get_result(&mut pool.get()?)?;
                 Ok(Json(result))
             }
 
@@ -244,11 +241,10 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
                 State(pool): State<ConnPool>,
                 Path(id_param): Path<#id_type>,
             ) -> Result<Json<#model>, AppError> {
-                let mut connection = pool.get()?;
                 let result = diesel::update(#schema_s.find(id_param))
                     .set(crate::schema::#schema_s::is_delete.eq(true))
                     .returning(#model::as_returning())
-                    .get_result(&mut connection)?;
+                    .get_result(&mut pool.get()?)?;
                 Ok(Json(result))
             }
 
@@ -256,7 +252,6 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
                 State(pool): State<ConnPool>,
                 Json(page): Json<PageParam<#builder_ident>>,
             ) -> Result<Json<PageRes<#model, #builder_ident>>, AppError> {
-                let mut connection = pool.get()?;
 
                 let mut statement = crate::schema::#schema_s::dsl::#schema_s.into_boxed();
                 let filter = page.filters.clone();
@@ -273,14 +268,14 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
                         .select(#model::as_select())
                         .logic_delete_query()
                         .paginate(page.page_no, page.page_size)
-                        .load_and_count_pages(&mut connection)?
+                        .load_and_count_pages(&mut pool.get()?)?
                 } else {
                     statement
                         .order(order_column.asc().nulls_last())
                         .select(#model::as_select())
                         .logic_delete_query()
                         .paginate(page.page_no, page.page_size)
-                        .load_and_count_pages(&mut connection)?
+                        .load_and_count_pages(&mut pool.get()?)?
                 };
                 let page_res = PageRes::from_param_records_count(page, res.0, res.1);
                 Ok(Json(page_res))
@@ -432,11 +427,10 @@ pub fn query_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::Token
                 State(pool): State<ConnPool>,
                 Path(id_param): Path<#id_type>,
             ) -> Result<Json<#model>, AppError> {
-                let mut connection = pool.get()?;
                 let result = #schema_s
                     .find(id_param)
                     .select(#model::as_select())
-                    .get_result(&mut connection)?;
+                    .get_result(&mut pool.get()?)?;
                 Ok(Json(result))
             }
 
@@ -446,7 +440,6 @@ pub fn query_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::Token
                 State(pool): State<ConnPool>,
                 Json(page): Json<PageParam<#builder_ident>>,
             ) -> Result<Json<PageRes<#model, #builder_ident>>, AppError> {
-                let mut connection = pool.get()?;
 
                 let mut statement = crate::schema_view::#schema_s::dsl::#schema_s.into_boxed();
                 let filter = page.filters.clone();
@@ -463,14 +456,14 @@ pub fn query_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::Token
                         .select(#model::as_select())
                         .logic_delete_query()
                         .paginate(page.page_no, page.page_size)
-                        .load_and_count_pages(&mut connection)?
+                        .load_and_count_pages(&mut pool.get()?)?
                 } else {
                     statement
                         .order(order_column.asc())
                         .select(#model::as_select())
                         .logic_delete_query()
                         .paginate(page.page_no, page.page_size)
-                        .load_and_count_pages(&mut connection)?
+                        .load_and_count_pages(&mut pool.get()?)?
                 };
                 let page_res = PageRes::from_param_records_count(page, res.0, res.1);
                 Ok(Json(page_res))

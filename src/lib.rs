@@ -1,3 +1,4 @@
+use derive_more::{Display, Error};
 use framework::api_doc::errors::AppError;
 use std::collections::HashMap;
 use std::panic;
@@ -17,23 +18,37 @@ pub mod schema_view;
 pub mod subscribe;
 pub mod utils;
 
+//todo dyn paging filter for "or"
+//todo global soft delete
+//todo global multi TENANTRY
+//todo global multi TENANTRY
 type AppRes<T> = Result<T, AppError>;
 pub const FILE_SERVER_DIRECTORY: &str = "/assets";
 pub type Cache<K, V> = LazyLock<Arc<RwLock<HashMap<K, V>>>>;
 
+#[allow(unused)]
+#[derive(Debug, Display, Error)]
+struct NoneError;
 pub fn set_env() {
     #[cfg(feature = "dev")]
     {
-        tracing::info!("profile :{} is active", "dev");
-        dotenvy::from_filename(".env").expect("no .env file");
+        set_dev_env()
     }
     #[cfg(not(feature = "dev"))]
     {
-        tracing::info!("profile :{} is active", "release");
-        dotenvy::from_filename("env_prod.env").expect("no env_prod.env file");
+        set_prod_env()
     }
 }
 
+pub fn set_dev_env() {
+    tracing::info!("profile :{} is active", "dev");
+    dotenvy::from_filename(".env").expect("no .env file");
+}
+
+pub fn set_prod_env() {
+    tracing::info!("profile :{} is active", "release");
+    dotenvy::from_filename("env_prod.env").expect("no env_prod.env file");
+}
 pub fn set_log() {
     panic::set_hook(Box::new(|info| {
         error!(error = %info, "panic occurred");
