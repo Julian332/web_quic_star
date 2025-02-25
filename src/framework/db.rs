@@ -1,11 +1,14 @@
 use crate::db_models::{Conn, ConnPool, DbType};
+use crate::set_dev_env;
 use diesel::query_builder::{AstPass, Query, QueryFragment};
 use diesel::query_dsl::LoadQuery;
 use diesel::r2d2::ConnectionManager;
 use diesel::sql_types::BigInt;
 use diesel::{Connection, QueryId, QueryResult, QueryableByName, RunQueryDsl};
+use diesel_logger::LoggingConnection;
 use r2d2::Pool;
 use std::env;
+
 #[derive(QueryableByName)]
 pub struct Count {
     #[diesel(sql_type = diesel::sql_types::BigInt)]
@@ -14,7 +17,7 @@ pub struct Count {
 
 pub fn setup_connection_pool() -> ConnPool {
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    let manager = ConnectionManager::<Conn>::new(database_url);
+    let manager = ConnectionManager::<LoggingConnection<Conn>>::new(database_url);
     // Refer to the `r2d2` documentation for more methods to use
     // when building a connection pool
     Pool::builder()
@@ -22,6 +25,19 @@ pub fn setup_connection_pool() -> ConnPool {
         .test_on_check_out(true)
         .build(manager)
         .expect("Could not build connection pool")
+}
+#[test]
+pub fn logger() {
+    set_dev_env();
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let manager = ConnectionManager::<LoggingConnection<Conn>>::new(database_url);
+    // Refer to the `r2d2` documentation for more methods to use
+    // when building a connection pool
+    let pool = Pool::builder()
+        .max_size(10)
+        .test_on_check_out(true)
+        .build(manager)
+        .expect("Could not build connection pool");
 }
 
 pub trait Paginate: Sized {
@@ -138,5 +154,3 @@ async fn test() {
 
     println!("{:?}", x);
 }
-
-pub fn update_by_id() {}

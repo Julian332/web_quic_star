@@ -21,7 +21,6 @@ pub mod utils;
 //todo dyn paging filter for "or"
 //todo global soft delete
 //todo global multi TENANTRY
-//todo global multi TENANTRY
 type AppRes<T> = Result<T, AppError>;
 pub const FILE_SERVER_DIRECTORY: &str = "/assets";
 pub type Cache<K, V> = LazyLock<Arc<RwLock<HashMap<K, V>>>>;
