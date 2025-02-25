@@ -20,6 +20,12 @@ impl From<Pubkey> for SolAddr {
     }
 }
 
+impl From<&Pubkey> for SolAddr {
+    fn from(value: &Pubkey) -> Self {
+        SolAddr(value.clone())
+    }
+}
+
 impl Display for SolAddr {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0)

@@ -1,10 +1,10 @@
-use std::fmt::Formatter;
 use aide::OperationIo;
 use alloy::primitives::Address;
 use schemars::gen::SchemaGenerator;
 use schemars::schema::{InstanceType, Schema, SchemaObject};
 use schemars::JsonSchema;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use std::fmt::Formatter;
 use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
 
@@ -15,6 +15,12 @@ pub struct EthAddr(pub Address);
 impl From<Address> for EthAddr {
     fn from(value: Address) -> Self {
         EthAddr(value)
+    }
+}
+
+impl From<&Address> for EthAddr {
+    fn from(value: &Address) -> Self {
+        EthAddr(value.clone())
     }
 }
 
