@@ -1,5 +1,4 @@
 use crate::db_models::{Conn, ConnPool, DbType};
-use crate::set_dev_env;
 use diesel::query_builder::{AstPass, Query, QueryFragment};
 use diesel::query_dsl::LoadQuery;
 use diesel::r2d2::ConnectionManager;
@@ -28,12 +27,14 @@ pub fn setup_connection_pool() -> ConnPool {
 }
 #[test]
 pub fn logger() {
+    use crate::set_dev_env;
+
     set_dev_env();
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let manager = ConnectionManager::<LoggingConnection<Conn>>::new(database_url);
     // Refer to the `r2d2` documentation for more methods to use
     // when building a connection pool
-    let pool = Pool::builder()
+    let _pool = Pool::builder()
         .max_size(10)
         .test_on_check_out(true)
         .build(manager)
@@ -90,7 +91,7 @@ where
     T: QueryFragment<DbType>,
 {
     fn walk_ast<'b>(&'b self, mut out: AstPass<'_, 'b, DbType>) -> QueryResult<()> {
-        out.push_sql("SELECT *, COUNT(1)  FROM (");
+        out.push_sql("SELECT *, COUNT(1) OVER () FROM (");
         self.query.walk_ast(out.reborrow())?;
         out.push_sql(") t  LIMIT ");
         out.push_bind_param::<BigInt, _>(&self.per_page)?;

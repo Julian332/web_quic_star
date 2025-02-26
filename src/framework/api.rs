@@ -42,6 +42,13 @@ pub enum Compare {
     LessAndEqual,
 }
 
+#[derive(Deserialize, Serialize, JsonSchema, Clone, Default)]
+pub enum BoolOp {
+    #[default]
+    And,
+    Or,
+}
+
 impl Compare {
     pub fn to_ident(self) -> String {
         match self {
@@ -61,7 +68,13 @@ pub struct Filter<T> {
     pub compare: Compare,
     pub compare_value: T,
 }
-
+#[derive(Deserialize, Serialize, JsonSchema, Clone, Default)]
+pub struct DynFilter {
+    pub column: String,
+    pub op: Option<BoolOp>,
+    pub compare: Option<Compare>,
+    pub value: String,
+}
 #[derive(Debug, Serialize, Deserialize, Default, JsonSchema)]
 #[serde(default)]
 pub struct PageRes<T: Default, TBuilder: Default> {

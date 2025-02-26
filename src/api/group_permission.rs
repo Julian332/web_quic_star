@@ -18,9 +18,9 @@ pub struct GroupsPermissionBuilder {
 
 use crate::db_models::group_permission::GroupsPermission;
 use crate::db_models::ConnPool;
-use crate::framework::api::Compare;
 use crate::framework::api::Filter;
 use crate::framework::api::LOGIN_URL;
+use crate::framework::api::{BoolOp, Compare};
 use crate::framework::api_doc::{default_resp_docs, empty_resp_docs};
 use crate::framework::auth::AuthBackend;
 use crate::schema::groups_permissions::dsl::groups_permissions;
@@ -33,10 +33,10 @@ use diesel::r2d2::{ConnectionManager, Pool};
 
 pub(crate) mod web {
     use super::*;
-    use crate::framework::api::PageParam;
     use crate::framework::api::PageRes;
+    use crate::framework::api::{DynFilter, PageParam};
     use crate::framework::api_doc::errors::AppError;
-    use crate::framework::db::{LogicDeleteQuery, Paginate};
+    use crate::framework::db::Paginate;
     use axum::extract::State;
     use axum::Json;
     use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SelectableHelper};
@@ -75,106 +75,149 @@ pub(crate) mod web {
     }
     pub async fn get_entity_page(
         State(pool): State<ConnPool>,
-        Json(page): Json<PageParam<GroupsPermissionBuilder>>,
-    ) -> Result<Json<PageRes<GroupsPermission, GroupsPermissionBuilder>>, AppError> {
+        Json(page): Json<PageParam<Vec<DynFilter>>>,
+    ) -> Result<Json<PageRes<GroupsPermission, Vec<DynFilter>>>, AppError> {
         let mut connection = pool.get()?;
         let mut statement = crate::schema::groups_permissions::dsl::groups_permissions.into_boxed();
+        let x_table = diesel_dynamic_schema::table(stringify!(groups_permissions));
 
         let filter = page.filters.clone();
-        if let Some(filter_param) = filter.group_id {
-            match filter_param.compare {
-                Compare::NotEqual => {
-                    statement = statement.filter(
-                        crate::schema::groups_permissions::group_id
-                            .ne(filter_param.compare_value.clone()),
-                    );
-                }
-                Compare::Equal => {
-                    statement = statement.filter(
-                        crate::schema::groups_permissions::group_id
-                            .eq(filter_param.compare_value.clone()),
-                    );
-                }
-                Compare::Greater => {
-                    statement = statement.filter(
-                        crate::schema::groups_permissions::group_id
-                            .gt(filter_param.compare_value.clone()),
-                    );
-                }
-                Compare::GreaterAndEqual => {
-                    statement = statement.filter(
-                        crate::schema::groups_permissions::group_id
-                            .ge(filter_param.compare_value.clone()),
-                    );
-                }
-                Compare::Less => {
-                    statement = statement.filter(
-                        crate::schema::groups_permissions::group_id
-                            .lt(filter_param.compare_value.clone()),
-                    );
-                }
-                Compare::LessAndEqual => {
-                    statement = statement.filter(
-                        crate::schema::groups_permissions::group_id
-                            .le(filter_param.compare_value.clone()),
-                    );
-                }
+        for f in filter {
+            let filter_column = x_table.column::<diesel::sql_types::Text, _>(f.column);
+            match f.op.unwrap_or_default() {
+                BoolOp::And => match f.compare.unwrap_or_default() {
+                    Compare::NotEqual => {
+                        statement = statement.filter(filter_column.ne(f.value));
+                    }
+                    Compare::Equal => {
+                        statement = statement.filter(filter_column.eq(f.value));
+                    }
+                    Compare::Greater => {
+                        statement = statement.filter(filter_column.gt(f.value));
+                    }
+                    Compare::GreaterAndEqual => {
+                        statement = statement.filter(filter_column.ge(f.value));
+                    }
+                    Compare::Less => {
+                        statement = statement.filter(filter_column.lt(f.value));
+                    }
+                    Compare::LessAndEqual => {
+                        statement = statement.filter(filter_column.le(f.value));
+                    }
+                },
+                BoolOp::Or => match f.compare.unwrap_or_default() {
+                    Compare::NotEqual => {
+                        statement = statement.or_filter(filter_column.ne(f.value));
+                    }
+                    Compare::Equal => {
+                        statement = statement.or_filter(filter_column.eq(f.value));
+                    }
+                    Compare::Greater => {
+                        statement = statement.or_filter(filter_column.gt(f.value));
+                    }
+                    Compare::GreaterAndEqual => {
+                        statement = statement.or_filter(filter_column.ge(f.value));
+                    }
+                    Compare::Less => {
+                        statement = statement.or_filter(filter_column.lt(f.value));
+                    }
+                    Compare::LessAndEqual => {
+                        statement = statement.or_filter(filter_column.le(f.value));
+                    }
+                },
             }
         }
-        if let Some(filter_param) = filter.permission_id {
-            match filter_param.compare {
-                Compare::NotEqual => {
-                    statement = statement.filter(
-                        crate::schema::groups_permissions::permission_id
-                            .ne(filter_param.compare_value.clone()),
-                    );
-                }
-                Compare::Equal => {
-                    statement = statement.filter(
-                        crate::schema::groups_permissions::permission_id
-                            .eq(filter_param.compare_value.clone()),
-                    );
-                }
-                Compare::Greater => {
-                    statement = statement.filter(
-                        crate::schema::groups_permissions::permission_id
-                            .gt(filter_param.compare_value.clone()),
-                    );
-                }
-                Compare::GreaterAndEqual => {
-                    statement = statement.filter(
-                        crate::schema::groups_permissions::permission_id
-                            .ge(filter_param.compare_value.clone()),
-                    );
-                }
-                Compare::Less => {
-                    statement = statement.filter(
-                        crate::schema::groups_permissions::permission_id
-                            .lt(filter_param.compare_value.clone()),
-                    );
-                }
-                Compare::LessAndEqual => {
-                    statement = statement.filter(
-                        crate::schema::groups_permissions::permission_id
-                            .le(filter_param.compare_value.clone()),
-                    );
-                }
-            }
-        };
-        let x_table = diesel_dynamic_schema::table(stringify!(groups_permissions));
+        // if let Some(filter_param) = filter.group_id {
+        //     match filter_param.compare {
+        //         Compare::NotEqual => {
+        //             statement = statement.filter(
+        //                 crate::schema::groups_permissions::group_id
+        //                     .ne(filter_param.compare_value.clone()),
+        //             );
+        //         }
+        //         Compare::Equal => {
+        //             statement = statement.filter(
+        //                 crate::schema::groups_permissions::group_id
+        //                     .eq(filter_param.compare_value.clone()),
+        //             );
+        //         }
+        //         Compare::Greater => {
+        //             statement = statement.filter(
+        //                 crate::schema::groups_permissions::group_id
+        //                     .gt(filter_param.compare_value.clone()),
+        //             );
+        //         }
+        //         Compare::GreaterAndEqual => {
+        //             statement = statement.filter(
+        //                 crate::schema::groups_permissions::group_id
+        //                     .ge(filter_param.compare_value.clone()),
+        //             );
+        //         }
+        //         Compare::Less => {
+        //             statement = statement.filter(
+        //                 crate::schema::groups_permissions::group_id
+        //                     .lt(filter_param.compare_value.clone()),
+        //             );
+        //         }
+        //         Compare::LessAndEqual => {
+        //             statement = statement.filter(
+        //                 crate::schema::groups_permissions::group_id
+        //                     .le(filter_param.compare_value.clone()),
+        //             );
+        //         }
+        //     }
+        // }
+        // if let Some(filter_param) = filter.permission_id {
+        //     match filter_param.compare {
+        //         Compare::NotEqual => {
+        //             statement = statement.filter(
+        //                 crate::schema::groups_permissions::permission_id
+        //                     .ne(filter_param.compare_value.clone()),
+        //             );
+        //         }
+        //         Compare::Equal => {
+        //             statement = statement.filter(
+        //                 crate::schema::groups_permissions::permission_id
+        //                     .eq(filter_param.compare_value.clone()),
+        //             );
+        //         }
+        //         Compare::Greater => {
+        //             statement = statement.filter(
+        //                 crate::schema::groups_permissions::permission_id
+        //                     .gt(filter_param.compare_value.clone()),
+        //             );
+        //         }
+        //         Compare::GreaterAndEqual => {
+        //             statement = statement.filter(
+        //                 crate::schema::groups_permissions::permission_id
+        //                     .ge(filter_param.compare_value.clone()),
+        //             );
+        //         }
+        //         Compare::Less => {
+        //             statement = statement.filter(
+        //                 crate::schema::groups_permissions::permission_id
+        //                     .lt(filter_param.compare_value.clone()),
+        //             );
+        //         }
+        //         Compare::LessAndEqual => {
+        //             statement = statement.filter(
+        //                 crate::schema::groups_permissions::permission_id
+        //                     .le(filter_param.compare_value.clone()),
+        //             );
+        //         }
+        //     }
+        // };
         let order_column = x_table.column::<diesel::sql_types::Text, _>(page.order_column.clone());
         let res = if page.is_desc {
             statement
                 .order(order_column.desc())
                 .select(GroupsPermission::as_select())
-                .logic_delete_query()
                 .paginate(page.page_no, page.page_size)
                 .load_and_count_pages(&mut connection)?
         } else {
             statement
                 .order(order_column.asc())
                 .select(GroupsPermission::as_select())
-                .logic_delete_query()
                 .paginate(page.page_no, page.page_size)
                 .load_and_count_pages(&mut connection)?
         };

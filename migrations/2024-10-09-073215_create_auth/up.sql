@@ -135,7 +135,10 @@ VALUES (-2, 'super_admin',
         '$argon2id$v=19$m=19456,t=2,p=1$pHJK4Msog1E+V7R4++t+Zg$QnzTOC3JNu50cn0fJcdO5P33WnUUeQRK3oa9M054nko', -2,
         'default', null, null, now(), -2, null, false);
 
-CREATE view user_with_group_views(id, username, password, group_id, tenantry, remark, update_time, create_time, create_by, update_by, is_delete, group_name) as
+CREATE view user_with_group_views
+            (id, username, password, group_id, tenantry, remark, update_time, create_time, create_by, update_by,
+             is_delete, group_name)
+as
 SELECT users.id,
        users.username,
        users.password,
@@ -151,5 +154,14 @@ SELECT users.id,
 FROM users
          LEFT JOIN groups ON users.group_id = groups.id;
 
-alter table user_with_group_views owner to postgres;
+alter table user_with_group_views
+    owner to postgres;
 
+-- auto cast
+CREATE CAST (text AS bigint) WITH INOUT AS IMPLICIT;
+CREATE CAST (text AS int4) WITH INOUT AS IMPLICIT;
+CREATE CAST (text AS numeric) WITH INOUT AS IMPLICIT;
+
+CREATE CAST (bigint AS text) WITH INOUT AS IMPLICIT;
+CREATE CAST (int4 AS text) WITH INOUT AS IMPLICIT;
+CREATE CAST (numeric AS text) WITH INOUT AS IMPLICIT;

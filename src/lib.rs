@@ -1,3 +1,4 @@
+#![forbid(unsafe_code)]
 use derive_more::{Display, Error};
 use framework::api_doc::errors::AppError;
 use std::collections::HashMap;
@@ -18,9 +19,8 @@ pub mod schema_view;
 pub mod subscribe;
 pub mod utils;
 
-//todo dyn paging filter for "or"
-//todo global soft delete
-//todo global multi TENANTRY
+//todo global soft delete ,toggle by feature
+//todo global multi TENANTRY ,toggle by feature
 type AppRes<T> = Result<T, AppError>;
 pub const FILE_SERVER_DIRECTORY: &str = "/assets";
 pub type Cache<K, V> = LazyLock<Arc<RwLock<HashMap<K, V>>>>;

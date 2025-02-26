@@ -89,34 +89,34 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
     let field_type = id_type_d.field_type();
     let (id_type, _) = field_type.setter_type_info();
 
-    let mut filters = vec![];
-    for field in opts.fields() {
-        let ident = field.field_ident();
-        filters.push(quote!(
-                    if let Some(filter_param) = filter.#ident {
-                        match filter_param.compare {
-                            Compare::NotEqual => {
-                                statement = statement.filter(crate::schema::#schema_s::#ident.ne(filter_param.compare_value.clone()));
-                            }
-                            Compare::Equal => {
-                                statement = statement.filter(crate::schema::#schema_s::#ident.eq(filter_param.compare_value.clone()));
-                            }
-                            Compare::Greater => {
-                                statement = statement.filter(crate::schema::#schema_s::#ident.gt(filter_param.compare_value.clone()));
-                            }
-                            Compare::GreaterAndEqual => {
-                                statement = statement.filter(crate::schema::#schema_s::#ident.ge(filter_param.compare_value.clone()));
-                            }
-                            Compare::Less => {
-                                statement = statement.filter(crate::schema::#schema_s::#ident.lt(filter_param.compare_value.clone()));
-                            }
-                            Compare::LessAndEqual => {
-                                statement = statement.filter(crate::schema::#schema_s::#ident.le(filter_param.compare_value.clone()));
-                            }
-                        }
-                    }
-        ));
-    }
+    // let mut filters = vec![];
+    // for field in opts.fields() {
+    //     let ident = field.field_ident();
+    //     filters.push(quote!(
+    //                 if let Some(filter_param) = filter.#ident {
+    //                     match filter_param.compare {
+    //                         Compare::NotEqual => {
+    //                             statement = statement.filter(crate::schema::#schema_s::#ident.ne(filter_param.compare_value.clone()));
+    //                         }
+    //                         Compare::Equal => {
+    //                             statement = statement.filter(crate::schema::#schema_s::#ident.eq(filter_param.compare_value.clone()));
+    //                         }
+    //                         Compare::Greater => {
+    //                             statement = statement.filter(crate::schema::#schema_s::#ident.gt(filter_param.compare_value.clone()));
+    //                         }
+    //                         Compare::GreaterAndEqual => {
+    //                             statement = statement.filter(crate::schema::#schema_s::#ident.ge(filter_param.compare_value.clone()));
+    //                         }
+    //                         Compare::Less => {
+    //                             statement = statement.filter(crate::schema::#schema_s::#ident.lt(filter_param.compare_value.clone()));
+    //                         }
+    //                         Compare::LessAndEqual => {
+    //                             statement = statement.filter(crate::schema::#schema_s::#ident.le(filter_param.compare_value.clone()));
+    //                         }
+    //                     }
+    //                 }
+    //     ));
+    // }
 
     let f = quote!(
         use crate::framework::auth::AuthBackend;
@@ -127,7 +127,7 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
         use aide::axum::ApiRouter;
         use axum::extract::{Path};
         use diesel::r2d2::{ConnectionManager, Pool};
-        use crate::framework::api::Compare;
+        use crate::framework::api::{BoolOp, Compare};
         use crate::framework::api::Filter;
         use axum_login::permission_required;
         use crate::db_models::ConnPool;
@@ -148,7 +148,7 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
 
 
         pub mod web {
-            use crate::framework::api::{PageParam, PageRes};
+            use crate::framework::api::{PageParam, PageRes,DynFilter};
             use super::*;
             use axum::Json;
             use axum::extract::State;
@@ -250,16 +250,59 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
 
             pub async fn get_entity_page(
                 State(pool): State<ConnPool>,
-                Json(page): Json<PageParam<#builder_ident>>,
-            ) -> Result<Json<PageRes<#model, #builder_ident>>, AppError> {
+                Json(page): Json<PageParam<Vec<DynFilter>>>,
+            ) -> Result<Json<PageRes<#model, Vec<DynFilter>>>, AppError> {
 
                 let mut statement = crate::schema::#schema_s::dsl::#schema_s.into_boxed();
-                let filter = page.filters.clone();
-                    #(#filters)*
-
-
-
                 let x_table = diesel_dynamic_schema::table(stringify!(#schema_s));
+
+                let filters = page.filters.clone();
+                for f in filters {
+                    let filter_column = x_table.column::<diesel::sql_types::Text, _>(f.column);
+                    match f.op.unwrap_or_default() {
+                        BoolOp::And => match f.compare.unwrap_or_default() {
+                            Compare::NotEqual => {
+                                statement = statement.filter(filter_column.ne(f.value));
+                            }
+                            Compare::Equal => {
+                                statement = statement.filter(filter_column.eq(f.value));
+                            }
+                            Compare::Greater => {
+                                statement = statement.filter(filter_column.gt(f.value));
+                            }
+                            Compare::GreaterAndEqual => {
+                                statement = statement.filter(filter_column.ge(f.value));
+                            }
+                            Compare::Less => {
+                                statement = statement.filter(filter_column.lt(f.value));
+                            }
+                            Compare::LessAndEqual => {
+                                statement = statement.filter(filter_column.le(f.value));
+                            }
+                        },
+                        BoolOp::Or => match f.compare.unwrap_or_default() {
+                            Compare::NotEqual => {
+                                statement = statement.or_filter(filter_column.ne(f.value));
+                            }
+                            Compare::Equal => {
+                                statement = statement.or_filter(filter_column.eq(f.value));
+                            }
+                            Compare::Greater => {
+                                statement = statement.or_filter(filter_column.gt(f.value));
+                            }
+                            Compare::GreaterAndEqual => {
+                                statement = statement.or_filter(filter_column.ge(f.value));
+                            }
+                            Compare::Less => {
+                                statement = statement.or_filter(filter_column.lt(f.value));
+                            }
+                            Compare::LessAndEqual => {
+                                statement = statement.or_filter(filter_column.le(f.value));
+                            }
+                        },
+                    }
+                }
+
 
                 let order_column = x_table.column::<diesel::sql_types::Text, _>(page.order_column.clone());
                 let res = if page.is_desc {
@@ -315,7 +358,7 @@ pub fn query_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::Token
     let page = format_ident!("page_of_{schema}");
     let schema_s = format_ident!("{}s", schema);
     let mut builder = opts.as_builder();
-    let builder_ident = opts.builder_ident();
+    let _builder_ident = opts.builder_ident();
 
     let mut id_type = None;
     for field in opts.fields() {
@@ -328,34 +371,34 @@ pub fn query_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::Token
     let field_type = id_type_d.field_type();
     let (id_type, _) = field_type.setter_type_info();
 
-    let mut filters = vec![];
-    for field in opts.fields() {
-        let ident = field.field_ident();
-        filters.push(quote!(
-                    if let Some(filter_param) = filter.#ident {
-                        match filter_param.compare {
-                            Compare::NotEqual => {
-                                statement = statement.filter(crate::schema_view::#schema_s::#ident.ne(filter_param.compare_value.clone()));
-                            }
-                            Compare::Equal => {
-                                statement = statement.filter(crate::schema_view::#schema_s::#ident.eq(filter_param.compare_value.clone()));
-                            }
-                            Compare::Greater => {
-                                statement = statement.filter(crate::schema_view::#schema_s::#ident.gt(filter_param.compare_value.clone()));
-                            }
-                            Compare::GreaterAndEqual => {
-                                statement = statement.filter(crate::schema_view::#schema_s::#ident.ge(filter_param.compare_value.clone()));
-                            }
-                            Compare::Less => {
-                                statement = statement.filter(crate::schema_view::#schema_s::#ident.lt(filter_param.compare_value.clone()));
-                            }
-                            Compare::LessAndEqual => {
-                                statement = statement.filter(crate::schema_view::#schema_s::#ident.le(filter_param.compare_value.clone()));
-                            }
-                        }
-                    }
-        ));
-    }
+    // let mut filters = vec![];
+    // for field in opts.fields() {
+    //     let ident = field.field_ident();
+    //     filters.push(quote!(
+    //                 if let Some(filter_param) = filter.#ident {
+    //                     match filter_param.compare {
+    //                         Compare::NotEqual => {
+    //                             statement = statement.filter(crate::schema_view::#schema_s::#ident.ne(filter_param.compare_value.clone()));
+    //                         }
+    //                         Compare::Equal => {
+    //                             statement = statement.filter(crate::schema_view::#schema_s::#ident.eq(filter_param.compare_value.clone()));
+    //                         }
+    //                         Compare::Greater => {
+    //                             statement = statement.filter(crate::schema_view::#schema_s::#ident.gt(filter_param.compare_value.clone()));
+    //                         }
+    //                         Compare::GreaterAndEqual => {
+    //                             statement = statement.filter(crate::schema_view::#schema_s::#ident.ge(filter_param.compare_value.clone()));
+    //                         }
+    //                         Compare::Less => {
+    //                             statement = statement.filter(crate::schema_view::#schema_s::#ident.lt(filter_param.compare_value.clone()));
+    //                         }
+    //                         Compare::LessAndEqual => {
+    //                             statement = statement.filter(crate::schema_view::#schema_s::#ident.le(filter_param.compare_value.clone()));
+    //                         }
+    //                     }
+    //                 }
+    //     ));
+    // }
 
     let f = quote!(
         use crate::framework::auth::AuthBackend;
@@ -366,7 +409,7 @@ pub fn query_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::Token
         use aide::axum::ApiRouter;
         use axum::extract::{Path};
         use diesel::r2d2::{ConnectionManager, Pool};
-        use crate::framework::api::Compare;
+        use crate::framework::api::{BoolOp, Compare};
         use crate::framework::api::Filter;
         use axum_login::permission_required;
         use crate::db_models::ConnPool;
@@ -381,7 +424,7 @@ pub fn query_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::Token
 
 
         pub mod web {
-            use crate::framework::api::{PageParam, PageRes};
+            use crate::framework::api::{PageParam, PageRes,DynFilter};
             use super::*;
             use axum::Json;
             use axum::extract::State;
@@ -438,16 +481,61 @@ pub fn query_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::Token
 
             pub async fn get_entity_page(
                 State(pool): State<ConnPool>,
-                Json(page): Json<PageParam<#builder_ident>>,
-            ) -> Result<Json<PageRes<#model, #builder_ident>>, AppError> {
+                Json(page): Json<PageParam<Vec<DynFilter>>>,
+            ) -> Result<Json<PageRes<#model, Vec<DynFilter>>>, AppError> {
 
                 let mut statement = crate::schema_view::#schema_s::dsl::#schema_s.into_boxed();
-                let filter = page.filters.clone();
-                    #(#filters)*
-
-
-
                 let x_table = diesel_dynamic_schema::table(stringify!(#schema_s));
+
+                let filters = page.filters.clone();
+                for f in filters {
+                    let filter_column = x_table.column::<diesel::sql_types::Text, _>(f.column);
+                    match f.op.unwrap_or_default() {
+                        BoolOp::And => match f.compare.unwrap_or_default() {
+                            Compare::NotEqual => {
+                                statement = statement.filter(filter_column.ne(f.value));
+                            }
+                            Compare::Equal => {
+                                statement = statement.filter(filter_column.eq(f.value));
+                            }
+                            Compare::Greater => {
+                                statement = statement.filter(filter_column.gt(f.value));
+                            }
+                            Compare::GreaterAndEqual => {
+                                statement = statement.filter(filter_column.ge(f.value));
+                            }
+                            Compare::Less => {
+                                statement = statement.filter(filter_column.lt(f.value));
+                            }
+                            Compare::LessAndEqual => {
+                                statement = statement.filter(filter_column.le(f.value));
+                            }
+                        },
+                        BoolOp::Or => match f.compare.unwrap_or_default() {
+                            Compare::NotEqual => {
+                                statement = statement.or_filter(filter_column.ne(f.value));
+                            }
+                            Compare::Equal => {
+                                statement = statement.or_filter(filter_column.eq(f.value));
+                            }
+                            Compare::Greater => {
+                                statement = statement.or_filter(filter_column.gt(f.value));
+                            }
+                            Compare::GreaterAndEqual => {
+                                statement = statement.or_filter(filter_column.ge(f.value));
+                            }
+                            Compare::Less => {
+                                statement = statement.or_filter(filter_column.lt(f.value));
+                            }
+                            Compare::LessAndEqual => {
+                                statement = statement.or_filter(filter_column.le(f.value));
+                            }
+                        },
+                    }
+                }
+
+
+
 
                 let order_column = x_table.column::<diesel::sql_types::Text, _>(page.order_column.clone());
                 let res = if page.is_desc {
