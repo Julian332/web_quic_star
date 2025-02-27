@@ -86,10 +86,11 @@ pub fn readonly_http_provider() -> FillProvider<
         .on_http(Url::from_str(env::var("ETH_RPC").expect(".env ETH_RPC").as_str()).unwrap())
 }
 
-pub async fn readonly_ws_provider() -> RootProvider<PubSubFrontend> {
-    let rpc_url = env::var("WS_ETH_RPC").unwrap();
+pub async fn readonly_ws_provider() -> AppRes<RootProvider<PubSubFrontend>> {
+    let rpc_url = env::var("WS_ETH_RPC")?;
     let ws = WsConnect::new(rpc_url);
-    ProviderBuilder::new().on_ws(ws).await.unwrap()
+    let provider = ProviderBuilder::new().on_ws(ws).await?;
+    Ok(provider)
 }
 
 pub fn weth_addr() -> Address {
