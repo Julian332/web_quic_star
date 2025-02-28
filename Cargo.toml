@@ -18,7 +18,7 @@ multi_tenant=[]
 [dependencies]
 #web ========
 axum = { version = "0.8.1", features = ["macros"] }
-axum-login = { path = "crates/axum_login/axum-login" }
+axum-login = { path = "crates/axum-login" }
 aide = { version = "0.14.1", features = ["redoc", "scalar", "axum", "axum-extra", "macros", "axum-tokio", "axum-multipart", "axum-json"] }
 password-auth = "1.0.0"
 tower-http = { version = "0.6.2", features = ["catch-panic", "cors", "trace", "fs"] }
