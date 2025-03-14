@@ -1,16 +1,8 @@
 use std::env;
-
-use aide::axum::ApiRouter;
-use http::{HeaderValue, Method};
-use tower_http::cors::CorsLayer;
-use tower_http::services::ServeDir;
-use tower_http::trace::TraceLayer;
-use web_quick::db_models::ConnPool;
-use web_quick::framework::api_doc::{fallback, set_api_doc};
-use web_quick::framework::auth::get_auth_layer;
+use web_quick::framework::api_doc::set_api_doc;
 use web_quick::framework::db::setup_connection_pool;
 use web_quick::scheduled_task::set_scheduler;
-use web_quick::{api, set_env, set_log, FILE_SERVER_DIRECTORY};
+use web_quick::{api, set_env, set_log};
 
 #[tokio::main]
 async fn main() {
