@@ -5,8 +5,8 @@ edition = "2021"
 
 [features]
 default = ["postgres","dev","solana_mode"]
-#eth_mode = ["dep:alloy"]
-eth_mode = []
+eth_mode = ["dep:alloy"]
+#eth_mode = []
 solana_mode = ["dep:anchor-client"]
 dev = []
 postgres = ["diesel/postgres", "diesel-dynamic-schema/postgres"]
@@ -44,7 +44,7 @@ diesel_logger = { path = "crates/diesel-logger" }
 anchor-client = { path = "crates/anchor-client", optional = true }
 
 #eth ========
-#alloy = { version = "0.11.1", features = ["full"], optional = true }
+alloy = { version = "0.12.5", features = ["full"], optional = true }
 
 #etc =======
 tokio = { version = "1.43.0", features = ["full"] }
@@ -54,10 +54,12 @@ serde = { version = "1.0.218", features = ["derive", "rc"] }
 serde_json = "1.0.139"
 
 dotenvy = "0.15.7"
-reqwest = { version = "0.11.27", features = ["json"] }
+reqwest = { version = "0.12.14", features = ["json"] }
 futures = "0.3.31"
 tokio-cron-scheduler = { version = "0.13.0", features = [] }
 derive_builder = { path = "crates/derive_builder" }
 derive_more = { version = "2.0.1", features = ["default", "error", "display"] }
 tokio-util = "0.7.13"
 sha2 = "0.10.8"
+[build]
+rustflags = ["-C", "link-args=/LIBPATH:C:\\Program Files\\OpenSSL-Win64\\lib"]
