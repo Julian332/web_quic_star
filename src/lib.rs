@@ -27,7 +27,7 @@ pub type Cache<K, V> = LazyLock<Arc<RwLock<HashMap<K, V>>>>;
 
 #[allow(unused)]
 #[derive(Debug, Display, Error)]
-struct NoneError;
+pub struct NoneError;
 pub fn set_env() {
     #[cfg(feature = "dev")]
     {
