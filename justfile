@@ -1,10 +1,10 @@
 local:
-	cargo watch -c -w ./src -- cargo run --bin web_quick -- features dev
+	cargo watch -c -w ./src -- cargo run  --bin web_quick -F dev
 dev:
-	cargo watch -c -w ./src -- cargo run --bin web_quick -- features dev
+	cargo watch -c -w ./src -- cargo run --bin web_quick -F dev
 
-main:
-	cargo watch -c -w ./src -- cargo run --bin web_quick -- features
+prod:
+	cargo watch -c -w ./src -- cargo run --bin web_quick
 
 test:
 	cargo test
