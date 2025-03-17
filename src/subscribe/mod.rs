@@ -20,19 +20,18 @@ pub fn get_wss_uri() -> String {
     env::var("SOLANA_WS_RPC").expect("SOLANA_WS_RPC environment variable not specified")
 }
 
-use crate::db_models::ConnPool;
 use crate::AppRes;
 use std::future::Future;
 use std::time::Duration;
 use tokio::time::sleep;
 use tracing::error;
 
-pub async fn subscribe_with_retry<F>(pool: ConnPool, func: fn(ConnPool) -> F) -> AppRes<()>
+pub async fn subscribe_with_retry<F>(func: fn() -> F) -> AppRes<()>
 where
     F: Future<Output = AppRes<()>> + Sized,
 {
     loop {
-        match func(pool.clone()).await {
+        match func().await {
             Ok(_) => {}
             Err(e) => {
                 error!(?e, " Will retry subscribe");

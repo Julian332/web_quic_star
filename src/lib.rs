@@ -4,8 +4,8 @@ use crate::framework::db::setup_connection_pool;
 use derive_more::{Display, Error};
 use framework::errors::AppError;
 use std::collections::HashMap;
-use std::panic;
 use std::sync::{Arc, LazyLock};
+use std::{env, panic};
 use tokio::sync::RwLock;
 use tracing::error;
 use tracing_subscriber::EnvFilter;
@@ -24,10 +24,30 @@ pub mod utils;
 
 //todo global soft delete ,toggle by feature
 //todo global multi TENANTRY ,toggle by feature
-type AppRes<T> = Result<T, AppError>;
+pub type AppRes<T> = Result<T, AppError>;
 pub type Cache<K, V> = LazyLock<Arc<RwLock<HashMap<K, V>>>>;
 pub static DB: LazyLock<ConnPool> = LazyLock::new(|| setup_connection_pool());
-pub static HTTP: LazyLock<reqwest::Client> = LazyLock::new(|| reqwest::Client::new());
+pub static HTTP_CLIENT: LazyLock<reqwest::Client> = LazyLock::new(|| reqwest::Client::new());
+#[cfg(feature = "solana_mode")]
+pub static SOL_CLIENT: LazyLock<anchor_client::solana_client::nonblocking::rpc_client::RpcClient> =
+    LazyLock::new(|| {
+        anchor_client::solana_client::nonblocking::rpc_client::RpcClient::new(
+            env::var("SOLANA_RPC").expect("SOLANA_RPC must be set"),
+        )
+    });
+
+#[cfg(feature = "solana_mode")]
+pub static ANCHOR_CLIENT: LazyLock<
+    anchor_client::Client<Arc<anchor_client::solana_sdk::signature::Keypair>>,
+> = LazyLock::new(|| {
+    anchor_client::Client::new(
+        anchor_client::Cluster::Custom(
+            env::var("SOLANA_RPC").expect("SOLANA_RPC must be set"),
+            env::var("WS_SOLANA_RPC").expect("WS_SOLANA_RPC must be set"),
+        ),
+        Arc::new(anchor_client::solana_sdk::signature::Keypair::new()),
+    )
+});
 
 #[allow(unused)]
 #[derive(Debug, Display, Error)]
