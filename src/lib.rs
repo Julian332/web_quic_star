@@ -1,6 +1,8 @@
 #![forbid(unsafe_code)]
+use crate::db_models::ConnPool;
+use crate::framework::db::setup_connection_pool;
 use derive_more::{Display, Error};
-use framework::api_doc::errors::AppError;
+use framework::errors::AppError;
 use std::collections::HashMap;
 use std::panic;
 use std::sync::{Arc, LazyLock};
@@ -8,7 +10,8 @@ use tokio::sync::RwLock;
 use tracing::error;
 use tracing_subscriber::EnvFilter;
 
-pub mod api;
+pub mod api_router;
+pub mod config;
 pub mod db_models;
 pub mod domain;
 pub mod framework;
@@ -22,8 +25,9 @@ pub mod utils;
 //todo global soft delete ,toggle by feature
 //todo global multi TENANTRY ,toggle by feature
 type AppRes<T> = Result<T, AppError>;
-pub const FILE_SERVER_DIRECTORY: &str = "/assets";
 pub type Cache<K, V> = LazyLock<Arc<RwLock<HashMap<K, V>>>>;
+pub static DB: LazyLock<ConnPool> = LazyLock::new(|| setup_connection_pool());
+pub static HTTP: LazyLock<reqwest::Client> = LazyLock::new(|| reqwest::Client::new());
 
 #[allow(unused)]
 #[derive(Debug, Display, Error)]

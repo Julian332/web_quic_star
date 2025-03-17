@@ -1,11 +1,11 @@
 use crate::db_models::user::User;
 use crate::framework::api_doc::default_resp_docs;
-use axum::Json;
 use crate::framework::auth::{AuthBackend, Credentials};
 use aide::axum::routing::post_with;
 use aide::axum::{ApiRouter, IntoApiResponse};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Redirect};
+use axum::Json;
 use axum_login::AuthSession;
 
 pub async fn login(

@@ -35,17 +35,16 @@ pub(crate) mod web {
     use super::*;
     use crate::framework::api::PageRes;
     use crate::framework::api::{DynFilter, PageParam};
-    use crate::framework::api_doc::errors::AppError;
     use crate::framework::db::Paginate;
-    use axum::extract::State;
+    use crate::framework::errors::AppError;
+    use crate::DB;
     use axum::Json;
     use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl, SelectableHelper};
 
     pub async fn create_entity(
-        State(pool): State<ConnPool>,
         Json(new_entity): Json<GroupsPermission>,
     ) -> Result<Json<GroupsPermission>, AppError> {
-        let mut connection = pool.get()?;
+        let mut connection = DB.get()?;
         let result = diesel::insert_into(groups_permissions)
             .values(new_entity)
             .returning(GroupsPermission::as_returning())
@@ -54,30 +53,27 @@ pub(crate) mod web {
     }
 
     pub async fn get_entity_by_id(
-        State(pool): State<ConnPool>,
         Path(id_param): Path<(i64, i64)>,
     ) -> Result<Json<GroupsPermission>, AppError> {
         let result = groups_permissions
             .find(id_param)
             .select(GroupsPermission::as_select())
-            .get_result(&mut pool.get()?)?;
+            .get_result(&mut DB.get()?)?;
         Ok(Json(result))
     }
     pub async fn delete_entity_by_id(
-        State(pool): State<ConnPool>,
         Path(id_param): Path<(i64, i64)>,
     ) -> Result<Json<GroupsPermission>, AppError> {
         let result = diesel::delete(groups_permissions.find(id_param))
             .returning(GroupsPermission::as_returning())
-            .get_result(&mut pool.get()?)?;
+            .get_result(&mut DB.get()?)?;
 
         Ok(Json(result))
     }
     pub async fn get_entity_page(
-        State(pool): State<ConnPool>,
         Json(page): Json<PageParam<Vec<DynFilter>>>,
     ) -> Result<Json<PageRes<GroupsPermission, Vec<DynFilter>>>, AppError> {
-        let mut connection = pool.get()?;
+        let mut connection = DB.get()?;
         let mut statement = crate::schema::groups_permissions::dsl::groups_permissions.into_boxed();
         let x_table = diesel_dynamic_schema::table(stringify!(groups_permissions));
 
@@ -226,11 +222,11 @@ pub(crate) mod web {
     }
 }
 
-pub fn group_permission_routes(conn_pool: ConnPool) -> ApiRouter {
+pub fn group_permission_routes() -> ApiRouter {
     let router_add = ApiRouter::new().api_route(
         "/create_entity",
         post_with(
-            crate::api::group_permission::web::create_entity,
+            crate::api_router::group_permission::web::create_entity,
             empty_resp_docs,
         ),
     );
@@ -254,5 +250,4 @@ pub fn group_permission_routes(conn_pool: ConnPool) -> ApiRouter {
         .route_layer(permission_required!(AuthBackend, "users_add"))
         .merge(router_read.route_layer(permission_required!(AuthBackend, "users_read")))
         .merge(router_delete.route_layer(permission_required!(AuthBackend, "users_delete")))
-        .with_state(conn_pool)
 }

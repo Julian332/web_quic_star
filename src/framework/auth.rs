@@ -1,12 +1,12 @@
 use crate::db_models::permission::Permission;
 use crate::db_models::user::User;
 use crate::db_models::ConnPool;
-use crate::framework::api_doc::errors::AppError;
-use crate::impl_from;
+use crate::framework::errors::AppError;
 use crate::schema::groups::table as groups;
 use crate::schema::groups_permissions::{group_id, permission_id, table as groups_permissions};
 use crate::schema::permissions::table as permissions;
 use crate::schema::users::{table as users, username};
+use crate::{impl_from, DB};
 use axum_login::tower_sessions::cookie::time::Duration;
 use axum_login::tower_sessions::{Expiry, MemoryStore, SessionManagerLayer};
 use axum_login::{
@@ -24,13 +24,13 @@ pub fn test() {
     println!("{}", password_auth::generate_hash("1234qwer"));
 }
 
-pub fn get_auth_layer(connection_pool: ConnPool) -> AuthManagerLayer<AuthBackend, MemoryStore> {
+pub fn get_auth_layer() -> AuthManagerLayer<AuthBackend, MemoryStore> {
     let session_store = MemoryStore::default();
     let session_layer = SessionManagerLayer::new(session_store)
         .with_secure(false)
         .with_expiry(Expiry::OnInactivity(Duration::days(1)));
 
-    let backend = AuthBackend::new(connection_pool);
+    let backend = AuthBackend::new(DB.clone());
     AuthManagerLayerBuilder::new(backend, session_layer).build()
 }
 

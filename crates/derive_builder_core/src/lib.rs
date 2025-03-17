@@ -130,10 +130,10 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
         use crate::framework::api::{BoolOp, Compare};
         use crate::framework::api::Filter;
         use axum_login::permission_required;
-        use crate::db_models::ConnPool;
+        use crate::DB;
         use diesel::PgSortExpressionMethods;
 
-        pub fn web_routes(conn_pool: ConnPool) -> ApiRouter {
+        pub fn web_routes() -> ApiRouter {
             let (router_add, router_read, router_update, router_delete) = web::get_routers();
 
             router_add
@@ -141,7 +141,7 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
                 .merge(router_read.route_layer(permission_required!(AuthBackend, "common_read")))
                 .merge(router_delete.route_layer(permission_required!(AuthBackend, "common_delete")))
                 .merge(router_update.route_layer(permission_required!(AuthBackend, "common_update")))
-                .with_state(conn_pool)
+
         }
 
         // web_fn_gen!(#schema, #new_model, #model);
@@ -154,14 +154,14 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
             use axum::extract::State;
             use diesel::r2d2::{ConnectionManager, Pool};
             use diesel::{ExpressionMethods,  QueryDsl, RunQueryDsl, SelectableHelper};
-            use crate::framework::api_doc::errors::AppError;
+            use crate::framework::errors::AppError;
             use crate::framework::db::{LogicDeleteQuery, Paginate};
 
             pub fn get_routers() -> (
-                ApiRouter<ConnPool>,
-                ApiRouter<ConnPool>,
-                ApiRouter<ConnPool>,
-                ApiRouter<ConnPool>,
+                ApiRouter,
+                ApiRouter,
+                ApiRouter,
+                ApiRouter,
             ) {
             let router_add = ApiRouter::new().api_route(
                 concat!("/",stringify!(#create)),
@@ -202,54 +202,49 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
             }
 
             pub async fn create_entity(
-                State(pool): State<ConnPool>,
                 Json(new_entity): Json<#new_model>,
             ) -> Result<Json<#model>, AppError> {
 
                 let result = diesel::insert_into(#schema_s)
                     .values(new_entity)
                     .returning(#model::as_returning())
-                    .get_result(&mut pool.get()?)?;
+                    .get_result(&mut DB.get()?)?;
 
                 Ok(Json(result))
             }
 
             pub async fn update_entity_by_id(
-                State(pool): State<ConnPool>,
                 Path(id_param): Path<#id_type>,
                 Json(new): Json<#update_builder_ident>,
             ) -> Result<Json<#model>, AppError> {
                 let result = diesel::update(#schema_s.find(id_param))
                     .set(&new)
                     .returning(#model::as_returning())
-                    .get_result(&mut pool.get()?)?;
+                    .get_result(&mut DB.get()?)?;
                 Ok(Json(result))
             }
 
             pub async fn get_entity_by_id(
-                State(pool): State<ConnPool>,
                 Path(id_param): Path<#id_type>,
             ) -> Result<Json<#model>, AppError> {
                 let result = #schema_s
                     .find(id_param)
                     .select(#model::as_select())
-                    .get_result(&mut pool.get()?)?;
+                    .get_result(&mut DB.get()?)?;
                 Ok(Json(result))
             }
 
             pub async fn delete_entity_by_id(
-                State(pool): State<ConnPool>,
                 Path(id_param): Path<#id_type>,
             ) -> Result<Json<#model>, AppError> {
                 let result = diesel::update(#schema_s.find(id_param))
                     .set(crate::schema::#schema_s::is_delete.eq(true))
                     .returning(#model::as_returning())
-                    .get_result(&mut pool.get()?)?;
+                    .get_result(&mut DB.get()?)?;
                 Ok(Json(result))
             }
 
             pub async fn get_entity_page(
-                State(pool): State<ConnPool>,
                 Json(page): Json<PageParam<Vec<DynFilter>>>,
             ) -> Result<Json<PageRes<#model, Vec<DynFilter>>>, AppError> {
 
@@ -311,14 +306,14 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
                         .select(#model::as_select())
                         .logic_delete_query()
                         .paginate(page.page_no, page.page_size)
-                        .load_and_count_pages(&mut pool.get()?)?
+                        .load_and_count_pages(&mut DB.get()?)?
                 } else {
                     statement
                         .order(order_column.asc().nulls_last())
                         .select(#model::as_select())
                         .logic_delete_query()
                         .paginate(page.page_no, page.page_size)
-                        .load_and_count_pages(&mut pool.get()?)?
+                        .load_and_count_pages(&mut DB.get()?)?
                 };
                 let page_res = PageRes::from_param_records_count(page, res.0, res.1);
                 Ok(Json(page_res))
@@ -412,13 +407,12 @@ pub fn query_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::Token
         use crate::framework::api::{BoolOp, Compare};
         use crate::framework::api::Filter;
         use axum_login::permission_required;
-        use crate::db_models::ConnPool;
-        pub fn web_routes(conn_pool: ConnPool) -> ApiRouter {
+        use crate::DB;
+        pub fn web_routes() -> ApiRouter {
             let (router_add, router_read, router_update, router_delete) = web::get_routers();
 
             router_read
                 .route_layer(permission_required!(AuthBackend, "common_read"))
-                .with_state(conn_pool)
         }
 
 
@@ -430,14 +424,14 @@ pub fn query_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::Token
             use axum::extract::State;
             use diesel::r2d2::{ConnectionManager, Pool};
             use diesel::{ExpressionMethods,  QueryDsl, RunQueryDsl, SelectableHelper};
-            use crate::framework::api_doc::errors::AppError;
+            use crate::framework::errors::AppError;
             use crate::framework::db::{LogicDeleteQuery, Paginate};
 
             pub fn get_routers() -> (
-                ApiRouter<ConnPool>,
-                ApiRouter<ConnPool>,
-                ApiRouter<ConnPool>,
-                ApiRouter<ConnPool>,
+                ApiRouter,
+                ApiRouter,
+                ApiRouter,
+                ApiRouter,
             ) {
             let router_add = ApiRouter::new();
             let router_read = ApiRouter::new()
@@ -467,20 +461,18 @@ pub fn query_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::Token
 
 
             pub async fn get_entity_by_id(
-                State(pool): State<ConnPool>,
                 Path(id_param): Path<#id_type>,
             ) -> Result<Json<#model>, AppError> {
                 let result = #schema_s
                     .find(id_param)
                     .select(#model::as_select())
-                    .get_result(&mut pool.get()?)?;
+                    .get_result(&mut DB.get()?)?;
                 Ok(Json(result))
             }
 
 
 
             pub async fn get_entity_page(
-                State(pool): State<ConnPool>,
                 Json(page): Json<PageParam<Vec<DynFilter>>>,
             ) -> Result<Json<PageRes<#model, Vec<DynFilter>>>, AppError> {
 
@@ -544,14 +536,14 @@ pub fn query_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::Token
                         .select(#model::as_select())
                         .logic_delete_query()
                         .paginate(page.page_no, page.page_size)
-                        .load_and_count_pages(&mut pool.get()?)?
+                        .load_and_count_pages(&mut DB.get()?)?
                 } else {
                     statement
                         .order(order_column.asc())
                         .select(#model::as_select())
                         .logic_delete_query()
                         .paginate(page.page_no, page.page_size)
-                        .load_and_count_pages(&mut pool.get()?)?
+                        .load_and_count_pages(&mut DB.get()?)?
                 };
                 let page_res = PageRes::from_param_records_count(page, res.0, res.1);
                 Ok(Json(page_res))

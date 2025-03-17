@@ -1,4 +1,4 @@
-use crate::framework::api_doc::errors::AppError;
+use crate::framework::errors::AppError;
 use crate::AppRes;
 use axum::body::Bytes;
 use axum::BoxError;

@@ -2,7 +2,6 @@ pub mod api_wrapper;
 #[cfg(feature = "eth_mode")]
 pub mod contracts;
 pub mod file;
-pub mod subscribe;
 
 // pub fn byte_is_zero(buf: &[u8]) -> bool {
 //     //safety: align_to

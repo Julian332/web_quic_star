@@ -1,8 +1,7 @@
-use crate::framework::api_doc::errors::AppError;
-use axum::Json;
-use crate::AppRes;
+use crate::framework::errors::AppError;
+use crate::{AppRes, DB};
 use aide::OperationIo;
-use axum::extract::State;
+use axum::Json;
 use axum_login::{login_required, AuthSession};
 use diesel::{QueryDsl, RunQueryDsl};
 use schemars::JsonSchema;
@@ -12,7 +11,7 @@ use aide::axum::routing::post_with;
 use aide::axum::ApiRouter;
 use axum_login::permission_required;
 
-use crate::db_models::{user, ConnPool};
+use crate::db_models::user;
 use crate::framework::api_doc::default_resp_docs;
 use crate::framework::auth::AuthBackend;
 use crate::schema::users::dsl::users;
@@ -23,7 +22,6 @@ pub struct ModifyPassword {
     new_password: String,
 }
 pub(crate) async fn modify_password(
-    State(pool): State<ConnPool>,
     auth_session: AuthSession<AuthBackend>,
     Json(modify_password): Json<ModifyPassword>,
 ) -> AppRes<String> {
@@ -40,14 +38,14 @@ pub(crate) async fn modify_password(
             user.password = hash;
             diesel::update(users.find(user.id))
                 .set(user)
-                .execute(&mut pool.get()?)?;
+                .execute(&mut DB.get()?)?;
         }
     }
 
     Ok("succeed".to_string())
 }
 
-pub fn user_routes(conn_pool: ConnPool) -> ApiRouter {
+pub fn user_routes() -> ApiRouter {
     let (router_add, router_read, router_update, router_delete) = user::web::get_routers();
     let modify_password = ApiRouter::new().api_route(
         "/modify_password",
@@ -59,5 +57,4 @@ pub fn user_routes(conn_pool: ConnPool) -> ApiRouter {
         .merge(router_delete.route_layer(permission_required!(AuthBackend, "users_delete")))
         .merge(router_update.route_layer(permission_required!(AuthBackend, "users_update")))
         .merge(modify_password.route_layer(login_required!(AuthBackend)))
-        .with_state(conn_pool)
 }

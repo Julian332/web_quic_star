@@ -1,5 +1,5 @@
-use crate::framework::api_doc::docs::docs_routes;
-use crate::framework::api_doc::errors::AppError;
+use crate::api_router::docs::docs_routes;
+use crate::framework::errors::AppError;
 use aide::axum::ApiRouter;
 use aide::openapi::OpenApi;
 use aide::transform::{TransformOpenApi, TransformOperation};
@@ -9,10 +9,6 @@ use axum::{Extension, Router};
 use schemars::JsonSchema;
 use serde::Serialize;
 use std::sync::Arc;
-
-pub mod axum_json_for_schema;
-pub mod docs;
-pub mod errors;
 
 pub fn default_resp_docs<Resp: JsonSchema + Serialize>(
     op: TransformOperation,
