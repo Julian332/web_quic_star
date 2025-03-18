@@ -3,7 +3,7 @@
 // use alloy::{node_bindings::Anvil, primitives::address, providers::ProviderBuilder, sol};
 // use eyre::Result;
 
-use crate::utils::contracts::readonly_http_provider;
+use crate::utils::contracts::readonly_ws_provider;
 use crate::utils::contracts::uni_router2::{uni_router2_addr, UNI_ROUTER2};
 use crate::AppRes;
 use alloy::primitives::Address;
@@ -18,6 +18,6 @@ sol!(
 );
 
 pub async fn uni_factory_addr() -> AppRes<Address> {
-    let uni_router2 = UNI_ROUTER2::new(uni_router2_addr(), readonly_http_provider());
+    let uni_router2 = UNI_ROUTER2::new(uni_router2_addr(), readonly_ws_provider());
     Ok(uni_router2.factory().call().await?._0)
 }

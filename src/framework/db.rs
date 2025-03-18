@@ -23,7 +23,7 @@ pub fn setup_connection_pool() -> ConnPool {
         .max_size(10)
         .test_on_check_out(true)
         .build(manager)
-        .expect("Could not build connection pool")
+        .expect("Could not build db connection pool")
 }
 #[test]
 pub fn logger() {

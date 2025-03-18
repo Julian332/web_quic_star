@@ -40,7 +40,7 @@ diesel_logger = { path = "crates/diesel_logger" }
 #r2d2_mysql = { version = "25.0.0",optional = true}
 
 #solana ======
-anchor-client = { path = "crates/anchor-client", optional = true }
+anchor-client = { path = "crates/anchor-client", optional = true ,features = ["async"]}
 
 #eth ========
 alloy = { version = "0.12.5", features = ["full"], optional = true }

@@ -39,7 +39,7 @@ pub fn setup_router() -> ApiRouter {
         .layer(TraceLayer::new_for_http())
         .layer(
             CorsLayer::new()
-                .allow_origin("*".parse::<HeaderValue>().unwrap())
+                .allow_origin("*".parse::<HeaderValue>().expect("allow_origin is wrong"))
                 .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE]),
         )
         .layer(get_auth_layer());

@@ -1,5 +1,6 @@
 use aide::OperationIo;
 use axum::{http::StatusCode, response::IntoResponse};
+use derive_more::{Display, Error};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -22,6 +23,9 @@ pub struct AppError {
     error_origin_position: Option<String>,
 }
 
+#[allow(unused)]
+#[derive(Debug, Display, Error)]
+pub struct NoneError;
 // impl Deref for AppError {
 //     type Target = dyn StdError + Send + Sync + 'static;
 //

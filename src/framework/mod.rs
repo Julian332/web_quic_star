@@ -3,6 +3,7 @@ pub mod api_doc;
 pub mod auth;
 pub mod db;
 pub mod errors;
+pub mod handler;
 
 #[macro_export]
 macro_rules! impl_from {

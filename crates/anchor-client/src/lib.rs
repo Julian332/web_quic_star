@@ -155,11 +155,7 @@ impl<C: Clone + Deref<Target = impl Signer>> Client<C> {
         }
     }
 
-    pub fn program(
-        &self,
-        program_id: Pubkey,
-        #[cfg(feature = "mock")] rpc_client: AsyncRpcClient,
-    ) -> Result<Program<C>, ClientError> {
+    pub fn program(&self, program_id: Pubkey) -> Result<Program<C>, ClientError> {
         let cfg = Config {
             cluster: self.cfg.cluster.clone(),
             options: self.cfg.options,
