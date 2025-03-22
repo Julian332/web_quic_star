@@ -4,24 +4,24 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-default = ["postgres","solana_mode"]
+default = ["postgres", "solana_mode"]
 eth_mode = ["dep:alloy"]
 solana_mode = ["dep:anchor-client"]
 dev = []
-postgres = ["diesel/postgres", "diesel-dynamic-schema/postgres"]
-multi_tenant=[]
+postgres = ["diesel/postgres_backend", "diesel-dynamic-schema/postgres"]
+multi_tenant = []
 
 
 #mysql = ["diesel/mysql", "diesel-dynamic-schema/mysql", "diesel-derive-enum/mysql","dep:r2d2_mysql"]
 
 [dependencies]
 #web ========
-axum = { version = "0.8.1", features = ["macros"] }
+axum = { version = "0.8.1", features = ["macros","http2"] }
 axum-login = { path = "crates/axum-login" }
-aide = { version = "0.14.1", features = ["redoc", "scalar", "axum", "axum-extra", "macros", "axum-tokio", "axum-multipart", "axum-json"] }
+aide = { version = "0.14.2", features = ["redoc", "swagger", "scalar", "axum", "macros", "axum-tokio", "axum-multipart", "axum-json", "axum-ws", "axum-form", "axum-matched-path", "axum-original-uri", "axum-query"] }
 password-auth = "1.0.0"
 tower-http = { version = "0.6.2", features = ["catch-panic", "cors", "trace", "fs"] }
-http = "1.2.0"
+http = "1"
 
 #log =======
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
@@ -29,10 +29,16 @@ tracing = "0.1.41"
 
 #db ========
 
-diesel = { version = "2.2.7", features = ["extras", ] }
-diesel-dynamic-schema = { version = "0.2.3", features = [] }
+diesel = { version = "2", features = ["chrono",
+    "time",
+    "serde_json",
+    "uuid",
+    "network-address",
+    #    "numeric",
+    "r2d2", ] }
+diesel-dynamic-schema = "0.2.3"
 r2d2 = "0.8.10"
-bigdecimal = { version = "0.4.7", features = ["serde-json"] }
+rust_decimal = { version = "1.37.0", features = ["serde-str", "db-diesel-postgres"] }
 chrono = { version = "0.4.39", features = ["serde"] }
 diesel-enum = { version = "0.2.1", features = [] }
 diesel_logger = { path = "crates/diesel_logger" }
@@ -40,20 +46,20 @@ diesel_logger = { path = "crates/diesel_logger" }
 #r2d2_mysql = { version = "25.0.0",optional = true}
 
 #solana ======
-anchor-client = { path = "crates/anchor-client", optional = true ,features = ["async"]}
+anchor-client = { path = "crates/anchor-client", optional = true, features = ["async"] }
 
 #eth ========
 alloy = { version = "0.12.5", features = ["full"], optional = true }
 
 #etc =======
-tokio = { version = "1.43.0", features = ["full"] }
-schemars = { version = "0.8.21", features = ["uuid1", "chrono", "bigdecimal04"] }
-uuid = { version = "1.14.0", features = ["serde", "v4"] }
-serde = { version = "1.0.218", features = ["derive", "rc"] }
-serde_json = "1.0.139"
+tokio = { version = "1", features = ["full"] }
+schemars = { version = "0.8.21", features = ["uuid1", "chrono", "rust_decimal"] }
+uuid = { version = "1", features = ["serde", "v4"] }
+serde = { version = "1", features = ["derive", "rc"] }
+serde_json = { version = "1" ,features = []}
 
 dotenvy = "0.15.7"
-reqwest = { version = "0.12.14", features = ["json"] }
+reqwest = { version = "0.12.14", features = ["json","cookies","multipart"] }
 futures = "0.3.31"
 tokio-cron-scheduler = { version = "0.13.0", features = [] }
 derive_builder = { path = "crates/derive_builder" }
