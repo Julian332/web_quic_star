@@ -57,16 +57,16 @@ pub fn docs_routes() -> ApiRouter {
             ),
             |p| p.security_requirement("ApiKey"),
         )
-        .api_route_with(
-            "/redoc",
-            aide::axum::routing::get_with(
-                aide::redoc::Redoc::new("/docs/private/api.json")
-                    .with_title("web_quic_star")
-                    .axum_handler(),
-                |op| op.description("This documentation page."),
-            ),
-            |p| p.security_requirement("ApiKey"),
-        )
+        // .api_route_with(
+        //     "/redoc",
+        //     aide::axum::routing::get_with(
+        //         aide::redoc::Redoc::new("/docs/private/api.json")
+        //             .with_title("web_quic_star")
+        //             .axum_handler(),
+        //         |op| op.description("This documentation page."),
+        //     ),
+        //     |p| p.security_requirement("ApiKey"),
+        // )
         .route("/private/api.json", aide::axum::routing::get(serve_docs));
     // .with_state(state);
 
