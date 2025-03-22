@@ -2,10 +2,10 @@ use crate::db_models::{Conn, ConnPool, DbType};
 use diesel::query_builder::{AstPass, Query, QueryFragment};
 use diesel::query_dsl::LoadQuery;
 use diesel::r2d2::ConnectionManager;
+use diesel::r2d2::Pool;
 use diesel::sql_types::BigInt;
 use diesel::{Connection, QueryId, QueryResult, QueryableByName, RunQueryDsl};
 use diesel_logger::LoggingConnection;
-use r2d2::Pool;
 use std::env;
 
 #[derive(QueryableByName)]
