@@ -1,4 +1,6 @@
 #![forbid(unsafe_code)]
+extern crate core;
+
 use crate::db_models::ConnPool;
 use crate::framework::db::setup_connection_pool;
 use framework::errors::AppError;
@@ -17,6 +19,7 @@ pub mod schema;
 pub mod schema_view;
 #[cfg(feature = "solana_mode")]
 pub mod subscribe;
+pub mod third_party_api;
 pub mod utils;
 
 //todo global soft delete ,toggle by feature

@@ -35,8 +35,6 @@ rust_decimal = { version = "1", features = ["serde-str", "db-diesel-postgres"] }
 chrono = { version = "0.4.39", features = ["serde"] }
 diesel-enum = { version = "0.2.1", features = [] }
 diesel_logger = { path = "crates/diesel_logger" }
-#r2d2_postgres = { version = "0.18.1" ,optional = true}
-#r2d2_mysql = { version = "25.0.0",optional = true}
 
 #solana ======
 anchor-client = { path = "crates/anchor-client", optional = true, features = ["async"] }
