@@ -40,6 +40,16 @@ pub fn docs_routes() -> ApiRouter {
         .api_route_with(
             "/",
             aide::axum::routing::get_with(
+                aide::swagger::Swagger::new("/docs/private/api.json")
+                    .with_title("web_quic_star")
+                    .axum_handler(),
+                |op| op.description("This documentation page."),
+            ),
+            |p| p.security_requirement("ApiKey"),
+        )
+        .api_route_with(
+            "/pretty_doc",
+            aide::axum::routing::get_with(
                 aide::scalar::Scalar::new("/docs/private/api.json")
                     .with_title("web_quic_star")
                     .axum_handler(),

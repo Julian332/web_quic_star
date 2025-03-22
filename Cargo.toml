@@ -16,7 +16,7 @@ multi_tenant = []
 
 [dependencies]
 #web ========
-axum = { version = "0.8.1", features = ["macros","http2"] }
+axum = { version = "0.8.1", features = ["macros", "http2"] }
 axum-login = { path = "crates/axum-login" }
 aide = { version = "0.14.2", features = ["redoc", "swagger", "scalar", "axum", "macros", "axum-tokio", "axum-multipart", "axum-json", "axum-ws", "axum-form", "axum-matched-path", "axum-original-uri", "axum-query"] }
 password-auth = "1.0.0"
@@ -56,10 +56,10 @@ tokio = { version = "1", features = ["full"] }
 schemars = { version = "0.8.21", features = ["uuid1", "chrono", "rust_decimal"] }
 uuid = { version = "1", features = ["serde", "v4"] }
 serde = { version = "1", features = ["derive", "rc"] }
-serde_json = { version = "1" ,features = []}
+serde_json = { version = "1", features = [] }
 
 dotenvy = "0.15.7"
-reqwest = { version = "0.12.14", features = ["json","cookies","multipart"] }
+reqwest = { version = "0.12.14", features = ["json", "cookies", "multipart"] }
 futures = "0.3.31"
 tokio-cron-scheduler = { version = "0.13.0", features = [] }
 derive_builder = { path = "crates/derive_builder" }
