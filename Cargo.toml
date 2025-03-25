@@ -16,46 +16,46 @@ multi_tenant = []
 
 [dependencies]
 #web ========
-axum = { version = "0.8.1", features = ["macros", "http2"] }
+axum = { version = "0.8", features = ["macros", "http2"] }
 axum-login = { path = "crates/axum-login" }
-aide = { version = "0.14.2", features = [ "swagger", "scalar", "axum", "macros", "axum-tokio", "axum-multipart", "axum-json", "axum-ws", "axum-form", "axum-matched-path", "axum-original-uri", "axum-query"] }
+aide = { version = "0.14", features = [ "swagger", "scalar", "axum", "macros", "axum-tokio", "axum-multipart", "axum-json", "axum-ws", "axum-form", "axum-matched-path", "axum-original-uri", "axum-query"] }
 password-auth = "1.0.0"
-tower-http = { version = "0.6.2", features = ["catch-panic", "cors", "trace", "fs"] }
+tower-http = { version = "0.6", features = ["catch-panic", "cors", "trace", "fs"] }
 http = "1"
 
 #log =======
-tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
-tracing = "0.1.41"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing = "0.1"
 
 #db ========
 diesel = { version = "2", features = ["chrono",  "serde_json", "uuid",  "r2d2", ] }
-diesel-dynamic-schema = "0.2.3"
+diesel-dynamic-schema = "0.2"
 r2d2 = "0.8.10"
 rust_decimal = { version = "1", features = ["serde-str", "db-diesel-postgres"] }
-chrono = { version = "0.4.39", features = ["serde"] }
-diesel-enum = { version = "0.2.1", features = [] }
+chrono = { version = "0.4", features = ["serde"] }
+diesel-enum = { version = "0.2", features = [] }
 diesel_logger = { path = "crates/diesel_logger" }
 
 #solana ======
 anchor-client = { path = "crates/anchor-client", optional = true, features = ["async"] }
 
 #eth ========
-alloy = { version = "0.12.5", features = ["full"], optional = true }
+alloy = { version = "0.12", features = ["full"], optional = true }
 
 #etc =======
 tokio = { version = "1", features = ["full"] }
-schemars = { version = "0.8.21", features = ["uuid1", "chrono", "rust_decimal"] }
+schemars = { version = "0.8", features = ["uuid1", "chrono", "rust_decimal"] }
 uuid = { version = "1", features = ["serde", "v4"] }
 serde = { version = "1", features = ["derive", "rc"] }
 serde_json = { version = "1", features = [] }
 
-dotenvy = "0.15.7"
-reqwest = { version = "0.12.14", features = ["json", "cookies", "multipart"] }
-futures = "0.3.31"
-tokio-cron-scheduler = { version = "0.13.0", features = [] }
+dotenvy = "0.15"
+reqwest = { version = "0.12", features = ["json", "cookies", "multipart"] }
+futures = "0.3"
+tokio-cron-scheduler = { version = "0.13", features = [] }
 derive_builder = { path = "crates/derive_builder" }
 derive_more = { version = "2", features = ["default", "error", "display"] }
-tokio-util = "0.7.13"
-sha2 = "0.10.8"
+tokio-util = "0.7"
+sha2 = "0.10"
 [dev-dependencies]
 r2d2_postgres = { version = "0.18.2" ,features = []}
