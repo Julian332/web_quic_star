@@ -18,7 +18,7 @@ multi_tenant = []
 #web ========
 axum = { version = "0.8", features = ["macros", "http2"] }
 axum-login = { path = "crates/axum-login" }
-aide = { version = "0.14", features = [ "swagger", "scalar", "axum", "macros", "axum-tokio", "axum-multipart", "axum-json", "axum-ws", "axum-form", "axum-matched-path", "axum-original-uri", "axum-query"] }
+aide = { version = "0.14", features = ["swagger", "scalar", "axum", "macros", "axum-tokio", "axum-multipart", "axum-json", "axum-ws", "axum-form", "axum-matched-path", "axum-original-uri", "axum-query"] }
 password-auth = "1.0.0"
 tower-http = { version = "0.6", features = ["catch-panic", "cors", "trace", "fs"] }
 http = "1"
@@ -28,7 +28,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tracing = "0.1"
 
 #db ========
-diesel = { version = "2", features = ["chrono",  "serde_json", "uuid",  "r2d2", ] }
+diesel = { version = "2", features = ["chrono", "serde_json", "uuid", "r2d2", ] }
 diesel-dynamic-schema = "0.2"
 r2d2 = "0.8.10"
 rust_decimal = { version = "1", features = ["serde-str", "db-diesel-postgres"] }
@@ -40,7 +40,8 @@ diesel_logger = { path = "crates/diesel_logger" }
 anchor-client = { path = "crates/anchor-client", optional = true, features = ["async"] }
 
 #eth ========
-alloy = { version = "0.12", features = ["full"], optional = true }
+alloy = { version = "0.12", features = ["full", "reqwest-rustls-tls",    "std",
+    "essentials",], optional = true ,default-features = false}
 
 #etc =======
 tokio = { version = "1", features = ["full"] }
@@ -50,7 +51,7 @@ serde = { version = "1", features = ["derive", "rc"] }
 serde_json = { version = "1", features = [] }
 
 dotenvy = "0.15"
-reqwest = { version = "0.12", features = ["json", "cookies", "multipart"] }
+reqwest = { version = "0.12", features = ["json", "cookies", "multipart", "rustls-tls", "charset", "http2", "macos-system-configuration", ], default-features = false }
 futures = "0.3"
 tokio-cron-scheduler = { version = "0.13", features = [] }
 derive_builder = { path = "crates/derive_builder" }
@@ -58,4 +59,4 @@ derive_more = { version = "2", features = ["default", "error", "display"] }
 tokio-util = "0.7"
 sha2 = "0.10"
 [dev-dependencies]
-r2d2_postgres = { version = "0.18.2" ,features = []}
+r2d2_postgres = { version = "0.18.2", features = [] }
