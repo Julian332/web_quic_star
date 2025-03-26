@@ -119,7 +119,7 @@ impl AuthnBackend for AuthBackend {
             .first(&mut self.db.get()?)
         {
             Ok(user) => verify_password(creds.password, &user.password)
-                .map_err(|e| AuthError(AppError::new(e.to_string())))
+                .map_err(|e| AuthError(AppError::new(&e.to_string())))
                 .map(|_| Some(user)),
             Err(e) => Err(e.into()),
         }
@@ -181,7 +181,7 @@ impl AuthnBackend for AuthBackend {
         let user_addr = creds.user_addr.0;
         let is_validate = signature.verify(LOGIN_MESSAGE.as_ref(), user_addr.as_ref());
         if !is_validate {
-            return Err(AuthError(AppError::new("wrong signature".to_owned())));
+            return Err(AuthError(AppError::new("wrong signature")));
         }
 
         match users

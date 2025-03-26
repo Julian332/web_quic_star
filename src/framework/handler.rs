@@ -16,7 +16,7 @@ fn t() {
         println!("HTTP: {method} {link}\nARGS: {args:?}");
     }
 
-    fn print_rev(link: String, Args(args): Args, Method(method): Method) {
+    fn _print_rev(link: String, Args(args): Args, Method(method): Method) {
         println!("HTTP: {method} {link}\nARGS: {args:?}");
     }
 }

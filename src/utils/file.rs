@@ -53,7 +53,7 @@ where
     let extension_name = filename.split('.').last().unwrap_or("");
 
     if !path_is_valid(filename) {
-        return Err(AppError::new("Invalid path".to_owned()));
+        return Err(AppError::new("Invalid path"));
     }
 
     let hash_file_name = async {

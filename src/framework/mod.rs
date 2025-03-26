@@ -9,8 +9,8 @@ pub mod handler;
 macro_rules! impl_from {
     ($error:path) => {
         impl From<$error> for AuthError {
-            fn from(value: $error) -> Self {
-                AuthError(AppError::new(format!("error:::::::: {}", value)))
+            fn from(_value: $error) -> Self {
+                AuthError(AppError::new("auth error"))
             }
         }
     };
