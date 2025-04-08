@@ -34,6 +34,7 @@ pub fn get_auth_layer() -> AuthManagerLayer<AuthBackend, MemoryStore> {
     AuthManagerLayerBuilder::new(backend, session_layer).build()
 }
 
+#[allow(dead_code)]
 const LOGIN_MESSAGE: &str = "welcome";
 pub const DEFAULT_TENANTRY: &str = "default";
 pub const COMMON_USER_ROLE: i64 = -1;
@@ -46,7 +47,10 @@ pub struct AuthBackend {
     db: ConnPool,
 }
 
-#[cfg(all(not(feature = "eth_mode"), not(feature = "solana_mode")))]
+#[cfg(any(
+    all(not(feature = "eth_mode"), not(feature = "solana_mode")),
+    all(feature = "eth_mode", feature = "solana_mode")
+))]
 #[derive(Debug, Clone, Deserialize, JsonSchema)]
 pub struct Credentials {
     pub username: String,
@@ -54,14 +58,14 @@ pub struct Credentials {
     pub next: Option<String>,
 }
 
-#[cfg(feature = "eth_mode")]
+#[cfg(all(feature = "eth_mode", not(feature = "solana_mode")))]
 #[derive(Debug, Clone, Deserialize, JsonSchema)]
 pub struct Credentials {
     pub user_addr: crate::domain::eth_addr::EthAddr,
     pub signature: String,
     pub next: Option<String>,
 }
-#[cfg(feature = "solana_mode")]
+#[cfg(all(feature = "solana_mode", not(feature = "eth_mode")))]
 #[derive(Debug, Clone, Deserialize, JsonSchema)]
 pub struct Credentials {
     pub user_addr: crate::domain::solana_addr::SolAddr,
@@ -106,7 +110,10 @@ impl AuthnBackend for AuthBackend {
     type Credentials = Credentials;
     type Error = AuthError;
 
-    #[cfg(all(not(feature = "eth_mode"), not(feature = "solana_mode")))]
+    #[cfg(any(
+        all(not(feature = "eth_mode"), not(feature = "solana_mode")),
+        all(feature = "eth_mode", feature = "solana_mode")
+    ))]
     async fn authenticate(
         &self,
         creds: Self::Credentials,
@@ -119,13 +126,13 @@ impl AuthnBackend for AuthBackend {
             .first(&mut self.db.get()?)
         {
             Ok(user) => verify_password(creds.password, &user.password)
-                .map_err(|e| AuthError(AppError::new(&e.to_string())))
+                .map_err(|e| AuthError(AppError::from(e)))
                 .map(|_| Some(user)),
             Err(e) => Err(e.into()),
         }
     }
 
-    #[cfg(feature = "eth_mode")]
+    #[cfg(all(feature = "eth_mode", not(feature = "solana_mode")))]
     async fn authenticate(
         &self,
         creds: Self::Credentials,
@@ -167,7 +174,7 @@ impl AuthnBackend for AuthBackend {
             Err(e) => Err(e.into()),
         }
     }
-    #[cfg(feature = "solana_mode")]
+    #[cfg(all(feature = "solana_mode", not(feature = "eth_mode")))]
     async fn authenticate(
         &self,
         creds: Self::Credentials,

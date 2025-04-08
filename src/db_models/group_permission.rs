@@ -30,14 +30,7 @@ pub struct GroupsPermission {
     pub permission_id: i64,
 }
 
-#[allow(clippy::all)]
-#[derive(Deserialize, Serialize, JsonSchema, Default, Clone)]
-pub struct GroupsPermissionBuilder {
-    pub group_id: ::derive_builder::export::core::option::Option<Filter<i64>>,
-    pub permission_id: ::derive_builder::export::core::option::Option<Filter<i64>>,
-}
 use crate::framework::api::Compare;
-use crate::framework::api::Filter;
 use crate::framework::api::LOGIN_URL;
 use crate::framework::api_doc::{default_resp_docs, empty_resp_docs};
 use crate::framework::auth::AuthBackend;

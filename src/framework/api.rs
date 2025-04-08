@@ -1,3 +1,4 @@
+use rust_decimal::Decimal;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -63,17 +64,25 @@ impl Compare {
     }
 }
 
-#[derive(Deserialize, Serialize, JsonSchema, Clone, Default)]
-pub struct Filter<T> {
-    pub compare: Compare,
-    pub compare_value: T,
-}
-#[derive(Deserialize, Serialize, JsonSchema, Clone, Default)]
+// #[derive(Deserialize, Serialize, JsonSchema, Clone, Default)]
+// pub struct Filter {
+//     pub compare: Compare,
+//     pub compare_value: Value,
+// }
+
+#[derive(Deserialize, Serialize, JsonSchema, Clone)]
 pub struct DynFilter {
     pub column: String,
     pub op: Option<BoolOp>,
     pub compare: Option<Compare>,
-    pub value: String,
+    pub compare_value: CompareValue,
+}
+#[derive(Deserialize, Serialize, JsonSchema, Clone)]
+pub enum CompareValue {
+    BigDecimal(Decimal),
+    Bool(bool),
+    Float(f64),
+    String(String),
 }
 #[derive(Debug, Serialize, Deserialize, Default, JsonSchema)]
 #[serde(default)]

@@ -4,11 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-default = ["postgres", "solana_mode"]
+default = ["postgres", "solana_mode", "eth_mode"]
 eth_mode = ["dep:alloy"]
 solana_mode = ["dep:anchor-client"]
 dev = []
-postgres = ["diesel/postgres", "diesel-dynamic-schema/postgres"]
+postgres = ["diesel/postgres", "diesel-dynamic-schema/postgres", "rust_decimal/db-diesel-postgres"]
 multi_tenant = []
 
 
@@ -31,7 +31,7 @@ tracing = "0.1"
 diesel = { version = "2", features = ["chrono", "serde_json", "uuid", "r2d2", ] }
 diesel-dynamic-schema = "0.2"
 r2d2 = "0.8.10"
-rust_decimal = { version = "1", features = ["serde-str", "db-diesel-postgres"] }
+rust_decimal = { version = "1", features = ["serde-str"] }
 chrono = { version = "0.4", features = ["serde"] }
 diesel-enum = { version = "0.2", features = [] }
 diesel_logger = { path = "crates/diesel_logger" }
@@ -40,7 +40,7 @@ diesel_logger = { path = "crates/diesel_logger" }
 anchor-client = { path = "crates/anchor-client", optional = true, features = ["async"] }
 
 #eth ========
-alloy = { version = "0.12", features = ["full", "reqwest-rustls-tls", "std", "essentials", ], optional = true, default-features = false }
+alloy = { version = "0.13", features = ["full", "reqwest-rustls-tls", "std", "essentials", ], optional = true, default-features = false }
 
 #etc =======
 tokio = { version = "1", features = ["full"] }
@@ -48,7 +48,7 @@ schemars = { version = "0.8", features = ["uuid1", "chrono", "rust_decimal"] }
 uuid = { version = "1", features = ["serde", "v4"] }
 serde = { version = "1", features = ["derive", "rc"] }
 serde_json = { version = "1", features = [] }
-anyhow = { version = "1" ,features = []}
+anyhow = { version = "1", features = [] }
 
 dotenvy = "0.15"
 reqwest = { version = "0.12", features = ["json", "cookies", "multipart", "rustls-tls", "charset", "http2", "macos-system-configuration", ], default-features = false }

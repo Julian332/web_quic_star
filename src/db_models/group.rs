@@ -56,4 +56,5 @@ pub struct Group {
     pub create_by: i64,
     pub update_by: Option<i64>,
     pub is_delete: bool,
+    pub permissions: Vec<i64>,
 }

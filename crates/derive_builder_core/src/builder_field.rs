@@ -138,7 +138,7 @@ impl<'a> ToTokens for BuilderFieldTypeWithCrateRoot<'a> {
         let crate_root = self.crate_root;
         match self.field_type {
             BuilderFieldType::Optional(ty) => tokens.append_all(quote!(
-                #crate_root::export::core::option::Option<Filter<#ty>>
+                #crate_root::export::core::option::Option<#ty>
             )),
             BuilderFieldType::Precise(ty) => ty.to_tokens(tokens),
             BuilderFieldType::Phantom(ty) => tokens.append_all(quote!(

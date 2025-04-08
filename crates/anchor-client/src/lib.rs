@@ -50,7 +50,7 @@
 //!
 //! More examples can be found in [here].
 //!
-//! [here]: https://github.com/coral-xyz/anchor/tree/v0.30.1/client/example/src
+//! [here]: https://github.com/coral-xyz/anchor/tree/v0.31.0/client/example/src
 //!
 //! # Features
 //!
@@ -59,7 +59,7 @@
 //! The client is blocking by default. To enable asynchronous client, add `async` feature:
 //!
 //! ```toml
-//! anchor-client = { version = "0.30.1 ", features = ["async"] }
+//! anchor-client = { version = "0.31.0 ", features = ["async"] }
 //! ````
 //!
 //! ## `mock`
@@ -155,7 +155,11 @@ impl<C: Clone + Deref<Target = impl Signer>> Client<C> {
         }
     }
 
-    pub fn program(&self, program_id: Pubkey) -> Result<Program<C>, ClientError> {
+    pub fn program(
+        &self,
+        program_id: Pubkey,
+        #[cfg(feature = "mock")] rpc_client: AsyncRpcClient,
+    ) -> Result<Program<C>, ClientError> {
         let cfg = Config {
             cluster: self.cfg.cluster.clone(),
             options: self.cfg.options,
@@ -217,7 +221,7 @@ pub struct EventUnsubscriber<'a> {
     _lifetime_marker: PhantomData<&'a Handle>,
 }
 
-impl<'a> EventUnsubscriber<'a> {
+impl EventUnsubscriber<'_> {
     async fn unsubscribe_internal(mut self) {
         if let Some(unsubscribe) = self.rx.recv().await {
             unsubscribe().await;
@@ -270,7 +274,7 @@ impl<C: Deref<Target = impl Signer> + Clone> Program<C> {
         filters: Vec<RpcFilterType>,
     ) -> Result<ProgramAccountsIterator<T>, ClientError> {
         let account_type_filter =
-            RpcFilterType::Memcmp(Memcmp::new_base58_encoded(0, &T::DISCRIMINATOR));
+            RpcFilterType::Memcmp(Memcmp::new_base58_encoded(0, T::DISCRIMINATOR));
         let config = RpcProgramAccountsConfig {
             filters: Some([vec![account_type_filter], filters].concat()),
             account_config: RpcAccountInfoConfig {
@@ -341,7 +345,7 @@ impl<C: Deref<Target = impl Signer> + Clone> Program<C> {
                         signature: logs.value.signature.parse().unwrap(),
                         slot: logs.context.slot,
                     };
-                    let events = parse_logs_response(logs, &program_id_str);
+                    let events = parse_logs_response(logs, &program_id_str)?;
                     for e in events {
                         f(&ctx, e);
                     }
@@ -394,7 +398,7 @@ pub fn handle_program_log<T: anchor_lang::Event + anchor_lang::AnchorDeserialize
         };
 
         let event = log_bytes
-            .starts_with(&T::DISCRIMINATOR)
+            .starts_with(T::DISCRIMINATOR)
             .then(|| {
                 let mut data = &log_bytes[T::DISCRIMINATOR.len()..];
                 T::deserialize(&mut data).map_err(|e| ClientError::LogParseError(e.to_string()))
@@ -420,7 +424,7 @@ pub fn handle_system_log(this_program_str: &str, log: &str) -> (Option<String>, 
         let vec = log.split(" ").collect::<Vec<_>>();
         let program = vec.get(1).expect(&format!("wrong log:{log}"));
 
-        (Some(program.to_string()), false) // Any string will do.
+        (Some(program.to_string()), false) // Any string will do.// Any string will do.
     } else {
         let re = Regex::new(r"^Program (.*) success*$").unwrap();
         if re.is_match(log) {
@@ -521,7 +525,7 @@ pub struct RequestBuilder<'a, C, S: 'a> {
 }
 
 // Shared implementation for all RequestBuilders
-impl<'a, C: Deref<Target = impl Signer> + Clone, S: AsSigner> RequestBuilder<'a, C, S> {
+impl<C: Deref<Target = impl Signer> + Clone, S: AsSigner> RequestBuilder<'_, C, S> {
     #[must_use]
     pub fn payer(mut self, payer: C) -> Self {
         self.payer = payer;
@@ -671,22 +675,20 @@ impl<'a, C: Deref<Target = impl Signer> + Clone, S: AsSigner> RequestBuilder<'a,
 fn parse_logs_response<T: anchor_lang::Event + anchor_lang::AnchorDeserialize>(
     logs: RpcResponse<RpcLogsResponse>,
     program_id_str: &str,
-) -> Vec<T> {
+) -> Result<Vec<T>, ClientError> {
     let mut logs = &logs.value.logs[..];
     let mut events: Vec<T> = Vec::new();
     if !logs.is_empty() {
         if let Ok(mut execution) = Execution::new(&mut logs) {
             // Create a new peekable iterator so that we can peek at the next log whilst iterating
             let mut logs_iter = logs.iter().peekable();
+            let regex = Regex::new(r"^Program (.*) invoke.*$").unwrap();
 
             while let Some(l) = logs_iter.next() {
                 // Parse the log.
                 let (event, new_program, did_pop) = {
                     if program_id_str == execution.program() {
-                        handle_program_log(program_id_str, l).unwrap_or_else(|e| {
-                            println!("Unable to parse log: {e}");
-                            std::process::exit(1);
-                        })
+                        handle_program_log(program_id_str, l)?
                     } else {
                         let (program, did_pop) = handle_system_log(program_id_str, l);
                         (None, program, did_pop)
@@ -713,9 +715,8 @@ fn parse_logs_response<T: anchor_lang::Event + anchor_lang::AnchorDeserialize>(
                     // a panic during the next iteration.
                     if let Some(&next_log) = logs_iter.peek() {
                         if next_log.ends_with("invoke [1]") {
-                            let re = Regex::new(r"^Program (.*) invoke.*$").unwrap();
                             let next_instruction =
-                                re.captures(next_log).unwrap().get(1).unwrap().as_str();
+                                regex.captures(next_log).unwrap().get(1).unwrap().as_str();
                             // Within this if block, there will always be a regex match.
                             // Therefore it's safe to unwrap and the captured program ID
                             // at index 1 can also be safely unwrapped.
@@ -726,7 +727,7 @@ fn parse_logs_response<T: anchor_lang::Event + anchor_lang::AnchorDeserialize>(
             }
         }
     }
-    events
+    Ok(events)
 }
 
 #[cfg(test)]
@@ -855,7 +856,7 @@ mod tests {
 
         // No events returned here. Just ensuring that the function doesn't panic
         // due an incorrectly emptied stack.
-        let _: Vec<MockEvent> = parse_logs_response(
+        parse_logs_response::<MockEvent>(
             RpcResponse {
                 context: RpcResponseContext::new(0),
                 value: RpcLogsResponse {
@@ -865,7 +866,8 @@ mod tests {
                 },
             },
             program_id_str,
-        );
+        )
+        .unwrap();
 
         Ok(())
     }
