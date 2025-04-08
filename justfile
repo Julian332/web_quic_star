@@ -1,3 +1,4 @@
+set shell := ["powershell.exe", "-c"]  # Windows PowerShell
 local:
 	cargo watch -c -w ./src -- cargo run  --bin web_quick -F dev
 dev:

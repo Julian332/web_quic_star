@@ -34,6 +34,7 @@ pub async fn set_scheduler() {
     let sched = JobScheduler::new()
         .await
         .expect("cannot create jobs scheduler");
+    #[cfg(feature = "dev")]
     add_async_cron(&sched, "1 1/10 * * * *", example).await;
 
     sched.start().await.expect("cannot start jobs scheduler");
