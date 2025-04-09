@@ -1,3 +1,4 @@
+use crate::framework::auth::AuthPermission2;
 use chrono::{DateTime, Utc};
 use derive_builder::WebApiGen;
 use diesel::{AsChangeset, Identifiable, Insertable, Queryable, Selectable};
@@ -18,6 +19,7 @@ pub struct NewGroup {
     pub create_by: i64,
     pub update_by: Option<i64>,
     pub is_delete: bool,
+    pub permissions: Vec<AuthPermission2>,
 }
 
 impl Default for NewGroup {
@@ -30,6 +32,7 @@ impl Default for NewGroup {
             create_by: 0,
             update_by: None,
             is_delete: false,
+            permissions: vec![],
         }
     }
 }
@@ -56,5 +59,5 @@ pub struct Group {
     pub create_by: i64,
     pub update_by: Option<i64>,
     pub is_delete: bool,
-    pub permissions: Vec<i64>,
+    pub permissions: Vec<AuthPermission2>,
 }

@@ -1,10 +1,8 @@
-use crate::db_models::permission::Permission;
+use crate::db_models::group::Group;
 use crate::db_models::user::User;
-use crate::db_models::ConnPool;
+use crate::db_models::{ConnPool, DbType};
 use crate::framework::errors::AppError;
 use crate::schema::groups::table as groups;
-use crate::schema::groups_permissions::{group_id, permission_id, table as groups_permissions};
-use crate::schema::permissions::table as permissions;
 use crate::schema::users::{table as users, username};
 use crate::{impl_from, DB};
 use axum_login::tower_sessions::cookie::time::Duration;
@@ -13,11 +11,162 @@ use axum_login::{
     AuthManagerLayer, AuthManagerLayerBuilder, AuthUser, AuthnBackend, AuthzBackend, UserId,
 };
 use diesel::associations::HasTable;
-use diesel::{ExpressionMethods, JoinOnDsl, QueryDsl, RunQueryDsl, SelectableHelper};
+use diesel::deserialize::FromSql;
+use diesel::serialize::{Output, ToSql};
+use diesel::sql_types::{Text, VarChar};
+use diesel::{
+    deserialize, serialize, ExpressionMethods, FromSqlRow, JoinOnDsl, QueryDsl, RunQueryDsl,
+    SelectableHelper,
+};
 use schemars::JsonSchema;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fmt::{Display, Formatter};
+use std::str::FromStr;
+
+#[allow(dead_code)]
+const LOGIN_MESSAGE: &str = "welcome";
+pub const DEFAULT_TENANTRY: &str = "default";
+pub const COMMON_USER_ROLE: i64 = -1;
+pub const COMMON_USER: i64 = -1;
+pub const SUPER_USER_ROLE: i64 = -2;
+pub const SUPER_USER: i64 = -2;
+
+#[derive(Debug, FromSqlRow, Serialize, Deserialize, JsonSchema, Clone, Eq, PartialEq, Hash)]
+#[diesel(sql_type = Text)]
+pub enum AuthPermission2 {
+    Admin,
+    TablePermissions(TablePermission),
+}
+
+impl Display for AuthPermission2 {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
+            AuthPermission2::Admin => "Admin".to_string(),
+            AuthPermission2::TablePermissions(x) => x.to_string(),
+        };
+        write!(f, "{}", str)
+    }
+}
+
+impl From<&str> for AuthPermission2 {
+    fn from(s: &str) -> Self {
+        match s {
+            string if string.eq_ignore_ascii_case("Admin") => AuthPermission2::Admin,
+            _ => AuthPermission2::TablePermissions(TablePermission::from(s)),
+        }
+    }
+}
+impl FromStr for AuthPermission2 {
+    type Err = AuthError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let result = match s {
+            string if string.eq_ignore_ascii_case("Admin") => AuthPermission2::Admin,
+            _ => AuthPermission2::TablePermissions(TablePermission::from_str(s)?),
+        };
+        Ok(result)
+    }
+}
+
+impl ToSql<Text, DbType> for AuthPermission2 {
+    fn to_sql<'b>(&'b self, out: &mut Output<'b, '_, DbType>) -> serialize::Result {
+        <String as ToSql<VarChar, DbType>>::to_sql(&self.to_string(), &mut out.reborrow())
+    }
+}
+
+impl FromSql<Text, DbType> for AuthPermission2 {
+    fn from_sql(
+        bytes: <DbType as diesel::backend::Backend>::RawValue<'_>,
+    ) -> deserialize::Result<Self> {
+        let string = <String as FromSql<VarChar, DbType>>::from_sql(bytes)?;
+        let perm = AuthPermission2::from_str(&string).map_err(Box::new)?;
+
+        Ok(perm)
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, JsonSchema, Clone, Eq, PartialEq, Hash)]
+pub enum TablePermission<Table = String> {
+    Read(Table),
+    Add(Table),
+    Delete(Table),
+    Update(Table),
+}
+impl FromStr for TablePermission {
+    type Err = AuthError;
+
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
+        let mut split = value.split(":");
+        let table = split.next().expect("table must exist");
+        let permission = split.next().expect("permission must exist");
+        let permission = match permission {
+            permission if permission.eq_ignore_ascii_case("read") => Self::Read(table.to_string()),
+            permission if permission.eq_ignore_ascii_case("add") => Self::Add(table.to_string()),
+            permission if permission.eq_ignore_ascii_case("delete") => {
+                Self::Delete(table.to_string())
+            }
+            permission if permission.eq_ignore_ascii_case("update") => {
+                Self::Update(table.to_string())
+            }
+            _ => {
+                return Err(AppError::new(&format!("unknown permission: {}", value)).into());
+            }
+        };
+        Ok(permission)
+    }
+}
+
+impl From<&str> for TablePermission {
+    fn from(value: &str) -> Self {
+        let mut split = value.split(":");
+        let table = split.next().expect("table must exist");
+        let permission = split.next().expect("permission must exist");
+        match permission {
+            permission if permission.eq_ignore_ascii_case("read") => Self::Read(table.to_string()),
+            permission if permission.eq_ignore_ascii_case("add") => Self::Add(table.to_string()),
+            permission if permission.eq_ignore_ascii_case("delete") => {
+                Self::Delete(table.to_string())
+            }
+            permission if permission.eq_ignore_ascii_case("update") => {
+                Self::Update(table.to_string())
+            }
+            _ => {
+                panic!("invalid table permission");
+            }
+        }
+    }
+}
+
+impl Display for TablePermission {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
+            TablePermission::Read(t) => {
+                format!("{t}:Read")
+            }
+            TablePermission::Add(t) => {
+                format!("{t}:Add")
+            }
+            TablePermission::Delete(t) => {
+                format!("{t}:Delete")
+            }
+            TablePermission::Update(t) => {
+                format!("{t}:Update")
+            }
+        };
+        write!(f, "{}", str)
+    }
+}
+
+#[test]
+fn permissions_test() {
+    let perm = TablePermission::from("t:add");
+    let perm2 = TablePermission::from("t:Add");
+    println!("{:?}", perm);
+    println!("{:?}", perm2);
+    println!("{}", perm.to_string());
+    println!("{}", perm2.to_string());
+}
 
 #[test]
 pub fn test() {
@@ -33,14 +182,6 @@ pub fn get_auth_layer() -> AuthManagerLayer<AuthBackend, MemoryStore> {
     let backend = AuthBackend::new(DB.clone());
     AuthManagerLayerBuilder::new(backend, session_layer).build()
 }
-
-#[allow(dead_code)]
-const LOGIN_MESSAGE: &str = "welcome";
-pub const DEFAULT_TENANTRY: &str = "default";
-pub const COMMON_USER_ROLE: i64 = -1;
-pub const COMMON_USER: i64 = -1;
-pub const SUPER_USER_ROLE: i64 = -2;
-pub const SUPER_USER: i64 = -2;
 
 #[derive(Debug, Clone)]
 pub struct AuthBackend {
@@ -96,6 +237,12 @@ impl AuthBackend {
 
 #[derive(Debug)]
 pub struct AuthError(AppError);
+
+impl From<AppError> for AuthError {
+    fn from(value: AppError) -> Self {
+        AuthError(value)
+    }
+}
 
 impl std::error::Error for AuthError {}
 
@@ -264,22 +411,21 @@ impl From<String> for AuthPermission {
 
 // #[async_trait]
 impl AuthzBackend for AuthBackend {
-    type Permission = AuthPermission;
+    type Permission = AuthPermission2;
 
     async fn get_group_permissions(
         &self,
         user: &Self::User,
     ) -> Result<HashSet<Self::Permission>, Self::Error> {
-        let conn = &mut self.db.get()?;
         match users
             .inner_join(groups::table())
-            .inner_join(groups_permissions.on(group_id.eq(crate::schema::groups::id)))
-            .inner_join(permissions.on(permission_id.eq(crate::schema::permissions::id)))
+            // .inner_join(groups_permissions.on(group_id.eq(crate::schema::groups::id)))
+            // .inner_join(permissions.on(permission_id.eq(crate::schema::permissions::id)))
             .filter(crate::schema::users::id.eq(user.id))
-            .select(Permission::as_select())
-            .load(conn)
+            .select(Group::as_select())
+            .load(&mut self.db.get()?)
         {
-            Ok(res) => Ok(res.into_iter().map(|x| x.name.into()).collect()),
+            Ok(res) => Ok(res.into_iter().map(|x| x.permissions).flatten().collect()),
             Err(e) => Err(e.into()),
         }
     }

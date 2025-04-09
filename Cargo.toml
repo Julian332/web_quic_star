@@ -3,8 +3,10 @@ name = "web_quick"
 version = "0.1.0"
 edition = "2021"
 
+[profile.dev]
+codegen-units = 32
 [features]
-default = ["postgres", "solana_mode", "eth_mode"]
+default = ["postgres", "eth_mode","solana_mode"]
 eth_mode = ["dep:alloy"]
 solana_mode = ["dep:anchor-client"]
 dev = []
@@ -49,7 +51,7 @@ uuid = { version = "1", features = ["serde", "v4"] }
 serde = { version = "1", features = ["derive", "rc"] }
 serde_json = { version = "1", features = [] }
 anyhow = { version = "1", features = [] }
-
+#strum = { version = "0.27", features = ["default", "derive"] }
 dotenvy = "0.15"
 reqwest = { version = "0.12", features = ["json", "cookies", "multipart", "rustls-tls", "charset", "http2", "macos-system-configuration", ], default-features = false }
 futures = "0.3"

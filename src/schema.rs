@@ -10,7 +10,7 @@ diesel::table! {
         create_by -> Int8,
         update_by -> Nullable<Int8>,
         is_delete -> Bool,
-        permissions -> Array<Int8>,
+        permissions -> Array<Text>,
     }
 }
 

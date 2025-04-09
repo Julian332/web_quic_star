@@ -200,9 +200,9 @@ fn test_display_error() {
 }
 
 impl AppError {
-    pub fn new(error: &'static str) -> Self {
+    pub fn new(error: &str) -> Self {
         Self {
-            error: anyhow::anyhow!(error),
+            error: anyhow::anyhow!("{error}"),
             error_id: Uuid::new_v4(),
             status: StatusCode::BAD_REQUEST,
             error_details: None,
