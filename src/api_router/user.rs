@@ -14,6 +14,7 @@ use axum_login::permission_required;
 use crate::db_models::user;
 use crate::framework::api_doc::default_resp_docs;
 use crate::framework::auth::AuthBackend;
+use crate::framework::auth::TablePermission::{Add, Delete, Read, Update};
 use crate::schema::users::dsl::users;
 
 #[derive(Serialize, Deserialize, OperationIo, Debug, Default, JsonSchema)]
@@ -50,9 +51,9 @@ pub fn user_routes() -> ApiRouter {
         post_with(modify_password, default_resp_docs::<String>),
     );
     router_add
-        .route_layer(permission_required!(AuthBackend, "users_add"))
-        .merge(router_read.route_layer(permission_required!(AuthBackend, "users_read")))
-        .merge(router_delete.route_layer(permission_required!(AuthBackend, "users_delete")))
-        .merge(router_update.route_layer(permission_required!(AuthBackend, "users_update")))
+        .route_layer(permission_required!(AuthBackend, Add("users")))
+        .merge(router_read.route_layer(permission_required!(AuthBackend, Read("users"))))
+        .merge(router_delete.route_layer(permission_required!(AuthBackend, Delete("users"))))
+        .merge(router_update.route_layer(permission_required!(AuthBackend, Update("users"))))
         .merge(modify_password.route_layer(login_required!(AuthBackend)))
 }

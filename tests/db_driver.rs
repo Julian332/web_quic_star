@@ -1,6 +1,5 @@
 use r2d2_postgres::postgres::NoTls;
 use r2d2_postgres::PostgresConnectionManager;
-use web_quick::db_models::group_permission::GroupsPermission;
 
 #[test]
 fn t() {
@@ -11,10 +10,7 @@ fn t() {
         NoTls,
     );
     let pool = r2d2::Pool::new(manager).unwrap();
-    let new = GroupsPermission {
-        group_id: 100,
-        permission_id: 100,
-    };
+
     let mut client = pool.get().unwrap();
 
     // diesel::insert_into(groups_permissions)

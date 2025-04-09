@@ -50,9 +50,6 @@ diesel::table! {
     }
 }
 
-diesel::joinable!(groups_permissions -> groups (group_id));
-// diesel::joinable!( groups -> permissions (permissions));
-diesel::joinable!(groups_permissions -> permissions (permission_id));
 diesel::joinable!(users -> groups (group_id));
 
-diesel::allow_tables_to_appear_in_same_query!(groups, groups_permissions, permissions, users,);
+diesel::allow_tables_to_appear_in_same_query!(groups, users,);

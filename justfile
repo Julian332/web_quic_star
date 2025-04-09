@@ -1,17 +1,18 @@
-set shell := ["powershell.exe", "-c"]  # Windows PowerShell
+set shell := ["powershell.exe", "-c"]
 local:
-	cargo watch -c -w ./src -- cargo run  --bin web_quick -F dev
+    cargo watch -c -- cargo run  --bin web_quick -F dev
+
 dev:
-	cargo watch -c -w ./src -- cargo run --bin web_quick -F dev
+    cargo watch -c  -- cargo run --bin web_quick -F dev
 
 prod:
-	cargo watch -c -w ./src -- cargo run --bin web_quick
+    cargo watch -c  -- cargo run --bin web_quick
 
 test:
-	cargo test
+    cargo test
 
 build:
-	cargo build --release
+    cargo build --release
 
 clean:
-	cargo clean
+    cargo clean

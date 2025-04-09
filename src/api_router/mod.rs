@@ -10,8 +10,6 @@ use tower_http::trace::TraceLayer;
 pub mod auth;
 pub mod docs;
 pub mod group;
-pub mod group_permission;
-pub mod permission;
 pub mod upload;
 pub mod user;
 
@@ -26,14 +24,6 @@ pub fn setup_router() -> ApiRouter {
         .nest_api_service("/groups", crate::api_router::group::group_router())
         .nest_api_service("/upload", crate::api_router::upload::upload_routes())
         .nest_service(FILE_SERVER_DIRECTORY, ServeDir::new("assets"))
-        .nest_api_service(
-            "/permissions",
-            crate::api_router::permission::permission_routes(),
-        )
-        .nest_api_service(
-            "/group_permission",
-            crate::api_router::group_permission::group_permission_routes(),
-        )
         .fallback(fallback)
         .layer(tower_http::catch_panic::CatchPanicLayer::new())
         .layer(TraceLayer::new_for_http())

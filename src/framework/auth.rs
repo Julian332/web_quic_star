@@ -15,8 +15,7 @@ use diesel::deserialize::FromSql;
 use diesel::serialize::{Output, ToSql};
 use diesel::sql_types::{Text, VarChar};
 use diesel::{
-    deserialize, serialize, ExpressionMethods, FromSqlRow, JoinOnDsl, QueryDsl, RunQueryDsl,
-    SelectableHelper,
+    deserialize, serialize, ExpressionMethods, FromSqlRow, QueryDsl, RunQueryDsl, SelectableHelper,
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -34,53 +33,59 @@ pub const SUPER_USER: i64 = -2;
 
 #[derive(Debug, FromSqlRow, Serialize, Deserialize, JsonSchema, Clone, Eq, PartialEq, Hash)]
 #[diesel(sql_type = Text)]
-pub enum AuthPermission2 {
+pub enum AuthPermission {
     Admin,
-    TablePermissions(TablePermission),
+    TablePermission(TablePermission),
 }
 
-impl Display for AuthPermission2 {
+impl From<TablePermission<&str>> for AuthPermission {
+    fn from(value: TablePermission<&str>) -> Self {
+        AuthPermission::TablePermission(TablePermission::from(value))
+    }
+}
+
+impl Display for AuthPermission {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let str = match self {
-            AuthPermission2::Admin => "Admin".to_string(),
-            AuthPermission2::TablePermissions(x) => x.to_string(),
+            AuthPermission::Admin => "Admin".to_string(),
+            AuthPermission::TablePermission(x) => x.to_string(),
         };
         write!(f, "{}", str)
     }
 }
 
-impl From<&str> for AuthPermission2 {
+impl From<&str> for AuthPermission {
     fn from(s: &str) -> Self {
         match s {
-            string if string.eq_ignore_ascii_case("Admin") => AuthPermission2::Admin,
-            _ => AuthPermission2::TablePermissions(TablePermission::from(s)),
+            string if string.eq_ignore_ascii_case("Admin") => AuthPermission::Admin,
+            _ => AuthPermission::TablePermission(TablePermission::from(s)),
         }
     }
 }
-impl FromStr for AuthPermission2 {
+impl FromStr for AuthPermission {
     type Err = AuthError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let result = match s {
-            string if string.eq_ignore_ascii_case("Admin") => AuthPermission2::Admin,
-            _ => AuthPermission2::TablePermissions(TablePermission::from_str(s)?),
+            string if string.eq_ignore_ascii_case("Admin") => AuthPermission::Admin,
+            _ => AuthPermission::TablePermission(TablePermission::from_str(s)?),
         };
         Ok(result)
     }
 }
 
-impl ToSql<Text, DbType> for AuthPermission2 {
+impl ToSql<Text, DbType> for AuthPermission {
     fn to_sql<'b>(&'b self, out: &mut Output<'b, '_, DbType>) -> serialize::Result {
         <String as ToSql<VarChar, DbType>>::to_sql(&self.to_string(), &mut out.reborrow())
     }
 }
 
-impl FromSql<Text, DbType> for AuthPermission2 {
+impl FromSql<Text, DbType> for AuthPermission {
     fn from_sql(
         bytes: <DbType as diesel::backend::Backend>::RawValue<'_>,
     ) -> deserialize::Result<Self> {
         let string = <String as FromSql<VarChar, DbType>>::from_sql(bytes)?;
-        let perm = AuthPermission2::from_str(&string).map_err(Box::new)?;
+        let perm = AuthPermission::from_str(&string).map_err(Box::new)?;
 
         Ok(perm)
     }
@@ -93,13 +98,25 @@ pub enum TablePermission<Table = String> {
     Delete(Table),
     Update(Table),
 }
+impl From<TablePermission<&str>> for TablePermission<String> {
+    fn from(value: TablePermission<&str>) -> Self {
+        match value {
+            TablePermission::Read(x) => TablePermission::Add(x.to_string()),
+            TablePermission::Add(x) => TablePermission::Add(x.to_string()),
+            TablePermission::Delete(x) => TablePermission::Add(x.to_string()),
+            TablePermission::Update(x) => TablePermission::Add(x.to_string()),
+        }
+    }
+}
 impl FromStr for TablePermission {
     type Err = AuthError;
 
     fn from_str(value: &str) -> Result<Self, Self::Err> {
         let mut split = value.split(":");
         let table = split.next().expect("table must exist");
-        let permission = split.next().expect("permission must exist");
+        let permission = split
+            .next()
+            .expect(&format!("permission must exist for `{value}`"));
         let permission = match permission {
             permission if permission.eq_ignore_ascii_case("read") => Self::Read(table.to_string()),
             permission if permission.eq_ignore_ascii_case("add") => Self::Add(table.to_string()),
@@ -121,7 +138,9 @@ impl From<&str> for TablePermission {
     fn from(value: &str) -> Self {
         let mut split = value.split(":");
         let table = split.next().expect("table must exist");
-        let permission = split.next().expect("permission must exist");
+        let permission = split
+            .next()
+            .expect(&format!("permission must exist for `{value}`"));
         match permission {
             permission if permission.eq_ignore_ascii_case("read") => Self::Read(table.to_string()),
             permission if permission.eq_ignore_ascii_case("add") => Self::Add(table.to_string()),
@@ -390,28 +409,9 @@ fn test1() {
     println!("{}", x1);
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct AuthPermission {
-    pub name: String,
-}
-
-impl From<&str> for AuthPermission {
-    fn from(name: &str) -> Self {
-        AuthPermission {
-            name: name.to_string(),
-        }
-    }
-}
-
-impl From<String> for AuthPermission {
-    fn from(name: String) -> Self {
-        AuthPermission { name }
-    }
-}
-
 // #[async_trait]
 impl AuthzBackend for AuthBackend {
-    type Permission = AuthPermission2;
+    type Permission = AuthPermission;
 
     async fn get_group_permissions(
         &self,
@@ -419,8 +419,6 @@ impl AuthzBackend for AuthBackend {
     ) -> Result<HashSet<Self::Permission>, Self::Error> {
         match users
             .inner_join(groups::table())
-            // .inner_join(groups_permissions.on(group_id.eq(crate::schema::groups::id)))
-            // .inner_join(permissions.on(permission_id.eq(crate::schema::permissions::id)))
             .filter(crate::schema::users::id.eq(user.id))
             .select(Group::as_select())
             .load(&mut self.db.get()?)
