@@ -1,5 +1,5 @@
 use crate::db_models::group::web::get_routers;
-use crate::framework::auth::{AuthBackend, TablePermission::*};
+use crate::framework::auth::{AuthBackend, AuthPermission::*};
 use aide::axum::ApiRouter;
 use axum_login::permission_required;
 

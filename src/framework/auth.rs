@@ -33,22 +33,34 @@ pub const SUPER_USER: i64 = -2;
 
 #[derive(Debug, FromSqlRow, Serialize, Deserialize, JsonSchema, Clone, Eq, PartialEq, Hash)]
 #[diesel(sql_type = Text)]
-pub enum AuthPermission {
+pub enum AuthPermission<Table = String> {
     Admin,
-    TablePermission(TablePermission),
+    Read(Table),
+    Add(Table),
+    Delete(Table),
+    Update(Table),
 }
 
-impl From<TablePermission<&str>> for AuthPermission {
-    fn from(value: TablePermission<&str>) -> Self {
-        AuthPermission::TablePermission(TablePermission::from(value))
+impl From<AuthPermission<&str>> for AuthPermission {
+    fn from(value: AuthPermission<&str>) -> Self {
+        match value {
+            AuthPermission::Admin => AuthPermission::Admin,
+            AuthPermission::Read(x) => AuthPermission::Read(x.to_string()),
+            AuthPermission::Add(x) => AuthPermission::Read(x.to_string()),
+            AuthPermission::Delete(x) => AuthPermission::Read(x.to_string()),
+            AuthPermission::Update(x) => AuthPermission::Read(x.to_string()),
+        }
     }
 }
 
 impl Display for AuthPermission {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let str = match self {
-            AuthPermission::Admin => "Admin".to_string(),
-            AuthPermission::TablePermission(x) => x.to_string(),
+            AuthPermission::Admin => "Admin",
+            AuthPermission::Read(x) => x,
+            AuthPermission::Add(x) => x,
+            AuthPermission::Delete(x) => x,
+            AuthPermission::Update(x) => x,
         };
         write!(f, "{}", str)
     }
@@ -56,21 +68,29 @@ impl Display for AuthPermission {
 
 impl From<&str> for AuthPermission {
     fn from(s: &str) -> Self {
-        match s {
+        Self::from_str(s).expect(&format!("invalid table permission:{s}"))
+    }
+}
+
+impl TryFrom<String> for AuthPermission {
+    type Error = AuthError;
+
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        let result = match s {
             string if string.eq_ignore_ascii_case("Admin") => AuthPermission::Admin,
-            _ => AuthPermission::TablePermission(TablePermission::from(s)),
-        }
+            permission if permission.eq_ignore_ascii_case("read") => Self::Read(permission),
+            permission if permission.eq_ignore_ascii_case("add") => Self::Add(permission),
+            permission if permission.eq_ignore_ascii_case("delete") => Self::Delete(permission),
+            permission if permission.eq_ignore_ascii_case("update") => Self::Update(permission),
+            _ => return Err(AppError::new(&format!("unknown permission: {s}")).into()),
+        };
+        Ok(result)
     }
 }
 impl FromStr for AuthPermission {
     type Err = AuthError;
-
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let result = match s {
-            string if string.eq_ignore_ascii_case("Admin") => AuthPermission::Admin,
-            _ => AuthPermission::TablePermission(TablePermission::from_str(s)?),
-        };
-        Ok(result)
+        Self::try_from(s.to_string())
     }
 }
 
@@ -85,102 +105,15 @@ impl FromSql<Text, DbType> for AuthPermission {
         bytes: <DbType as diesel::backend::Backend>::RawValue<'_>,
     ) -> deserialize::Result<Self> {
         let string = <String as FromSql<VarChar, DbType>>::from_sql(bytes)?;
-        let perm = AuthPermission::from_str(&string).map_err(Box::new)?;
-
+        let perm = AuthPermission::try_from(string).map_err(Box::new)?;
         Ok(perm)
-    }
-}
-
-#[derive(Debug, Serialize, Deserialize, JsonSchema, Clone, Eq, PartialEq, Hash)]
-pub enum TablePermission<Table = String> {
-    Read(Table),
-    Add(Table),
-    Delete(Table),
-    Update(Table),
-}
-impl From<TablePermission<&str>> for TablePermission<String> {
-    fn from(value: TablePermission<&str>) -> Self {
-        match value {
-            TablePermission::Read(x) => TablePermission::Add(x.to_string()),
-            TablePermission::Add(x) => TablePermission::Add(x.to_string()),
-            TablePermission::Delete(x) => TablePermission::Add(x.to_string()),
-            TablePermission::Update(x) => TablePermission::Add(x.to_string()),
-        }
-    }
-}
-impl FromStr for TablePermission {
-    type Err = AuthError;
-
-    fn from_str(value: &str) -> Result<Self, Self::Err> {
-        let mut split = value.split(":");
-        let table = split.next().expect("table must exist");
-        let permission = split
-            .next()
-            .expect(&format!("permission must exist for `{value}`"));
-        let permission = match permission {
-            permission if permission.eq_ignore_ascii_case("read") => Self::Read(table.to_string()),
-            permission if permission.eq_ignore_ascii_case("add") => Self::Add(table.to_string()),
-            permission if permission.eq_ignore_ascii_case("delete") => {
-                Self::Delete(table.to_string())
-            }
-            permission if permission.eq_ignore_ascii_case("update") => {
-                Self::Update(table.to_string())
-            }
-            _ => {
-                return Err(AppError::new(&format!("unknown permission: {}", value)).into());
-            }
-        };
-        Ok(permission)
-    }
-}
-
-impl From<&str> for TablePermission {
-    fn from(value: &str) -> Self {
-        let mut split = value.split(":");
-        let table = split.next().expect("table must exist");
-        let permission = split
-            .next()
-            .expect(&format!("permission must exist for `{value}`"));
-        match permission {
-            permission if permission.eq_ignore_ascii_case("read") => Self::Read(table.to_string()),
-            permission if permission.eq_ignore_ascii_case("add") => Self::Add(table.to_string()),
-            permission if permission.eq_ignore_ascii_case("delete") => {
-                Self::Delete(table.to_string())
-            }
-            permission if permission.eq_ignore_ascii_case("update") => {
-                Self::Update(table.to_string())
-            }
-            _ => {
-                panic!("invalid table permission");
-            }
-        }
-    }
-}
-
-impl Display for TablePermission {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let str = match self {
-            TablePermission::Read(t) => {
-                format!("{t}:Read")
-            }
-            TablePermission::Add(t) => {
-                format!("{t}:Add")
-            }
-            TablePermission::Delete(t) => {
-                format!("{t}:Delete")
-            }
-            TablePermission::Update(t) => {
-                format!("{t}:Update")
-            }
-        };
-        write!(f, "{}", str)
     }
 }
 
 #[test]
 fn permissions_test() {
-    let perm = TablePermission::from("t:add");
-    let perm2 = TablePermission::from("t:Add");
+    let perm = AuthPermission::from("t:add");
+    let perm2 = AuthPermission::from("t:Add");
     println!("{:?}", perm);
     println!("{:?}", perm2);
     println!("{}", perm.to_string());

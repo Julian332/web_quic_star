@@ -14,7 +14,7 @@ use axum_login::permission_required;
 use crate::db_models::user;
 use crate::framework::api_doc::default_resp_docs;
 use crate::framework::auth::AuthBackend;
-use crate::framework::auth::TablePermission::{Add, Delete, Read, Update};
+use crate::framework::auth::AuthPermission::*;
 use crate::schema::users::dsl::users;
 
 #[derive(Serialize, Deserialize, OperationIo, Debug, Default, JsonSchema)]
