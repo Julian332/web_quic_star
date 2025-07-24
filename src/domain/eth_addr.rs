@@ -1,8 +1,7 @@
+use std::borrow::Cow;
 use aide::OperationIo;
 use alloy::primitives::Address;
-use schemars::gen::SchemaGenerator;
-use schemars::schema::{InstanceType, Schema, SchemaObject};
-use schemars::JsonSchema;
+use schemars::generate::SchemaGenerator;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt::Formatter;
 use std::ops::{Deref, DerefMut};
@@ -72,16 +71,14 @@ impl DerefMut for EthAddr {
 }
 
 impl JsonSchema for EthAddr {
-    fn schema_name() -> String {
-        "EthAddr".to_owned()
+    fn schema_name() -> Cow<'static, str> {
+        Cow::Borrowed("EthAddr")
     }
 
     fn json_schema(_gen: &mut SchemaGenerator) -> Schema {
-        SchemaObject {
-            instance_type: Some(InstanceType::String.into()),
-            ..Default::default()
-        }
-        .into()
+        json_schema!({
+            "type": "string",
+        })
     }
 }
 use crate::db_models::DbType;
@@ -89,6 +86,7 @@ use diesel::deserialize::{self, FromSql, FromSqlRow};
 use diesel::expression::AsExpression;
 use diesel::serialize::{self, Output, ToSql};
 use diesel::sql_types::*;
+use schemars::{json_schema, JsonSchema, Schema};
 
 impl ToSql<Text, DbType> for EthAddr {
     fn to_sql<'b>(&'b self, out: &mut Output<'b, '_, DbType>) -> serialize::Result {

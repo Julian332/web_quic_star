@@ -1,6 +1,7 @@
 use aide::OperationIo;
 use axum::{http::StatusCode, response::IntoResponse};
 use derive_more::{Display, Error};
+use schemars::json_schema;
 use serde_json::Value;
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
@@ -22,71 +23,157 @@ const _: () = {
     #[automatically_derived]
     #[allow(unused_braces)]
     impl schemars::JsonSchema for AppError {
-        fn schema_name() -> std::string::String {
-            "AppError".to_owned()
+        fn schema_name() -> schemars::_private::alloc::borrow::Cow<'static, str> {
+            schemars::_private::alloc::borrow::Cow::Borrowed("AppError")
         }
-        fn schema_id() -> std::borrow::Cow<'static, str> {
-            std::borrow::Cow::Borrowed(std::concat!(std::module_path!(), "::", "AppError"))
+        fn schema_id() -> schemars::_private::alloc::borrow::Cow<'static, str> {
+            schemars::_private::alloc::borrow::Cow::Borrowed(::core::concat!(
+                ::core::module_path!(),
+                "::",
+                "AppError"
+            ))
         }
-        fn json_schema(
-            generator: &mut schemars::r#gen::SchemaGenerator,
-        ) -> schemars::schema::Schema {
-            schemars::_private::metadata::add_description(
+        fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+            {
+                let mut schema = schemars::json_schema!({"type" : "object" , });
                 {
-                    let mut schema_object = schemars::schema::SchemaObject {
-                        instance_type: Some(schemars::schema::InstanceType::Object.into()),
-                        ..Default::default()
-                    };
-                    let object_validation = schema_object.object();
-                    {
-                        schemars::_private::insert_object_property::<String>(
-                            object_validation,
-                            "error",
-                            false,
-                            false,
-                            schemars::_private::metadata::add_description(
-                                generator.subschema_for::<String>(),
-                                "An error message.",
+                    schemars::_private::insert_object_property(&mut schema, "error", false, {
+                        let mut schema = json_schema!({
+                        "type": "string",
+                            });
+                        schemars::_private::insert_metadata_property_if_nonempty(
+                            &mut schema,
+                            "title",
+                            {
+                                const TITLE: &str = schemars::_private::get_title_and_description(
+                                    ::core::concat!("An error message."),
+                                )
+                                .0;
+                                TITLE
+                            },
+                        );
+                        schemars::_private::insert_metadata_property_if_nonempty(
+                            &mut schema,
+                            "description",
+                            {
+                                const DESCRIPTION: &str =
+                                    schemars::_private::get_title_and_description(::core::concat!(
+                                        "An error message."
+                                    ))
+                                    .1;
+                                DESCRIPTION
+                            },
+                        );
+                        schema
+                    });
+                }
+                {
+                    schemars::_private::insert_object_property(
+                        &mut schema,
+                        "error_id",
+                        generator.contract().is_deserialize()
+                            && <Uuid as schemars::JsonSchema>::_schemars_private_is_option(),
+                        {
+                            let mut schema = generator.subschema_for::<Uuid>();
+                            schemars::_private::insert_metadata_property_if_nonempty(
+                                &mut schema,
+                                "title",
+                                {
+                                    const TITLE: &str =
+                                        schemars::_private::get_title_and_description(
+                                            ::core::concat!("A unique error ID."),
+                                        )
+                                        .0;
+                                    TITLE
+                                },
+                            );
+                            schemars::_private::insert_metadata_property_if_nonempty(
+                                &mut schema,
+                                "description",
+                                {
+                                    const DESCRIPTION: &str =
+                                        schemars::_private::get_title_and_description(
+                                            ::core::concat!("A unique error ID."),
+                                        )
+                                        .1;
+                                    DESCRIPTION
+                                },
+                            );
+                            schema
+                        },
+                    );
+                }
+                {
+                    schemars::_private::insert_object_property(
+                        &mut schema,
+                        "status",
+                        false,
+                        { generator.subschema_for::<u16>() },
+                    );
+                }
+                {
+                    schemars::_private::insert_object_property(
+                        &mut schema,
+                        "error_details",
+                        generator.contract().is_deserialize()
+                            && <Option<Value> as schemars::JsonSchema>::_schemars_private_is_option(
                             ),
-                        );
-                    }
+                        {
+                            let mut schema = generator.subschema_for::<Option<Value>>();
+                            schemars::_private::insert_metadata_property_if_nonempty(
+                                &mut schema,
+                                "title",
+                                {
+                                    const TITLE: &str =
+                                        schemars::_private::get_title_and_description(
+                                            ::core::concat!("Optional Additional error details."),
+                                        )
+                                        .0;
+                                    TITLE
+                                },
+                            );
+                            schemars::_private::insert_metadata_property_if_nonempty(
+                                &mut schema,
+                                "description",
+                                {
+                                    const DESCRIPTION: &str =
+                                        schemars::_private::get_title_and_description(
+                                            ::core::concat!("Optional Additional error details."),
+                                        )
+                                        .1;
+                                    DESCRIPTION
+                                },
+                            );
+                            schema
+                        },
+                    );
+                }
+                {
+                    schemars::_private::insert_object_property(&mut schema, "error_origin_position", generator.contract().is_deserialize() && <Option<String> as schemars::JsonSchema>::_schemars_private_is_option(), { generator.subschema_for::<Option<String>>() });
+                }
+                schemars::_private::insert_metadata_property_if_nonempty(&mut schema, "title", {
+                    const TITLE: &str = schemars::_private::get_title_and_description(
+                        ::core::concat!("A default error response for most API errors."),
+                    )
+                    .0;
+                    TITLE
+                });
+                schemars::_private::insert_metadata_property_if_nonempty(
+                    &mut schema,
+                    "description",
                     {
-                        schemars::_private::insert_object_property::<Uuid>(
-                            object_validation,
-                            "error_id",
-                            false,
-                            false,
-                            schemars::_private::metadata::add_description(
-                                generator.subschema_for::<Uuid>(),
-                                "A unique error ID.",
-                            ),
-                        );
-                    }
-                    {
-                        schemars::_private::insert_object_property::<Option<Value>>(
-                            object_validation,
-                            "error_details",
-                            false,
-                            false,
-                            schemars::_private::metadata::add_description(
-                                generator.subschema_for::<Option<Value>>(),
-                                "Optional Additional error details.",
-                            ),
-                        );
-                    }
-                    {
-                        schemars::_private::insert_object_property::<Option<String>>(
-                            object_validation,
-                            "error_origin_position",
-                            false,
-                            false,
-                            generator.subschema_for::<Option<String>>(),
-                        );
-                    }
-                    schemars::schema::Schema::Object(schema_object)
-                },
-                "A default error response for most API errors.",
-            )
+                        const DESCRIPTION: &str = schemars::_private::get_title_and_description(
+                            ::core::concat!("A default error response for most API errors."),
+                        )
+                        .1;
+                        DESCRIPTION
+                    },
+                );
+                schema
+            }
+        }
+        fn inline_schema() -> bool {
+            false
         }
     }
 };

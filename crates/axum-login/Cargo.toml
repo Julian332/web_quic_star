@@ -17,7 +17,7 @@ documentation = "https://docs.rs/axum-login"
 readme = "../axum_login/README.md"
 
 [dependencies]
-aide = { version = "0.14.1",features = ["macros"]}
+aide = { path = "../aide/crates/aide",features = ["macros"]}
 axum = { version = "0.8.1", default-features = false, features = [
   "original-uri",
 ] }

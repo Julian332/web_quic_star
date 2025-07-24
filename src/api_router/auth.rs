@@ -5,7 +5,7 @@ use aide::axum::routing::post_with;
 use aide::axum::{ApiRouter, IntoApiResponse};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Redirect};
-use axum::Json;
+use axum::{ Json};
 use axum_login::AuthSession;
 
 pub async fn login(

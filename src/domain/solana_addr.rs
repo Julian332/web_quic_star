@@ -1,8 +1,8 @@
+use std::borrow::Cow;
 use aide::OperationIo;
 use anchor_client::anchor_lang::prelude::Pubkey;
-use schemars::gen::SchemaGenerator;
-use schemars::schema::{InstanceType, Schema, SchemaObject};
-use schemars::JsonSchema;
+use schemars::generate::SchemaGenerator;
+use schemars::{json_schema, JsonSchema, Schema};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt::{Display, Formatter};
 use std::ops::{Deref, DerefMut};
@@ -56,16 +56,14 @@ impl<'de> Deserialize<'de> for SolAddr {
 }
 
 impl JsonSchema for SolAddr {
-    fn schema_name() -> String {
-        "PubKey".to_owned()
+    fn schema_name() -> Cow<'static, str> {
+        Cow::Borrowed("SolAddr")
     }
 
     fn json_schema(_gen: &mut SchemaGenerator) -> Schema {
-        SchemaObject {
-            instance_type: Some(InstanceType::String.into()),
-            ..Default::default()
-        }
-        .into()
+        json_schema!({
+            "type": "string",
+        })
     }
 }
 
