@@ -21,10 +21,7 @@ pub mod schema_view;
 pub mod subscribe;
 pub mod third_party_api;
 pub mod utils;
-
-// todo global soft delete ,toggle by feature
 // todo global multi TENANTRY ,toggle by feature
-// todo time util
 pub type AppRes<T> = Result<T, AppError>;
 pub static DB: LazyLock<ConnPool> = LazyLock::new(|| setup_connection_pool());
 pub static HTTP_CLIENT: LazyLock<reqwest::Client> = LazyLock::new(|| reqwest::Client::new());

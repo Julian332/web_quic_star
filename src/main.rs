@@ -17,6 +17,7 @@ async fn main() {
     let server_port = env::var("SERVER_PORT").unwrap_or("5090".to_string());
     #[cfg(feature = "dev")]
     tracing::info!("swagger docs are accessible at http://127.0.0.1:{server_port}/docs");
+    #[cfg(feature = "dev")]
     tracing::info!("pretty docs are accessible at http://127.0.0.1:{server_port}/docs/pretty_doc");
 
     let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{server_port}"))

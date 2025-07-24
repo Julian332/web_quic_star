@@ -10,8 +10,8 @@ use tokio::fs::File;
 use tokio::io::{AsyncReadExt, BufReader, BufWriter};
 use tokio_util::io::StreamReader;
 use tracing::info;
+use crate::config::FILE_SERVER_DIRECTORY;
 
-pub const UPLOADS_DIRECTORY: &str = "assets";
 
 pub async fn sha256_digest(path: &PathBuf) -> AppRes<String> {
     let input = File::open(path).await?;
@@ -63,7 +63,7 @@ where
         futures::pin_mut!(body_reader);
 
         // Create the file. `File` implements `AsyncWrite`.
-        let path = std::path::Path::new(UPLOADS_DIRECTORY).join(filename);
+        let path = std::path::Path::new(FILE_SERVER_DIRECTORY.as_str()).join(filename);
         let mut file = BufWriter::new(File::create(path.clone()).await?);
 
         // Copy the body into the file.
@@ -71,7 +71,7 @@ where
         let hash = sha256_digest(&path).await?;
         let hash_file_name = format!("{hash}.{extension_name}");
         info!("file: {} has saved", hash_file_name);
-        let hash_file = std::path::Path::new(UPLOADS_DIRECTORY).join(hash_file_name.clone());
+        let hash_file = std::path::Path::new(FILE_SERVER_DIRECTORY.as_str()).join(hash_file_name.clone());
 
         tokio::fs::rename(path, hash_file).await?;
         Ok::<_, AppError>(hash_file_name)

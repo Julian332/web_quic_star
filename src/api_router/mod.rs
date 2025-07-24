@@ -3,6 +3,7 @@ use crate::framework::api_doc::fallback;
 use crate::framework::auth::get_auth_layer;
 use aide::axum::ApiRouter;
 use http::{HeaderValue, Method};
+use std::ops::Deref;
 use tower_http::cors::CorsLayer;
 use tower_http::services::ServeDir;
 use tower_http::trace::TraceLayer;
@@ -15,15 +16,18 @@ pub mod user;
 
 pub fn setup_router() -> ApiRouter {
     let app = ApiRouter::new()
-        .nest_api_service("/auth", crate::api_router::auth::router())
-        .nest_api_service("/users", crate::api_router::user::user_routes())
+        .nest_api_service("/auth", auth::router())
+        .nest_api_service("/users", user::user_routes())
         .nest_api_service(
             "/user_with_group",
             crate::db_models::user_with_group_views::web_routes(),
         )
-        .nest_api_service("/groups", crate::api_router::group::group_router())
-        .nest_api_service("/upload", crate::api_router::upload::upload_routes())
-        .nest_service(FILE_SERVER_DIRECTORY, ServeDir::new("assets"))
+        .nest_api_service("/groups", group::group_router())
+        .nest_api_service("/upload", upload::upload_routes())
+        .nest_service(
+            &format!("/{}", FILE_SERVER_DIRECTORY.deref()),
+            ServeDir::new(FILE_SERVER_DIRECTORY.as_str()),
+        )
         .fallback(fallback)
         .layer(tower_http::catch_panic::CatchPanicLayer::new())
         .layer(TraceLayer::new_for_http())

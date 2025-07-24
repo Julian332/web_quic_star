@@ -8,7 +8,7 @@ codegen-units = 32
 [features]
 default = ["postgres", "eth_mode", "solana_mode", "dev"]
 eth_mode = ["dep:alloy"]
-solana_mode = ["dep:anchor-client"]
+solana_mode = ["dep:anchor-client", "dep:anchor-spl"]
 dev = []
 postgres = ["diesel/postgres", "diesel-dynamic-schema/postgres", "rust_decimal/db-diesel-postgres"]
 multi_tenant = []
@@ -40,13 +40,13 @@ diesel_logger = { path = "crates/diesel_logger" }
 
 #solana ======
 anchor-client = { path = "crates/anchor-client", optional = true, features = ["async"] }
-
+anchor-spl = { version = "0.31.1", features = ["default"], optional = true }
 #eth ========
 alloy = { version = "1", features = ["full", "reqwest-rustls-tls", "std", "essentials", ], optional = true, default-features = false }
 
 #etc =======
 tokio = { version = "1", features = ["full"] }
-schemars = { version = "1", features = ["rust_decimal1","chrono04","uuid1","url2"] }
+schemars = { version = "1", features = ["rust_decimal1", "chrono04", "uuid1", "url2"] }
 uuid = { version = "1", features = ["serde", "v4"] }
 serde = { version = "1", features = ["derive", "rc"] }
 serde_json = { version = "1", features = [] }

@@ -1,3 +1,4 @@
+use std::ops::Deref;
 use crate::config::FILE_SERVER_DIRECTORY;
 use crate::framework::api_doc::empty_resp_docs;
 use crate::framework::auth::AuthBackend;
@@ -59,7 +60,7 @@ async fn accept_form(mut multipart: Multipart) -> AppRes<Json<Vec<FileSave>>> {
         let hash = file::stream_to_file(&file_name, field).await?;
         res.push(FileSave {
             filename: file_name,
-            hash: format!("{FILE_SERVER_DIRECTORY}/{hash}"),
+            hash: format!("/{}/{hash}",FILE_SERVER_DIRECTORY.deref()),
         });
     }
 
