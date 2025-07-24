@@ -113,6 +113,7 @@ dependencies = [
 [[package]]
 name = "aide"
 version = "0.15.0"
+source = "git+https://github.com/tamasfe/aide#de8f0734270e97c5486c75e16739ae199bb1e20f"
 dependencies = [
  "aide-macros",
  "axum",
@@ -133,6 +134,7 @@ dependencies = [
 [[package]]
 name = "aide-macros"
 version = "0.15.0"
+source = "git+https://github.com/tamasfe/aide#de8f0734270e97c5486c75e16739ae199bb1e20f"
 dependencies = [
  "darling",
  "proc-macro2",

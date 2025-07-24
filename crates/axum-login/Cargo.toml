@@ -7,19 +7,19 @@ homepage = "https://github.com/maxcountryman/axum-login"
 license = "MIT"
 keywords = ["authentication", "authorization", "login", "axum", "sessions"]
 categories = [
-  "web-programming::http-server",
-  "web-programming",
-  "database",
-  "asynchronous",
+    "web-programming::http-server",
+    "web-programming",
+    "database",
+    "asynchronous",
 ]
 repository = "https://github.com/maxcountryman/axum-login"
 documentation = "https://docs.rs/axum-login"
 readme = "../axum_login/README.md"
 
 [dependencies]
-aide = { path = "../aide/crates/aide",features = ["macros"]}
+aide = { git = "https://github.com/tamasfe/aide", features = ["macros"] }
 axum = { version = "0.8.1", default-features = false, features = [
-  "original-uri",
+    "original-uri",
 ] }
 subtle = "2"
 serde = "1"

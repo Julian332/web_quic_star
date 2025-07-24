@@ -23,6 +23,9 @@ const _: () = {
     #[automatically_derived]
     #[allow(unused_braces)]
     impl schemars::JsonSchema for AppError {
+        fn inline_schema() -> bool {
+            false
+        }
         fn schema_name() -> schemars::_private::alloc::borrow::Cow<'static, str> {
             schemars::_private::alloc::borrow::Cow::Borrowed("AppError")
         }
@@ -171,9 +174,6 @@ const _: () = {
                 );
                 schema
             }
-        }
-        fn inline_schema() -> bool {
-            false
         }
     }
 };
