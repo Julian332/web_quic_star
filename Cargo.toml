@@ -37,7 +37,7 @@ r2d2 = "0.8.10"
 rust_decimal = { version = "1", features = ["serde-str"] }
 chrono = { version = "0.4", features = ["serde"] }
 diesel-enum = { version = "0.2", features = [] }
-diesel_logger = { path = "crates/diesel_logger" }
+diesel_logger = { git = "https://github.com/Julian332/diesel-logger" }
 
 #solana ======
 anchor-client = { path = "crates/anchor-client", optional = true, features = ["async"] }

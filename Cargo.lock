@@ -2555,6 +2555,7 @@ dependencies = [
 [[package]]
 name = "diesel_logger"
 version = "0.4.0"
+source = "git+https://github.com/Julian332/diesel-logger#d231d339e9cebedd23345c9a594cb2cdb2c64e0f"
 dependencies = [
  "diesel",
  "log",
