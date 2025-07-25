@@ -19,11 +19,12 @@ multi_tenant = []
 [dependencies]
 #web ========
 axum = { version = "0.8", features = ["macros", "http2"] }
-axum-login = { path = "crates/axum-login" }
+axum-login = { git = "https://github.com/Julian332/axum-login" }
 aide = { git = "https://github.com/tamasfe/aide", features = ["swagger", "scalar", "axum", "macros", "axum-tokio", "axum-multipart", "axum-json", "axum-ws", "axum-form", "axum-matched-path", "axum-original-uri", "axum-query"] }
 password-auth = "1.0.0"
 tower-http = { version = "0.6", features = ["catch-panic", "cors", "trace", "fs"] }
 http = "1"
+tower-sessions = { version = "0.14", features = ["memory-store"] }
 
 #log =======
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }

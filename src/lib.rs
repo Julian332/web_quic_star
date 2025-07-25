@@ -22,6 +22,7 @@ pub mod subscribe;
 pub mod third_party_api;
 pub mod utils;
 // todo global multi TENANTRY ,toggle by feature
+// todo Progress bar
 pub type AppRes<T> = Result<T, AppError>;
 pub static DB: LazyLock<ConnPool> = LazyLock::new(|| setup_connection_pool());
 pub static HTTP_CLIENT: LazyLock<reqwest::Client> = LazyLock::new(|| reqwest::Client::new());

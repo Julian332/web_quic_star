@@ -29,7 +29,7 @@ pub(crate) async fn modify_password(
     if modify_password.new_password.len() < 8 {
         return Err(AppError::new("password should be longer than or equal 8"));
     }
-    match auth_session.user {
+    match auth_session.user().await {
         None => return Err(AppError::new("not be")),
         Some(mut user) => {
             password_auth::verify_password(modify_password.old_password, &user.password)?;

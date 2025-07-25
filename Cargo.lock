@@ -1551,7 +1551,8 @@ dependencies = [
 
 [[package]]
 name = "axum-login"
-version = "0.17.0"
+version = "0.18.0"
+source = "git+https://github.com/Julian332/axum-login#c45c1ffe2fdce39c64b44bb75b519aac6fda0561"
 dependencies = [
  "aide",
  "axum",
@@ -1559,6 +1560,7 @@ dependencies = [
  "serde",
  "subtle",
  "thiserror 2.0.12",
+ "tokio",
  "tower-cookies",
  "tower-layer",
  "tower-service",
@@ -9711,6 +9713,7 @@ dependencies = [
  "tokio-cron-scheduler",
  "tokio-util",
  "tower-http",
+ "tower-sessions",
  "tracing",
  "tracing-subscriber",
  "uuid",

@@ -6,7 +6,7 @@ use crate::schema::groups::table as groups;
 use crate::schema::users::{table as users, username};
 use crate::{impl_from, DB};
 use axum_login::tower_sessions::cookie::time::Duration;
-use axum_login::tower_sessions::{Expiry, MemoryStore, SessionManagerLayer};
+use axum_login::tower_sessions::{Expiry,  SessionManagerLayer};
 use axum_login::{
     AuthManagerLayer, AuthManagerLayerBuilder, AuthUser, AuthnBackend, AuthzBackend, UserId,
 };
@@ -22,6 +22,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
+use tower_sessions::MemoryStore;
 
 #[allow(dead_code)]
 const LOGIN_MESSAGE: &str = "welcome";
@@ -132,6 +133,7 @@ pub fn get_auth_layer() -> AuthManagerLayer<AuthBackend, MemoryStore> {
         .with_expiry(Expiry::OnInactivity(Duration::days(1)));
 
     let backend = AuthBackend::new(DB.clone());
+
     AuthManagerLayerBuilder::new(backend, session_layer).build()
 }
 

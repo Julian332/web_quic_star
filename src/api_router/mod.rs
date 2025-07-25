@@ -15,6 +15,7 @@ pub mod upload;
 pub mod user;
 
 pub fn setup_router() -> ApiRouter {
+
     let app = ApiRouter::new()
         .nest_api_service("/auth", auth::router())
         .nest_api_service("/users", user::user_routes())
