@@ -982,7 +982,9 @@ dependencies = [
 
 [[package]]
 name = "anchor-client"
-version = "0.31.0"
+version = "0.31.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "49b3e91b12501d37c8f07de9da8c7d22067998a7760a515231187afb47ded225"
 dependencies = [
  "anchor-lang",
  "anyhow",

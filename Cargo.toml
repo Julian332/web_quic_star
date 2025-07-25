@@ -40,7 +40,7 @@ diesel-enum = { version = "0.2", features = [] }
 diesel_logger = { git = "https://github.com/Julian332/diesel-logger" }
 
 #solana ======
-anchor-client = { path = "crates/anchor-client", optional = true, features = ["async"] }
+anchor-client = { version = "0.31.1", optional = true, features = ["async"] }
 anchor-spl = { version = "0.31.1", features = ["default"], optional = true }
 #eth ========
 alloy = { version = "1", features = ["full", "reqwest-rustls-tls", "std", "essentials", ], optional = true, default-features = false }
