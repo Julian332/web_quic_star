@@ -15,28 +15,31 @@ pub struct SolAddrs {}
 impl Default for SolAddrs {
     fn default() -> Self {
         #[cfg(feature = "dev")]
-        { SolAddrs {} }
+        {
+            SolAddrs {}
+        }
         #[cfg(not(feature = "dev"))]
-        { SolAddrs {} }
+        {
+            SolAddrs {}
+        }
     }
 }
 #[derive(
-    OperationIo, Default, Debug, Clone, AsExpression, FromSqlRow, Copy, Hash, Eq, PartialEq,
+    OperationIo,
+    Default,
+    Debug,
+    Clone,
+    AsExpression,
+    FromSqlRow,
+    Copy,
+    Hash,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
 )]
 #[diesel(sql_type = Text)]
 pub struct SolAddr(pub Pubkey);
-
-impl From<Pubkey> for SolAddr {
-    fn from(value: Pubkey) -> Self {
-        SolAddr(value)
-    }
-}
-
-impl From<&Pubkey> for SolAddr {
-    fn from(value: &Pubkey) -> Self {
-        SolAddr(value.clone())
-    }
-}
 
 impl Display for SolAddr {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -101,10 +104,26 @@ impl FromSql<Text, DbType> for SolAddr {
         Ok(SolAddr(pubkey))
     }
 }
+impl From<Pubkey> for SolAddr {
+    fn from(value: Pubkey) -> Self {
+        SolAddr(value)
+    }
+}
 
+impl From<&Pubkey> for SolAddr {
+    fn from(value: &Pubkey) -> Self {
+        SolAddr(*value)
+    }
+}
 impl AsRef<Pubkey> for SolAddr {
     fn as_ref(&self) -> &Pubkey {
         &self.0
+    }
+}
+
+impl AsMut<Pubkey> for SolAddr {
+    fn as_mut(&mut self) -> &mut Pubkey {
+        &mut self.0
     }
 }
 

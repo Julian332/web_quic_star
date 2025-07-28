@@ -40,6 +40,10 @@ pub fn setup_router() -> Router {
                 .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE]),
         )
         .layer(get_auth_layer());
-
+    let server_port = CONFIG.server_port;
+    #[cfg(feature = "dev")]
+    tracing::info!("swagger docs are accessible at http://127.0.0.1:{server_port}/docs");
+    #[cfg(feature = "dev")]
+    tracing::info!("pretty docs are accessible at http://127.0.0.1:{server_port}/docs/pretty_doc");
     set_api_doc(app)
 }

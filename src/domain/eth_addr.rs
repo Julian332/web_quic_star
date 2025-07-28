@@ -36,21 +36,21 @@ impl Default for EthAddrs {
     }
 }
 
-#[derive(OperationIo, Default, Debug, Clone, AsExpression, FromSqlRow, Hash, Eq, PartialEq)]
+#[derive(
+    OperationIo,
+    Default,
+    Debug,
+    Clone,
+    AsExpression,
+    FromSqlRow,
+    Hash,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
+)]
 #[diesel(sql_type = Text)]
 pub struct EthAddr(pub Address);
-
-impl From<Address> for EthAddr {
-    fn from(value: Address) -> Self {
-        EthAddr(value)
-    }
-}
-
-impl From<&Address> for EthAddr {
-    fn from(value: &Address) -> Self {
-        EthAddr(value.clone())
-    }
-}
 
 impl std::fmt::Display for EthAddr {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -77,25 +77,6 @@ impl<'de> Deserialize<'de> for EthAddr {
                 })
             })
             .map(EthAddr)
-    }
-}
-
-impl AsRef<Address> for EthAddr {
-    fn as_ref(&self) -> &Address {
-        &self.0
-    }
-}
-
-impl Deref for EthAddr {
-    type Target = Address;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for EthAddr {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
     }
 }
 
@@ -131,5 +112,39 @@ impl FromSql<Text, DbType> for EthAddr {
         let addr = Address::from_str(&string).map_err(Box::new)?;
 
         Ok(EthAddr(addr))
+    }
+}
+impl From<Address> for EthAddr {
+    fn from(value: Address) -> Self {
+        EthAddr(value)
+    }
+}
+
+impl From<&Address> for EthAddr {
+    fn from(value: &Address) -> Self {
+        EthAddr(*value)
+    }
+}
+impl AsRef<Address> for EthAddr {
+    fn as_ref(&self) -> &Address {
+        &self.0
+    }
+}
+
+impl AsMut<Address> for EthAddr {
+    fn as_mut(&mut self) -> &mut Address {
+        &mut self.0
+    }
+}
+impl Deref for EthAddr {
+    type Target = Address;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for EthAddr {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }

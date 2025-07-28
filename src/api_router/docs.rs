@@ -76,7 +76,6 @@ pub fn docs_routes() -> ApiRouter {
     router
 }
 
-#[allow(unused)]
 async fn serve_docs(Extension(api): Extension<Arc<OpenApi>>) -> impl IntoApiResponse {
     Json(api).into_response()
 }
