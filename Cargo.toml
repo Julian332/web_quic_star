@@ -11,7 +11,6 @@ eth_mode = ["dep:alloy"]
 solana_mode = ["dep:anchor-client", "dep:anchor-spl"]
 dev = []
 postgres = ["diesel/postgres", "diesel-dynamic-schema/postgres", "rust_decimal/db-diesel-postgres"]
-multi_tenant = []
 
 
 #mysql = ["diesel/mysql", "diesel-dynamic-schema/mysql", "diesel-derive-enum/mysql","dep:r2d2_mysql"]
@@ -23,9 +22,9 @@ axum-login = { git = "https://github.com/Julian332/axum-login" }
 aide = { git = "https://github.com/tamasfe/aide", features = ["swagger", "scalar", "axum", "macros", "axum-tokio", "axum-multipart", "axum-json", "axum-ws", "axum-form", "axum-matched-path", "axum-original-uri", "axum-query"] }
 password-auth = "1.0.0"
 tower-http = { version = "0.6", features = ["catch-panic", "cors", "trace", "fs"] }
-http = "1"
+http = { version = "1" }
 tower-sessions = { version = "0.14", features = ["memory-store"] }
-
+url = { version = "2" ,features = ["serde"]}
 #log =======
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tracing = "0.1"
@@ -54,6 +53,7 @@ serde_json = { version = "1", features = [] }
 anyhow = { version = "1", features = [] }
 #strum = { version = "0.27", features = ["default", "derive"] }
 dotenvy = "0.15"
+envy = { version = "0.4" }
 reqwest = { version = "0.12", features = ["json", "cookies", "multipart", "rustls-tls", "charset", "http2", "macos-system-configuration", ], default-features = false }
 futures = "0.3"
 tokio-cron-scheduler = { version = "0.14.0", features = [] }

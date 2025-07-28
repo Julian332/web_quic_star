@@ -1,12 +1,12 @@
 use std::env;
 use web_quick::framework::api_doc::set_api_doc;
 use web_quick::scheduled_task::set_scheduler;
-use web_quick::{api_router, set_env, set_log};
+use web_quick::api_router;
+use web_quick::config::{set_env, set_log};
 
 #[tokio::main]
 async fn main() {
-    set_log();
-    set_env();
+
     set_scheduler().await;
 
     aide::generate::extract_schemas(true);

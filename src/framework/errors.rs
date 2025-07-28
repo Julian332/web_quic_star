@@ -279,11 +279,16 @@ impl Display for AppError {
 }
 #[test]
 fn test_display_error() {
+
     let error =
         AppError::new("eee").with_error_origin_position("error_origin_position".to_string());
     println!("{:?}", error);
-    println!("{}", error);
-    println!("{:?}", serde_json::to_string(&error));
+    // println!("{}", error);
+    // println!("{:?}", serde_json::to_string(&error));
+    use alloy::rpc::types::BlockError;
+
+    let x: AppError = BlockError::InvalidSignature.into();
+    println!("{:?}", x);
 }
 
 impl AppError {

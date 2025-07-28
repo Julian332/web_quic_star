@@ -27,7 +27,7 @@ pub fn setup_connection_pool() -> ConnPool {
 }
 #[test]
 pub fn logger() {
-    use crate::set_dev_env;
+    use crate::config::set_dev_env;
 
     set_dev_env();
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
@@ -139,7 +139,7 @@ where
 async fn test() {
     use crate::db_models::user::User;
     use crate::schema::users::table as users;
-    use crate::set_env;
+    use crate::config::set_env;
     use diesel::QueryDsl;
     use diesel::SelectableHelper;
 

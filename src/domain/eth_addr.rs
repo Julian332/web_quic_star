@@ -1,11 +1,39 @@
-use std::borrow::Cow;
 use aide::OperationIo;
-use alloy::primitives::Address;
+use alloy::primitives::{Address, address};
 use schemars::generate::SchemaGenerator;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use std::borrow::Cow;
+use std::convert::Into;
 use std::fmt::Formatter;
 use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
+
+#[allow(unused)]
+pub struct EthAddrs {
+    uni_router2_addr: EthAddr,
+    weth_addr: EthAddr,
+    usdt_addr: EthAddr,
+}
+impl Default for EthAddrs {
+    fn default() -> Self {
+        #[cfg(not(feature = "dev"))]
+        {
+            EthAddrs {
+                uni_router2_addr: address!("0x1689E7B1F10000AE47eBfE339a4f69dECd19F602").into(),
+                weth_addr: address!("0x4200000000000000000000000000000000000006").into(),
+                usdt_addr: address!("0x2ab0c976EB9551c5d18e80178C92bAf17391Bc79").into(),
+            }
+        }
+        #[cfg(feature = "dev")]
+        {
+            EthAddrs {
+                uni_router2_addr: address!("0x1689E7B1F10000AE47eBfE339a4f69dECd19F602").into(),
+                weth_addr: address!("0x4200000000000000000000000000000000000006").into(),
+                usdt_addr: address!("0x2ab0c976EB9551c5d18e80178C92bAf17391Bc79").into(),
+            }
+        }
+    }
+}
 
 #[derive(OperationIo, Default, Debug, Clone, AsExpression, FromSqlRow, Hash, Eq, PartialEq)]
 #[diesel(sql_type = Text)]
@@ -86,7 +114,7 @@ use diesel::deserialize::{self, FromSql, FromSqlRow};
 use diesel::expression::AsExpression;
 use diesel::serialize::{self, Output, ToSql};
 use diesel::sql_types::*;
-use schemars::{json_schema, JsonSchema, Schema};
+use schemars::{JsonSchema, Schema, json_schema};
 
 impl ToSql<Text, DbType> for EthAddr {
     fn to_sql<'b>(&'b self, out: &mut Output<'b, '_, DbType>) -> serialize::Result {

@@ -1,13 +1,24 @@
-use std::borrow::Cow;
 use aide::OperationIo;
 use anchor_client::anchor_lang::prelude::Pubkey;
 use schemars::generate::SchemaGenerator;
-use schemars::{json_schema, JsonSchema, Schema};
+use schemars::{JsonSchema, Schema, json_schema};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use std::borrow::Cow;
 use std::fmt::{Display, Formatter};
 use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
 
+#[allow(unused)]
+pub struct SolAddrs {}
+
+impl Default for SolAddrs {
+    fn default() -> Self {
+        #[cfg(feature = "dev")]
+        { SolAddrs {} }
+        #[cfg(not(feature = "dev"))]
+        { SolAddrs {} }
+    }
+}
 #[derive(
     OperationIo, Default, Debug, Clone, AsExpression, FromSqlRow, Copy, Hash, Eq, PartialEq,
 )]
