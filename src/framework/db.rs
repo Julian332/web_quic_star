@@ -6,7 +6,8 @@ use diesel::r2d2::Pool;
 use diesel::sql_types::BigInt;
 use diesel::{Connection, QueryId, QueryResult, QueryableByName, RunQueryDsl};
 use diesel_logger::LoggingConnection;
-use std::env;
+
+use crate::CONFIG;
 
 #[derive(QueryableByName)]
 pub struct Count {
@@ -15,7 +16,7 @@ pub struct Count {
 }
 
 pub fn setup_connection_pool() -> ConnPool {
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let database_url = CONFIG.database_url.to_string();
     let manager = ConnectionManager::<LoggingConnection<Conn>>::new(database_url);
     // Refer to the `r2d2` documentation for more methods to use
     // when building a connection pool
@@ -30,7 +31,7 @@ pub fn logger() {
     use crate::config::set_dev_env;
 
     set_dev_env();
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let database_url = CONFIG.database_url.to_string();
     let manager = ConnectionManager::<LoggingConnection<Conn>>::new(database_url);
     // Refer to the `r2d2` documentation for more methods to use
     // when building a connection pool

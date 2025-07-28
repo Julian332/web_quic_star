@@ -9,6 +9,7 @@ use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
 
 #[allow(unused)]
+#[derive(Debug)]
 pub struct SolAddrs {}
 
 impl Default for SolAddrs {

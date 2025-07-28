@@ -1,5 +1,5 @@
-// #[cfg(feature = "eth_mode")]
-// pub mod contracts;
+#[cfg(feature = "eth_mode")]
+pub mod contracts;
 pub mod datetime;
 pub mod file;
 // pub fn byte_is_zero(buf: &[u8]) -> bool {

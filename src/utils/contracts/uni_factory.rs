@@ -1,11 +1,5 @@
-//! Example of generating code from ABI file using the `sol!` macro to interact with the contract.
-
-// use alloy::{node_bindings::Anvil, primitives::address, providers::ProviderBuilder, sol};
-// use eyre::Result;
-
-use crate::utils::contracts::readonly_ws_provider;
-use crate::utils::contracts::uni_router2::{uni_router2_addr, UNI_ROUTER2};
-use crate::AppRes;
+use crate::utils::contracts::uni_router2::{ UNI_ROUTER2};
+use crate::{AppRes, CONFIG, ETH_CLIENT};
 use alloy::primitives::Address;
 use alloy::sol;
 
@@ -18,6 +12,6 @@ sol!(
 );
 
 pub async fn uni_factory_addr() -> AppRes<Address> {
-    let uni_router2 = UNI_ROUTER2::new(uni_router2_addr(), readonly_ws_provider());
-    Ok(uni_router2.factory().call().await?._0)
+    let uni_router2 = UNI_ROUTER2::new(CONFIG.eth_addrs.uni_router2_addr.0, ETH_CLIENT.clone());
+    Ok(uni_router2.factory().call().await?)
 }

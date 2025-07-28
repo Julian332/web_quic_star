@@ -1,12 +1,10 @@
-use std::env;
 use web_quick::framework::api_doc::set_api_doc;
 use web_quick::scheduled_task::set_scheduler;
-use web_quick::api_router;
-use web_quick::config::{set_env, set_log};
+use web_quick::{api_router, config, CONFIG};
 
 #[tokio::main]
 async fn main() {
-
+    config::set_log();
     set_scheduler().await;
 
     aide::generate::extract_schemas(true);
@@ -14,7 +12,7 @@ async fn main() {
     let app = api_router::setup_router();
 
     let doc_app = set_api_doc(app);
-    let server_port = env::var("SERVER_PORT").unwrap_or("5090".to_string());
+    let server_port = CONFIG.server_port;
     #[cfg(feature = "dev")]
     tracing::info!("swagger docs are accessible at http://127.0.0.1:{server_port}/docs");
     #[cfg(feature = "dev")]

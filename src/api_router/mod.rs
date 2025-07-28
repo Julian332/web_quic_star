@@ -1,4 +1,3 @@
-use crate::config::FILE_SERVER_DIRECTORY;
 use crate::framework::api_doc::fallback;
 use crate::framework::auth::get_auth_layer;
 use aide::axum::ApiRouter;
@@ -7,6 +6,7 @@ use std::ops::Deref;
 use tower_http::cors::CorsLayer;
 use tower_http::services::ServeDir;
 use tower_http::trace::TraceLayer;
+use crate::CONFIG;
 
 pub mod auth;
 pub mod docs;
@@ -26,8 +26,8 @@ pub fn setup_router() -> ApiRouter {
         .nest_api_service("/groups", group::group_router())
         .nest_api_service("/upload", upload::upload_routes())
         .nest_service(
-            &format!("/{}", FILE_SERVER_DIRECTORY.deref()),
-            ServeDir::new(FILE_SERVER_DIRECTORY.as_str()),
+            &format!("/{}", CONFIG.file_server_directory.deref()),
+            ServeDir::new(CONFIG.file_server_directory.as_str()),
         )
         .fallback(fallback)
         .layer(tower_http::catch_panic::CatchPanicLayer::new())

@@ -9,10 +9,11 @@ use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
 
 #[allow(unused)]
+#[derive(Debug)]
 pub struct EthAddrs {
-    uni_router2_addr: EthAddr,
-    weth_addr: EthAddr,
-    usdt_addr: EthAddr,
+    pub uni_router2_addr: EthAddr,
+    pub weth_addr: EthAddr,
+    pub usdt_addr: EthAddr,
 }
 impl Default for EthAddrs {
     fn default() -> Self {

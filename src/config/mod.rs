@@ -1,30 +1,26 @@
 use serde::Deserialize;
-use std::env;
-use std::sync::LazyLock;
 use tracing::error;
 use tracing_subscriber::EnvFilter;
 use url::Url;
 
-pub const FILE_SERVER_DIRECTORY: LazyLock<String> =
-    LazyLock::new(|| env::var("FILE_SERVER_DIRECTORY").expect(".env FILE_SERVER_DIRECTORY"));
 #[allow(unused)]
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct Config {
-    database_url: Url,
-    eth_rpc: Url,
-    solana_rpc: Url,
-    ws_eth_rpc: Url,
-    ws_solana_rpc: Url,
-    uni_graph_url: Url,
-    server_port: u64,
-    file_server_directory: String,
-    
+    pub database_url: Url,
+    pub eth_rpc: Url,
+    pub solana_rpc: Url,
+    pub ws_eth_rpc: Url,
+    pub ws_solana_rpc: Url,
+    pub uni_graph_url: Url,
+    pub server_port: u64,
+    pub file_server_directory: String,
+
     #[cfg(feature = "eth_mode")]
     #[serde(skip)]
-    eth_addrs: crate::domain::eth_addr::EthAddrs,
+    pub eth_addrs: crate::domain::eth_addr::EthAddrs,
     #[cfg(feature = "solana_mode")]
     #[serde(skip)]
-    sol_addrs: crate::domain::solana_addr::SolAddrs,
+    pub sol_addrs: crate::domain::solana_addr::SolAddrs,
 }
 
 pub fn set_env() {
@@ -66,6 +62,7 @@ pub fn set_log() {
 
 #[test]
 pub fn test() {
+    use std::ops::Deref;
     set_log();
     use tracing::error;
 
@@ -75,5 +72,5 @@ pub fn test() {
     error!(target: "app_events", "App Error: {}", err_info);
     error!({ info = err_info }, "error on port: {}", port);
     error!(name: "invalid_input", "Invalid input: {}", err_info);
-    panic!("asda")
+    println!("{:?}", crate::CONFIG.deref());
 }

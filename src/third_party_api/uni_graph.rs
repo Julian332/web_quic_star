@@ -3,7 +3,7 @@
 use chrono::Days;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::env;
+use crate::CONFIG;
 
 #[derive(Serialize, Deserialize)]
 pub struct UniGraphResp {
@@ -167,7 +167,7 @@ pub async fn get_user_swaps(user_addr: String) -> Result<Vec<Swap>, Box<dyn std:
     let timestamp = variables.get_mut("timestamp").unwrap();
     *timestamp = Value::from(three_day_ago);
     let request = client
-        .request(reqwest::Method::POST, env::var("UNI_GRAPH_URL")?)
+        .request(reqwest::Method::POST, CONFIG.uni_graph_url.clone())
         .headers(headers)
         .json(&json);
 
