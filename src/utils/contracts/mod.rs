@@ -1,6 +1,5 @@
 use crate::CONFIG;
 use alloy::network::{EthereumWallet};
-
 use alloy::providers::{Identity, Provider, ProviderBuilder, RootProvider};
 use alloy::providers::fillers::{BlobGasFiller, ChainIdFiller, FillProvider, GasFiller, JoinFill, NonceFiller};
 
@@ -10,7 +9,7 @@ pub mod uni_pair;
 pub mod uni_router2;
 pub mod usdt;
 
-pub fn get_project_signer() -> EthereumWallet {
+fn get_project_signer() -> EthereumWallet {
     todo!()
 }
 
