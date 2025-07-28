@@ -1,5 +1,5 @@
-use web_quick::scheduled_task::set_scheduler;
-use web_quick::{api_router, config, CONFIG};
+use web3_quick::scheduled_task::set_scheduler;
+use web3_quick::{api_router, config, CONFIG};
 
 #[tokio::main]
 async fn main() {

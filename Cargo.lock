@@ -9693,7 +9693,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "web_quick"
+name = "web3_quick"
 version = "0.1.0"
 dependencies = [
  "aide",
