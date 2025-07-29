@@ -15,8 +15,10 @@ pub mod schema;
 pub mod schema_view;
 #[cfg(feature = "solana_mode")]
 pub mod subscribe;
-pub mod third_party_api;
+pub mod api_wrapper;
 pub mod utils;
+pub mod api_service;
+
 // todo Progress bar
 // todo without native db driver
 pub type AppRes<T> = Result<T, AppError>;
