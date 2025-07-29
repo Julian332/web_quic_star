@@ -6,6 +6,8 @@ use framework::errors::AppError;
 use std::sync::LazyLock;
 
 pub mod api_router;
+pub mod api_service;
+pub mod api_wrapper;
 pub mod config;
 pub mod db_models;
 pub mod domain;
@@ -15,9 +17,21 @@ pub mod schema;
 pub mod schema_view;
 #[cfg(feature = "solana_mode")]
 pub mod subscribe;
-pub mod api_wrapper;
 pub mod utils;
-pub mod api_service;
+pub mod prelude {
+    pub use chrono::prelude::*;
+    pub use rust_decimal::prelude::*;
+    pub use diesel::prelude::*;
+    pub use tracing::{info,debug,trace,warn,error};
+    pub use super::*;
+    pub use utils::datetime::TimeUtil;
+    pub use framework::db::{Paginate,LogicDeleteQuery};
+    pub use framework::api::*;
+    #[cfg(feature = "solana_mode")]
+    pub use domain::solana_addr::SolAddr;
+    #[cfg(feature = "eth_mode")]
+    pub use domain::eth_addr::EthAddr;
+}
 
 // todo Progress bar
 // todo without native db driver

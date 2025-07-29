@@ -120,7 +120,6 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
 
     let f = quote!(
         use crate::framework::auth::AuthBackend;
-        use crate::framework::api::LOGIN_URL;
         use crate::framework::api_doc::{default_resp_docs, empty_resp_docs};
         use crate::schema::#schema_s::dsl::#schema_s;
         use aide::axum::routing::{delete_with, get_with, post_with, put_with};
@@ -537,7 +536,6 @@ pub fn query_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::Token
 
     let f = quote!(
         use crate::framework::auth::AuthBackend;
-        use crate::framework::api::LOGIN_URL;
         use crate::framework::api_doc::{default_resp_docs, empty_resp_docs};
         use crate::schema_view::#schema_s::dsl::#schema_s;
         use aide::axum::routing::{delete_with, get_with, post_with, put_with};

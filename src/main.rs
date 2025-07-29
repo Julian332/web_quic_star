@@ -5,7 +5,6 @@ use web3_quick::{CONFIG, api_router, config};
 async fn main() {
     config::set_log();
     set_scheduler().await;
-
     let doc_app = api_router::setup_router();
     let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}",CONFIG.server_port))
         .await

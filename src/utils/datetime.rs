@@ -1,19 +1,31 @@
-use chrono::{DateTime, Local, NaiveDateTime, TimeZone, Utc};
+use chrono::{DateTime, FixedOffset, TimeZone};
 use core::fmt;
-use std::time::SystemTime;
-
-pub fn now() -> DateTime<Utc> {
-    SystemTime::now().into()
+pub trait TimeUtil {
+    fn format_common_chinese(&self) -> String;
 }
-pub fn naive_now() -> NaiveDateTime {
-    let time: DateTime<Local> = SystemTime::now().into();
-    time.naive_local()
-}
-
-pub fn format_common_chinese<Tz: TimeZone>(date_time: &DateTime<Tz>) -> String
+impl<Tz: TimeZone> TimeUtil for DateTime<Tz>
 where
     Tz::Offset: fmt::Display,
 {
-    let format = date_time.format("%Y-%m-%d %H:%M:%S");
-    format!("{format}")
+    fn format_common_chinese(&self) -> String {
+        let format = self
+            .with_timezone(&FixedOffset::east_opt(8 * 3600).unwrap())
+            .format("%Y-%m-%d %H:%M:%S");
+        format!("{format}")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chrono::{Local, Utc};
+    #[tokio::test(flavor = "multi_thread", worker_threads = 3)]
+    async fn test1() {}
+    #[test]
+    fn sync_test1() {
+        let time = Local::now();
+        println!("{}", time.format_common_chinese());
+        let time = Utc::now();
+        println!("{}", time.format_common_chinese());
+    }
 }
