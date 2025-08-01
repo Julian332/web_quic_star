@@ -1,11 +1,10 @@
 use aide::OperationIo;
 use anchor_client::anchor_lang::prelude::Pubkey;
+use derive_more::{AsMut, AsRef, Deref, DerefMut, Display, From, FromStr, Into};
 use schemars::generate::SchemaGenerator;
 use schemars::{JsonSchema, Schema, json_schema};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::borrow::Cow;
-use std::fmt::{Display, Formatter};
-use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
 
 #[allow(unused)]
@@ -37,15 +36,17 @@ impl Default for SolAddrs {
     PartialEq,
     Ord,
     PartialOrd,
+    From,
+    AsMut,
+    AsRef,
+    Display,
+    Deref,
+    DerefMut,
+    FromStr,
+    Into,
 )]
 #[diesel(sql_type = Text)]
 pub struct SolAddr(pub Pubkey);
-
-impl Display for SolAddr {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
 
 impl Serialize for SolAddr {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
@@ -104,38 +105,13 @@ impl FromSql<Text, DbType> for SolAddr {
         Ok(SolAddr(pubkey))
     }
 }
-impl From<Pubkey> for SolAddr {
-    fn from(value: Pubkey) -> Self {
-        SolAddr(value)
-    }
-}
-
 impl From<&Pubkey> for SolAddr {
     fn from(value: &Pubkey) -> Self {
         SolAddr(*value)
     }
 }
-impl AsRef<Pubkey> for SolAddr {
-    fn as_ref(&self) -> &Pubkey {
-        &self.0
-    }
-}
-
-impl AsMut<Pubkey> for SolAddr {
-    fn as_mut(&mut self) -> &mut Pubkey {
-        &mut self.0
-    }
-}
-
-impl Deref for SolAddr {
-    type Target = Pubkey;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for SolAddr {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
+impl From<&SolAddr> for Pubkey {
+    fn from(value: &SolAddr) -> Self {
+        value.0
     }
 }

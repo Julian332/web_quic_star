@@ -21,10 +21,10 @@ axum = { version = "0.8", features = ["macros", "http2"] }
 axum-login = { git = "https://github.com/Julian332/axum-login" }
 aide = { git = "https://github.com/tamasfe/aide", features = ["swagger", "scalar", "axum", "macros", "axum-tokio", "axum-multipart", "axum-json", "axum-ws", "axum-form", "axum-matched-path", "axum-original-uri", "axum-query"] }
 password-auth = "1.0.0"
-tower-http = { version = "0.6", features = ["catch-panic", "cors", "trace", "fs"] }
+tower-http = { version = "0.6", features = ["catch-panic", "cors", "trace", "fs", "limit", "normalize-path"] }
 http = { version = "1" }
 tower-sessions = { version = "0.14", features = ["memory-store"] }
-url = { version = "2" ,features = ["serde"]}
+url = { version = "2", features = ["serde"] }
 #log =======
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tracing = "0.1"
@@ -33,7 +33,7 @@ tracing = "0.1"
 diesel = { version = "2", features = ["chrono", "serde_json", "uuid", "r2d2", ] }
 diesel-dynamic-schema = "0.2"
 r2d2 = "0.8.10"
-rust_decimal = { version = "1", features = ["serde-str"] }
+rust_decimal = { version = "1", features = ["serde-str", "macros", "db-diesel2-postgres", "maths"] }
 chrono = { version = "0.4", features = ["serde"] }
 diesel-enum = { version = "0.2", features = [] }
 diesel_logger = { git = "https://github.com/Julian332/diesel-logger" }
@@ -49,16 +49,16 @@ tokio = { version = "1", features = ["full"] }
 schemars = { version = "1", features = ["rust_decimal1", "chrono04", "uuid1", "url2"] }
 uuid = { version = "1", features = ["serde", "v4"] }
 serde = { version = "1", features = ["derive", "rc"] }
-serde_json = { version = "1", features = [] }
+serde_json = { version = "1", features = ["default"] }
 anyhow = { version = "1", features = [] }
 #strum = { version = "0.27", features = ["default", "derive"] }
 dotenvy = "0.15"
 envy = { version = "0.4" }
 reqwest = { version = "0.12", features = ["json", "cookies", "multipart", "rustls-tls", "charset", "http2", "macos-system-configuration", ], default-features = false }
 futures = "0.3"
-tokio-cron-scheduler = { version = "0.14.0", features = [] }
+tokio-cron-scheduler = { version = "0.14.0", features = ["default"] }
 derive_builder = { path = "crates/derive_builder" }
-derive_more = { version = "2", features = ["default", "error", "display"] }
+derive_more = { version = "2", features = ["full"] }
 tokio-util = "0.7"
 sha2 = "0.10"
 [dev-dependencies]

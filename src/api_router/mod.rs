@@ -1,13 +1,15 @@
+use crate::CONFIG;
 use crate::framework::api_doc::{fallback, set_api_doc};
 use crate::framework::auth::get_auth_layer;
 use aide::axum::ApiRouter;
+use axum::Router;
 use http::{HeaderValue, Method};
 use std::ops::Deref;
-use axum::Router;
 use tower_http::cors::CorsLayer;
+use tower_http::limit::RequestBodyLimitLayer;
+use tower_http::normalize_path::NormalizePathLayer;
 use tower_http::services::ServeDir;
 use tower_http::trace::TraceLayer;
-use crate::CONFIG;
 
 pub mod auth;
 pub mod docs;
@@ -34,16 +36,23 @@ pub fn setup_router() -> Router {
         .fallback(fallback)
         .layer(tower_http::catch_panic::CatchPanicLayer::new())
         .layer(TraceLayer::new_for_http())
+        //10MB
+        .layer(RequestBodyLimitLayer::new(10240))
+        .layer(NormalizePathLayer::trim_trailing_slash())
         .layer(
             CorsLayer::new()
-                .allow_origin("*".parse::<HeaderValue>().expect("allow_origin is wrong"))
+                .allow_origin("*".parse::<HeaderValue>().unwrap())
                 .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE]),
         )
         .layer(get_auth_layer());
-    let server_port = CONFIG.server_port;
     #[cfg(feature = "dev")]
-    tracing::info!("swagger docs are accessible at http://127.0.0.1:{server_port}/docs");
-    #[cfg(feature = "dev")]
-    tracing::info!("pretty docs are accessible at http://127.0.0.1:{server_port}/docs/pretty_doc");
+    {
+        let server_port = CONFIG.server_port;
+        tracing::info!("swagger docs are accessible at http://127.0.0.1:{server_port}/docs");
+        tracing::info!(
+            "pretty docs are accessible at http://127.0.0.1:{server_port}/docs/pretty_doc"
+        );
+    }
+
     set_api_doc(app)
 }

@@ -1,13 +1,47 @@
 use aide::OperationIo;
 use alloy::primitives::{Address, address};
+use derive_more::{AsMut, AsRef, Deref, DerefMut, Display, From, FromStr, Into};
 use schemars::generate::SchemaGenerator;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::borrow::Cow;
 use std::convert::Into;
-use std::fmt::Formatter;
-use std::ops::{Deref, DerefMut};
-use std::str::FromStr;
+#[derive(
+    OperationIo,
+    Default,
+    Debug,
+    Clone,
+    AsExpression,
+    FromSqlRow,
+    Hash,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
+    From,
+    AsMut,
+    AsRef,
+    Display,
+    Deref,
+    DerefMut,
+    FromStr,
+    Into,
+    derive_more::BitAnd,
+    derive_more::BitAndAssign,
+    derive_more::BitOr,
+    derive_more::BitOrAssign,
+    derive_more::BitXor,
+    derive_more::BitXorAssign,
+    derive_more::Not,
+    derive_more::Index,
+    derive_more::IndexMut,
+    derive_more::IntoIterator,
+    derive_more::LowerHex,
+    derive_more::UpperHex,
+)]
+#[diesel(sql_type = Text)]
+pub struct EthAddr(#[into_iterator(owned, ref, ref_mut)] pub Address);
 
+use std::str::FromStr;
 #[allow(unused)]
 #[derive(Debug)]
 pub struct EthAddrs {
@@ -15,6 +49,7 @@ pub struct EthAddrs {
     pub weth_addr: EthAddr,
     pub usdt_addr: EthAddr,
 }
+
 impl Default for EthAddrs {
     fn default() -> Self {
         #[cfg(not(feature = "dev"))]
@@ -33,28 +68,6 @@ impl Default for EthAddrs {
                 usdt_addr: address!("0x2ab0c976EB9551c5d18e80178C92bAf17391Bc79").into(),
             }
         }
-    }
-}
-
-#[derive(
-    OperationIo,
-    Default,
-    Debug,
-    Clone,
-    AsExpression,
-    FromSqlRow,
-    Hash,
-    Eq,
-    PartialEq,
-    Ord,
-    PartialOrd,
-)]
-#[diesel(sql_type = Text)]
-pub struct EthAddr(pub Address);
-
-impl std::fmt::Display for EthAddr {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
     }
 }
 
@@ -114,37 +127,15 @@ impl FromSql<Text, DbType> for EthAddr {
         Ok(EthAddr(addr))
     }
 }
-impl From<Address> for EthAddr {
-    fn from(value: Address) -> Self {
-        EthAddr(value)
-    }
-}
 
 impl From<&Address> for EthAddr {
     fn from(value: &Address) -> Self {
         EthAddr(*value)
     }
 }
-impl AsRef<Address> for EthAddr {
-    fn as_ref(&self) -> &Address {
-        &self.0
+impl From<&EthAddr> for  Address {
+    fn from(value: &EthAddr) -> Self {
+        value.0
     }
 }
 
-impl AsMut<Address> for EthAddr {
-    fn as_mut(&mut self) -> &mut Address {
-        &mut self.0
-    }
-}
-impl Deref for EthAddr {
-    type Target = Address;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for EthAddr {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
