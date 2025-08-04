@@ -1,5 +1,5 @@
 use chrono::{DateTime, Utc};
-use derive_builder::ViewApiGen;
+use web_api_gen::ViewApiGen;
 use diesel::{AsChangeset, Queryable, Selectable};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};

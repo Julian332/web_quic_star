@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+#[allow(unused)]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UniGraphParams {
     #[serde(rename = "variables")]
@@ -9,6 +10,7 @@ pub struct UniGraphParams {
     pub query: String,
 }
 
+#[allow(unused)]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Variables {
     #[serde(rename = "addr")]

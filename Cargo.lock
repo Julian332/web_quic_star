@@ -2467,17 +2467,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "derive_builder"
-version = "0.20.2"
-dependencies = [
- "derive_builder_macro",
- "rustversion",
- "serde",
- "serde_json",
- "trybuild",
-]
-
-[[package]]
 name = "derive_builder_core"
 version = "0.20.2"
 dependencies = [
@@ -9798,7 +9787,6 @@ dependencies = [
  "axum",
  "axum-login",
  "chrono",
- "derive_builder",
  "derive_more",
  "diesel",
  "diesel-dynamic-schema",
@@ -9826,6 +9814,18 @@ dependencies = [
  "tracing-subscriber",
  "url",
  "uuid",
+ "web_api_gen",
+]
+
+[[package]]
+name = "web_api_gen"
+version = "0.20.2"
+dependencies = [
+ "derive_builder_macro",
+ "rustversion",
+ "serde",
+ "serde_json",
+ "trybuild",
 ]
 
 [[package]]

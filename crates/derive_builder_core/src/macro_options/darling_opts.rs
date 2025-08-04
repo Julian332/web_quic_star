@@ -489,7 +489,7 @@ fn unnest_from_one_attribute(attr: syn::Attribute) -> darling::Result<Attribute>
 }
 
 fn default_crate_root() -> Path {
-    parse_quote!(::derive_builder)
+    parse_quote!(::web_api_gen)
 }
 
 fn default_create_empty() -> Ident {

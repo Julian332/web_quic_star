@@ -57,13 +57,16 @@ envy = { version = "0.4" }
 reqwest = { version = "0.12", features = ["json", "cookies", "multipart", "rustls-tls", "charset", "http2", "macos-system-configuration", ], default-features = false }
 futures = "0.3"
 tokio-cron-scheduler = { version = "0.14.0", features = ["default"] }
-derive_builder = { path = "crates/derive_builder" }
+web_api_gen = { path = "crates/derive_builder" }
 derive_more = { version = "2", features = ["full"] }
 tokio-util = "0.7"
 sha2 = "0.10"
+
 [dev-dependencies]
 r2d2_postgres = { version = "0.18.2", features = [] }
-[profile.dev.package.huge-mostly-unused-dependency]
-hint-mostly-unused = true
+
+#[profile.dev.package.huge-mostly-unused-dependency]
+#hint-mostly-unused = true
+
 [workspace]
 members = ["crates/*"]

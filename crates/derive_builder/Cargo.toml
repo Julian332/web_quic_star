@@ -1,5 +1,5 @@
 [package]
-name = "derive_builder"
+name = "web_api_gen"
 version = "0.20.2"
 authors = [
     "Colin Kiegel <kiegel@gmx.de>",
