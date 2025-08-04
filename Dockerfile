@@ -18,6 +18,7 @@ RUN apt-get install libpq-dev -y
 RUN cargo install diesel_cli --no-default-features --features postgres
 
 WORKDIR /app
+#todo db migrate
 COPY --from=builder /build/exe /app/exe
 COPY --from=builder /build/.env /app/.env
 
