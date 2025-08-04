@@ -63,3 +63,7 @@ tokio-util = "0.7"
 sha2 = "0.10"
 [dev-dependencies]
 r2d2_postgres = { version = "0.18.2", features = [] }
+[profile.dev.package.huge-mostly-unused-dependency]
+hint-mostly-unused = true
+[workspace]
+members = ["crates/*"]
