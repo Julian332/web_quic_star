@@ -36,8 +36,6 @@ pub mod prelude {
 // todo Progress bar
 // todo without native db driver
 // todo workspace for speed up compile
-// todo auto migrate db
-// todo rename derive builder
 pub type AppRes<T> = Result<T, AppError>;
 pub static DB: LazyLock<ConnPool> = LazyLock::new(|| setup_connection_pool());
 pub static HTTP_CLIENT: LazyLock<reqwest::Client> = LazyLock::new(|| reqwest::Client::new());

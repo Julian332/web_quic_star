@@ -15,6 +15,7 @@ FROM rust:1.83-slim AS runtime
 RUN apt-get update
 RUN apt-get remove libpq5
 RUN apt-get install libpq-dev -y
+RUN cargo install diesel_cli --no-default-features --features postgres
 
 WORKDIR /app
 COPY --from=builder /build/exe /app/exe

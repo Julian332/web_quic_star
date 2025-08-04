@@ -46,7 +46,7 @@ create table in [schema.rs](src/schema.rs)
 ```shell
 diesel migration generate --diff-schema create_table
 
-diesel migration run
+diesel migration run --locked-schema
 
 ```
 
