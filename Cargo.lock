@@ -1554,7 +1554,7 @@ dependencies = [
 [[package]]
 name = "axum-login"
 version = "0.18.0"
-source = "git+https://github.com/Julian332/axum-login#c45c1ffe2fdce39c64b44bb75b519aac6fda0561"
+source = "git+https://github.com/Julian332/axum-login#6ad4e23f3805551ba452f4dcc440a03fd32f3d96"
 dependencies = [
  "aide",
  "axum",

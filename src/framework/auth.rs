@@ -1,12 +1,12 @@
 use crate::db_models::group::Group;
 use crate::db_models::user::User;
 use crate::db_models::{ConnPool, DbType};
-use crate::framework::errors::AppError;
+use crate::framework::errors::{AppError, NoneError};
 use crate::schema::groups::table as groups;
 use crate::schema::users::{table as users, username};
-use crate::{impl_from, DB};
+use crate::{DB, impl_from};
 use axum_login::tower_sessions::cookie::time::Duration;
-use axum_login::tower_sessions::{Expiry,  SessionManagerLayer};
+use axum_login::tower_sessions::{Expiry, SessionManagerLayer};
 use axum_login::{
     AuthManagerLayer, AuthManagerLayerBuilder, AuthUser, AuthnBackend, AuthzBackend, UserId,
 };
@@ -15,7 +15,7 @@ use diesel::deserialize::FromSql;
 use diesel::serialize::{Output, ToSql};
 use diesel::sql_types::{Text, VarChar};
 use diesel::{
-    deserialize, serialize, ExpressionMethods, FromSqlRow, QueryDsl, RunQueryDsl, SelectableHelper,
+    ExpressionMethods, FromSqlRow, QueryDsl, RunQueryDsl, SelectableHelper, deserialize, serialize,
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -42,7 +42,7 @@ pub enum AuthPermission<Table = String> {
     Update(Table),
 }
 
-impl From<AuthPermission<&str>> for AuthPermission {
+impl From<AuthPermission<&str>> for AuthPermission<String> {
     fn from(value: AuthPermission<&str>) -> Self {
         match value {
             AuthPermission::Admin => AuthPermission::Admin,
@@ -56,20 +56,13 @@ impl From<AuthPermission<&str>> for AuthPermission {
 
 impl Display for AuthPermission {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let str = match self {
-            AuthPermission::Admin => "Admin",
-            AuthPermission::Read(x) => x,
-            AuthPermission::Add(x) => x,
-            AuthPermission::Delete(x) => x,
-            AuthPermission::Update(x) => x,
-        };
-        write!(f, "{}", str)
-    }
-}
-
-impl From<&str> for AuthPermission {
-    fn from(s: &str) -> Self {
-        Self::from_str(s).expect(&format!("invalid table permission:{s}"))
+        match self {
+            AuthPermission::Admin => write!(f, "{}", "Admin"),
+            AuthPermission::Read(x) => write!(f, "{x}:read"),
+            AuthPermission::Add(x) => write!(f, "{x}:add"),
+            AuthPermission::Delete(x) => write!(f, "{x}:delete"),
+            AuthPermission::Update(x) => write!(f, "{x}:update"),
+        }
     }
 }
 
@@ -77,21 +70,28 @@ impl TryFrom<String> for AuthPermission {
     type Error = AuthError;
 
     fn try_from(s: String) -> Result<Self, Self::Error> {
-        let result = match s {
-            string if string.eq_ignore_ascii_case("Admin") => AuthPermission::Admin,
-            permission if permission.eq_ignore_ascii_case("read") => Self::Read(permission),
-            permission if permission.eq_ignore_ascii_case("add") => Self::Add(permission),
-            permission if permission.eq_ignore_ascii_case("delete") => Self::Delete(permission),
-            permission if permission.eq_ignore_ascii_case("update") => Self::Update(permission),
-            _ => return Err(AppError::new(&format!("unknown permission: {s}")).into()),
-        };
-        Ok(result)
+        s.parse()
     }
 }
 impl FromStr for AuthPermission {
     type Err = AuthError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Self::try_from(s.to_string())
+        let split = s.split(':').collect::<Vec<_>>();
+        let perm = split.last().ok_or(NoneError)?;
+        let table = split.first().ok_or(NoneError)?;
+        let result = match perm {
+            string if string.eq_ignore_ascii_case("Admin") => AuthPermission::Admin,
+            permission if permission.eq_ignore_ascii_case("read") => Self::Read(table.to_string()),
+            permission if permission.eq_ignore_ascii_case("add") => Self::Add(table.to_string()),
+            permission if permission.eq_ignore_ascii_case("delete") => {
+                Self::Delete(table.to_string())
+            }
+            permission if permission.eq_ignore_ascii_case("update") => {
+                Self::Update(table.to_string())
+            }
+            _ => return Err(AppError::new(&format!("unknown permission: {s}")).into()),
+        };
+        Ok(result)
     }
 }
 
@@ -113,8 +113,8 @@ impl FromSql<Text, DbType> for AuthPermission {
 
 #[test]
 fn permissions_test() {
-    let perm = AuthPermission::from("t:add");
-    let perm2 = AuthPermission::from("t:Add");
+    let perm = AuthPermission::from_str("t:add").unwrap();
+    let perm2 = AuthPermission::from_str("t:Add").unwrap();
     println!("{:?}", perm);
     println!("{:?}", perm2);
     println!("{}", perm.to_string());
@@ -177,9 +177,9 @@ impl AuthUser for User {
 
     fn session_auth_hash(&self) -> &[u8] {
         self.password.as_bytes() // We use the password hash as the auth
-                                 // hash--what this means
-                                 // is when the user changes their password the
-                                 // auth session becomes invalid.
+        // hash--what this means
+        // is when the user changes their password the
+        // auth session becomes invalid.
     }
 }
 
@@ -365,6 +365,7 @@ impl AuthzBackend for AuthBackend {
 }
 
 impl_from!(diesel::result::Error);
+impl_from!(NoneError);
 impl_from!(r2d2::Error);
 #[cfg(feature = "eth_mode")]
 impl_from!(alloy::primitives::SignatureError);

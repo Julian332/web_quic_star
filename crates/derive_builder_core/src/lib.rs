@@ -130,15 +130,15 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
         use axum_login::permission_required;
         use crate::DB;
         use diesel::PgSortExpressionMethods;
-
+        use crate::framework::auth::AuthPermission::*;
         pub fn web_routes() -> ApiRouter {
             let (router_add, router_read, router_update, router_delete) = web::get_routers();
 
             router_add
-                .route_layer(permission_required!(AuthBackend, "common_add"))
-                .merge(router_read.route_layer(permission_required!(AuthBackend, "common_read")))
-                .merge(router_delete.route_layer(permission_required!(AuthBackend, "common_delete")))
-                .merge(router_update.route_layer(permission_required!(AuthBackend, "common_update")))
+                .route_layer(permission_required!(AuthBackend, Add(stringify!(#schema))))
+                .merge(router_read.route_layer(permission_required!(AuthBackend, Read(stringify!(#schema)))))
+                .merge(router_delete.route_layer(permission_required!(AuthBackend, Delete(stringify!(#schema)))))
+                .merge(router_update.route_layer(permission_required!(AuthBackend, Update(stringify!(#schema)))))
 
         }
 
@@ -545,11 +545,13 @@ pub fn query_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::Token
         use crate::framework::api::{BoolOp, Compare};
         use axum_login::permission_required;
         use crate::DB;
+        use crate::framework::auth::AuthPermission::Read;
+
         pub fn web_routes() -> ApiRouter {
             let (router_add, router_read, router_update, router_delete) = web::get_routers();
 
             router_read
-                .route_layer(permission_required!(AuthBackend, "common_read"))
+                .route_layer(permission_required!(AuthBackend, Read(stringify!(#schema))))
         }
 
 
