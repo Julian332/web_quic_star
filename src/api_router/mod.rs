@@ -12,7 +12,7 @@ use tower_http::normalize_path::NormalizePathLayer;
 use tower_http::services::ServeDir;
 use tower_http::trace::{DefaultOnRequest, TraceLayer};
 use tracing::Level;
-use crate::config::{save_req_to_task_local};
+use crate::web_middleware::save_req_to_task_local;
 
 pub mod auth;
 pub mod docs;

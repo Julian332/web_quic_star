@@ -1,3 +1,4 @@
+use std::process::Command;
 use crate::db_models::{Conn, ConnPool, DbType};
 use diesel::query_builder::{AstPass, Query, QueryFragment};
 use diesel::query_dsl::LoadQuery;
@@ -6,7 +7,7 @@ use diesel::r2d2::Pool;
 use diesel::sql_types::BigInt;
 use diesel::{Connection, QueryId, QueryResult, QueryableByName, RunQueryDsl};
 use diesel_logger::LoggingConnection;
-
+use tracing::info;
 use crate::CONFIG;
 
 #[derive(QueryableByName)]
@@ -155,4 +156,20 @@ async fn test() {
         .unwrap();
 
     println!("{:?}", x);
+}
+
+pub fn sync_db_schema() {
+    info!(
+        "db update succeed: {:?}",
+        Command::new("diesel")
+            .args([
+                "migration",
+                "run",
+                "--locked-schema",
+                "--database-url",
+                &format!("{}", CONFIG.database_url)
+            ])
+            .output()
+            .unwrap()
+    );
 }

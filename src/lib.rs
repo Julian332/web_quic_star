@@ -18,6 +18,8 @@ pub mod schema_view;
 #[cfg(feature = "solana_mode")]
 pub mod subscribe;
 pub mod utils;
+pub mod web_middleware;
+
 pub mod prelude {
     pub use super::*;
     pub use chrono::prelude::*;

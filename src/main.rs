@@ -1,24 +1,11 @@
-use std::process::Command;
-use tracing::info;
 use web3_quick::scheduled_task::set_scheduler;
-use web3_quick::{CONFIG, api_router, config};
+use web3_quick::{api_router, config, CONFIG};
+use web3_quick::framework::db;
 
 #[tokio::main]
 async fn main() {
     config::set_log();
-    info!(
-        "db update succeed: {:?}",
-        Command::new("diesel")
-            .args([
-                "migration",
-                "run",
-                "--locked-schema",
-                "--database-url",
-                &format!("{}", CONFIG.database_url)
-            ])
-            .output()
-            .unwrap()
-    );
+    db::sync_db_schema();
     set_scheduler().await;
     let doc_app = api_router::setup_router();
     let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", CONFIG.server_port))
@@ -28,3 +15,4 @@ async fn main() {
         .await
         .expect("Can not run server");
 }
+
