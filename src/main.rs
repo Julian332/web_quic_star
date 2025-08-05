@@ -9,7 +9,13 @@ async fn main() {
     info!(
         "db update succeed: {:?}",
         Command::new("diesel")
-            .args(["migration", "run", "--locked-schema"])
+            .args([
+                "migration",
+                "run",
+                "--locked-schema",
+                "--database-url",
+                &format!("{}", CONFIG.database_url)
+            ])
             .output()
             .unwrap()
     );

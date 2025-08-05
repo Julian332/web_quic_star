@@ -39,7 +39,7 @@ pub mod prelude {
 pub type AppRes<T> = Result<T, AppError>;
 
 #[global_allocator]
-static MI_MALLOC: MiMalloc = MiMalloc;
+static GLOBAL: MiMalloc = MiMalloc;
 task_local! {
     pub static CURRENT_REQ_HEADER : http::HeaderMap ;
 }

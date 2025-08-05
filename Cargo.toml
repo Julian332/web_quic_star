@@ -61,7 +61,7 @@ web_api_gen = { path = "crates/derive_builder" }
 derive_more = { version = "2", features = ["full"] }
 tokio-util = "0.7"
 sha2 = "0.10"
-mimalloc = { version = "0.1", features = ["secure"] }
+mimalloc = { version = "0.1", features = [] }
 
 [dev-dependencies]
 r2d2_postgres = { version = "0.18.2", features = [] }
