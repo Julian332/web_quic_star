@@ -5,11 +5,14 @@ use aide::axum::ApiRouter;
 use axum::Router;
 use http::{HeaderValue, Method};
 use std::ops::Deref;
+use axum::middleware::from_fn;
 use tower_http::cors::CorsLayer;
 use tower_http::limit::RequestBodyLimitLayer;
 use tower_http::normalize_path::NormalizePathLayer;
 use tower_http::services::ServeDir;
-use tower_http::trace::TraceLayer;
+use tower_http::trace::{DefaultOnRequest, TraceLayer};
+use tracing::Level;
+use crate::config::{save_req_to_task_local};
 
 pub mod auth;
 pub mod docs;
@@ -34,8 +37,7 @@ pub fn setup_router() -> Router {
             ServeDir::new(CONFIG.file_server_directory.as_str()),
         )
         .fallback(fallback)
-        .layer(tower_http::catch_panic::CatchPanicLayer::new())
-        .layer(TraceLayer::new_for_http())
+        .layer(TraceLayer::new_for_http().on_request(DefaultOnRequest::default().level(Level::DEBUG)))
         //10MB
         .layer(RequestBodyLimitLayer::new(10240))
         .layer(NormalizePathLayer::trim_trailing_slash())
@@ -44,6 +46,7 @@ pub fn setup_router() -> Router {
                 .allow_origin("*".parse::<HeaderValue>().unwrap())
                 .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE]),
         )
+        .layer(from_fn(save_req_to_task_local))
         .layer(get_auth_layer());
     #[cfg(feature = "dev")]
     {

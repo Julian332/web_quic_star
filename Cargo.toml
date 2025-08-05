@@ -21,7 +21,7 @@ axum = { version = "0.8", features = ["macros", "http2"] }
 axum-login = { git = "https://github.com/Julian332/axum-login" }
 aide = { git = "https://github.com/tamasfe/aide", features = ["swagger", "scalar", "axum", "macros", "axum-tokio", "axum-multipart", "axum-json", "axum-ws", "axum-form", "axum-matched-path", "axum-original-uri", "axum-query"] }
 password-auth = "1.0.0"
-tower-http = { version = "0.6", features = ["catch-panic", "cors", "trace", "fs", "limit", "normalize-path"] }
+tower-http = { version = "0.6", features = [ "cors", "trace", "fs", "limit", "normalize-path"] }
 http = { version = "1" }
 tower-sessions = { version = "0.14", features = ["memory-store"] }
 url = { version = "2", features = ["serde"] }
@@ -61,6 +61,7 @@ web_api_gen = { path = "crates/derive_builder" }
 derive_more = { version = "2", features = ["full"] }
 tokio-util = "0.7"
 sha2 = "0.10"
+mimalloc = { version = "0.1", features = ["secure"] }
 
 [dev-dependencies]
 r2d2_postgres = { version = "0.18.2", features = [] }

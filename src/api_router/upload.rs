@@ -1,17 +1,17 @@
-use std::ops::Deref;
 use crate::framework::api_doc::empty_resp_docs;
 use crate::framework::auth::AuthBackend;
 use crate::utils::file;
 use crate::{AppRes, CONFIG};
-use aide::axum::routing::get_with;
-use aide::axum::ApiRouter;
 use aide::OperationIo;
+use aide::axum::ApiRouter;
+use aide::axum::routing::get_with;
+use axum::Json;
 use axum::extract::Multipart;
 use axum::response::Html;
-use axum::Json;
 use axum_login::login_required;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use std::ops::Deref;
 
 pub fn upload_routes() -> ApiRouter {
     ApiRouter::new()
@@ -59,7 +59,7 @@ async fn accept_form(mut multipart: Multipart) -> AppRes<Json<Vec<FileSave>>> {
         let hash = file::stream_to_file(&file_name, field).await?;
         res.push(FileSave {
             filename: file_name,
-            hash: format!("/{}/{hash}",CONFIG.file_server_directory.deref()),
+            hash: format!("/{}/{hash}", CONFIG.file_server_directory.deref()),
         });
     }
 

@@ -19,24 +19,30 @@ pub mod schema_view;
 pub mod subscribe;
 pub mod utils;
 pub mod prelude {
-    pub use chrono::prelude::*;
-    pub use rust_decimal::prelude::*;
-    pub use diesel::prelude::*;
-    pub use tracing::{info,debug,trace,warn,error};
     pub use super::*;
-    pub use utils::datetime::TimeUtil;
-    pub use framework::db::{Paginate,LogicDeleteQuery};
-    pub use framework::api::*;
-    #[cfg(feature = "solana_mode")]
-    pub use domain::solana_addr::SolAddr;
+    pub use chrono::prelude::*;
+    pub use diesel::prelude::*;
     #[cfg(feature = "eth_mode")]
     pub use domain::eth_addr::EthAddr;
+    #[cfg(feature = "solana_mode")]
+    pub use domain::solana_addr::SolAddr;
+    pub use framework::api::*;
+    pub use framework::db::{LogicDeleteQuery, Paginate};
+    pub use rust_decimal::prelude::*;
+    pub use tracing::{debug, error, info, trace, warn};
+    pub use utils::datetime::TimeUtil;
 }
 
 // todo Progress bar
 // todo without native db driver
 // todo workspace for speed up compile
 pub type AppRes<T> = Result<T, AppError>;
+
+#[global_allocator]
+static MI_MALLOC: MiMalloc = MiMalloc;
+task_local! {
+    pub static CURRENT_REQ_HEADER : http::HeaderMap ;
+}
 pub static DB: LazyLock<ConnPool> = LazyLock::new(|| setup_connection_pool());
 pub static HTTP_CLIENT: LazyLock<reqwest::Client> = LazyLock::new(|| reqwest::Client::new());
 #[cfg(feature = "solana_mode")]
@@ -52,6 +58,9 @@ use alloy::providers::fillers::{
 };
 #[cfg(feature = "eth_mode")]
 use alloy::providers::{Identity, RootProvider};
+use mimalloc::MiMalloc;
+use tokio::task_local;
+
 #[cfg(feature = "eth_mode")]
 pub static ETH_CLIENT: LazyLock<
     FillProvider<

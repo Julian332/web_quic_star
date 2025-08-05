@@ -1,4 +1,5 @@
 /target
+/assets2
 /.idea/*
 /.env
 /env_prod.env

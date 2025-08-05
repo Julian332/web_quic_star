@@ -5,6 +5,7 @@ use schemars::json_schema;
 use serde_json::Value;
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
+use tracing::warn;
 use uuid::Uuid;
 /// A default error response for most API errors.
 #[derive(Debug, OperationIo)]
@@ -107,12 +108,9 @@ const _: () = {
                     );
                 }
                 {
-                    schemars::_private::insert_object_property(
-                        &mut schema,
-                        "status",
-                        false,
-                        { generator.subschema_for::<u16>() },
-                    );
+                    schemars::_private::insert_object_property(&mut schema, "status", false, {
+                        generator.subschema_for::<u16>()
+                    });
                 }
                 {
                     schemars::_private::insert_object_property(
@@ -279,7 +277,6 @@ impl Display for AppError {
 }
 #[test]
 fn test_display_error() {
-
     let error =
         AppError::new("eee").with_error_origin_position("error_origin_position".to_string());
     println!("{:?}", error);
@@ -342,6 +339,7 @@ impl<T: Error + Send + Sync + 'static> From<T> for AppError {
 
 impl IntoResponse for AppError {
     fn into_response(self) -> axum::response::Response {
+        warn!("request failed :{self:?}");
         let status = self.status.clone();
         let mut res = axum::Json(self).into_response();
         *res.status_mut() = status;
