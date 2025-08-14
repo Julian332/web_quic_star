@@ -1,5 +1,5 @@
 /target
-/assets2
+/assets
 /.idea/*
 /.env
 /env_prod.env

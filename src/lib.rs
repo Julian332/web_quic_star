@@ -24,13 +24,14 @@ pub mod prelude {
     pub use super::*;
     pub use chrono::prelude::*;
     pub use diesel::prelude::*;
+    pub use rust_decimal::prelude::*;
+
     #[cfg(feature = "eth_mode")]
     pub use domain::eth_addr::EthAddr;
     #[cfg(feature = "solana_mode")]
     pub use domain::solana_addr::SolAddr;
-    pub use framework::api::*;
+    pub use framework::api::PageRes;
     pub use framework::db::{LogicDeleteQuery, Paginate};
-    pub use rust_decimal::prelude::*;
     pub use tracing::{debug, error, info, trace, warn};
     pub use utils::datetime::TimeUtil;
 }

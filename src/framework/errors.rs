@@ -1,3 +1,4 @@
+use crate::CURRENT_REQ_HEADER;
 use aide::OperationIo;
 use axum::{http::StatusCode, response::IntoResponse};
 use derive_more::{Display, Error};
@@ -5,19 +6,20 @@ use schemars::json_schema;
 use serde_json::Value;
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
-use tracing::warn;
+use tracing::{debug, info, warn};
 use uuid::Uuid;
+
 /// A default error response for most API errors.
 #[derive(Debug, OperationIo)]
 pub struct AppError {
-    /// An error message.
-    error: anyhow::Error,
     /// A unique error ID.
     error_id: Uuid,
     status: StatusCode,
     /// Optional Additional error details.
     error_details: Option<Value>,
     error_origin_position: Option<String>,
+    /// An error message.
+    error: anyhow::Error,
 }
 
 const _: () = {
@@ -279,8 +281,8 @@ impl Display for AppError {
 fn test_display_error() {
     let error =
         AppError::new("eee").with_error_origin_position("error_origin_position".to_string());
+    println!("{}", error);
     println!("{:?}", error);
-    // println!("{}", error);
     // println!("{:?}", serde_json::to_string(&error));
     use alloy::rpc::types::BlockError;
 
@@ -339,7 +341,16 @@ impl<T: Error + Send + Sync + 'static> From<T> for AppError {
 
 impl IntoResponse for AppError {
     fn into_response(self) -> axum::response::Response {
-        warn!("request failed :{self:?}");
+        match CURRENT_REQ_HEADER.try_with(|x| {
+            debug!("request header: {x:?};");
+        }) {
+            Ok(_) => {
+                info!("web request err: {self:?};");
+            }
+            Err(_) => {
+                warn!("internal err: {self:?};");
+            }
+        }
         let status = self.status.clone();
         let mut res = axum::Json(self).into_response();
         *res.status_mut() = status;
