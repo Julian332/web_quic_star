@@ -45,7 +45,7 @@ pub fn api_docs(api: TransformOpenApi) -> TransformOpenApi {
             },
         )
         .default_response_with::<axum::Json<AppError>, _>(|res| {
-            res.example(AppError::new("some error happened").with_status(StatusCode::IM_A_TEAPOT))
+            res.example(AppError::new("some error happened"))
         })
 }
 
