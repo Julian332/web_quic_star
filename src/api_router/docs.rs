@@ -4,7 +4,7 @@ use aide::{
     axum::{ApiRouter, IntoApiResponse},
     openapi::OpenApi,
 };
-use axum::{response::IntoResponse, Extension};
+use axum::{Extension, response::IntoResponse};
 
 use axum::Json;
 

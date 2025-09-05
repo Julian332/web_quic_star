@@ -1,6 +1,6 @@
-use web3_quick::scheduled_task::set_scheduler;
-use web3_quick::{api_router, config, CONFIG};
 use web3_quick::framework::db;
+use web3_quick::scheduled_task::set_scheduler;
+use web3_quick::{CONFIG, api_router, config};
 
 #[tokio::main]
 async fn main() {
@@ -15,4 +15,3 @@ async fn main() {
         .await
         .expect("Can not run server");
 }
-

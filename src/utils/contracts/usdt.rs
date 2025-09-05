@@ -5,5 +5,3 @@ sol!(
     USDT,
     "src/utils/contracts/abis/usdt.json"
 );
-
-

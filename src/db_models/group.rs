@@ -1,9 +1,9 @@
 use crate::framework::auth::AuthPermission;
 use chrono::{DateTime, Utc};
-use web_api_gen::WebApiGen;
 use diesel::{AsChangeset, Identifiable, Insertable, Queryable, Selectable};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use web_api_gen::WebApiGen;
 
 #[derive(
     Queryable, Debug, Selectable, Serialize, Deserialize, JsonSchema, AsChangeset, Insertable,

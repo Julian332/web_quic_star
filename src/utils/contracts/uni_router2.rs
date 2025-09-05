@@ -5,4 +5,3 @@ sol!(
     UNI_ROUTER2,
     "src/utils/contracts/abis/uni_router2.json"
 );
-

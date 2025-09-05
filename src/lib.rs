@@ -1,4 +1,6 @@
 #![forbid(unsafe_code)]
+extern crate core;
+
 use crate::config::Config;
 use crate::db_models::ConnPool;
 use crate::framework::db::setup_connection_pool;

@@ -1,5 +1,5 @@
-use r2d2_postgres::postgres::NoTls;
 use r2d2_postgres::PostgresConnectionManager;
+use r2d2_postgres::postgres::NoTls;
 
 #[test]
 fn t() {

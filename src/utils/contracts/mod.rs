@@ -1,7 +1,9 @@
 use crate::CONFIG;
-use alloy::network::{EthereumWallet};
+use alloy::network::EthereumWallet;
+use alloy::providers::fillers::{
+    BlobGasFiller, ChainIdFiller, FillProvider, GasFiller, JoinFill, NonceFiller,
+};
 use alloy::providers::{Identity, Provider, ProviderBuilder, RootProvider};
-use alloy::providers::fillers::{BlobGasFiller, ChainIdFiller, FillProvider, GasFiller, JoinFill, NonceFiller};
 
 mod erc20;
 pub mod uni_factory;
@@ -19,6 +21,12 @@ pub fn signer_http_provider() -> impl Provider {
         .connect_http(CONFIG.eth_rpc.clone())
 }
 
-pub fn http_provider() -> FillProvider<JoinFill<Identity, JoinFill<GasFiller, JoinFill<BlobGasFiller, JoinFill<NonceFiller, ChainIdFiller>>>>, RootProvider> {
+pub fn http_provider() -> FillProvider<
+    JoinFill<
+        Identity,
+        JoinFill<GasFiller, JoinFill<BlobGasFiller, JoinFill<NonceFiller, ChainIdFiller>>>,
+    >,
+    RootProvider,
+> {
     ProviderBuilder::new().connect_http(CONFIG.eth_rpc.clone())
 }

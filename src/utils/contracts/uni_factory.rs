@@ -4,4 +4,3 @@ alloy::sol!(
     UNI_FACTORY,
     "src/utils/contracts/abis/uni_factory.json"
 );
-

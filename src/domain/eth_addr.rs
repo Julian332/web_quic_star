@@ -133,9 +133,8 @@ impl From<&Address> for EthAddr {
         EthAddr(*value)
     }
 }
-impl From<&EthAddr> for  Address {
+impl From<&EthAddr> for Address {
     fn from(value: &EthAddr) -> Self {
         value.0
     }
 }
-

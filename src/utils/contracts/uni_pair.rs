@@ -5,5 +5,3 @@ sol!(
     UNI_PAIR,
     "src/utils/contracts/abis/uni_pair.json"
 );
-
-

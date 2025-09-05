@@ -1,7 +1,7 @@
 use crate::framework::errors::AppError;
 use crate::{AppRes, CONFIG};
-use axum::body::Bytes;
 use axum::BoxError;
+use axum::body::Bytes;
 use futures::{Stream, TryStreamExt};
 use sha2::{Digest, Sha256};
 use std::io;
@@ -10,7 +10,6 @@ use tokio::fs::File;
 use tokio::io::{AsyncReadExt, BufReader, BufWriter};
 use tokio_util::io::StreamReader;
 use tracing::info;
-
 
 pub async fn sha256_digest(path: &PathBuf) -> AppRes<String> {
     let input = File::open(path).await?;
@@ -70,7 +69,8 @@ where
         let hash = sha256_digest(&path).await?;
         let hash_file_name = format!("{hash}.{extension_name}");
         info!("file: {} has saved", hash_file_name);
-        let hash_file = std::path::Path::new(CONFIG.file_server_directory.as_str()).join(hash_file_name.clone());
+        let hash_file = std::path::Path::new(CONFIG.file_server_directory.as_str())
+            .join(hash_file_name.clone());
 
         tokio::fs::rename(path, hash_file).await?;
         Ok::<_, AppError>(hash_file_name)

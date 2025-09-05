@@ -6,7 +6,7 @@ use derive_more::{Display, Error};
 use schemars::json_schema;
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
-use tracing::{info};
+use tracing::info;
 use uuid::Uuid;
 
 #[allow(unused)]

@@ -1,8 +1,8 @@
 use chrono::{DateTime, Utc};
-use web_api_gen::ViewApiGen;
 use diesel::{AsChangeset, Queryable, Selectable};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use web_api_gen::ViewApiGen;
 
 #[derive(
     Queryable,

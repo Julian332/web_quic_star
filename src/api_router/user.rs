@@ -2,13 +2,13 @@ use crate::framework::errors::AppError;
 use crate::{AppRes, DB};
 use aide::OperationIo;
 use axum::Json;
-use axum_login::{login_required, AuthSession};
+use axum_login::{AuthSession, login_required};
 use diesel::{QueryDsl, RunQueryDsl};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use aide::axum::routing::post_with;
 use aide::axum::ApiRouter;
+use aide::axum::routing::post_with;
 use axum_login::permission_required;
 
 use crate::db_models::user;

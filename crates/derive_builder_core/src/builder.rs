@@ -605,5 +605,3 @@ macro_rules! default_builder {
         }
     };
 }
-
-

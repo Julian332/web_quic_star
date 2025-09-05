@@ -1,18 +1,18 @@
 use crate::CONFIG;
 use crate::framework::api_doc::{fallback, set_api_doc};
 use crate::framework::auth::get_auth_layer;
+use crate::web_middleware::save_req_to_task_local;
 use aide::axum::ApiRouter;
 use axum::Router;
+use axum::middleware::from_fn;
 use http::{HeaderValue, Method};
 use std::ops::Deref;
-use axum::middleware::from_fn;
 use tower_http::cors::CorsLayer;
 use tower_http::limit::RequestBodyLimitLayer;
 use tower_http::normalize_path::NormalizePathLayer;
 use tower_http::services::ServeDir;
 use tower_http::trace::{DefaultOnRequest, TraceLayer};
 use tracing::Level;
-use crate::web_middleware::save_req_to_task_local;
 
 pub mod auth;
 pub mod docs;
@@ -37,7 +37,9 @@ pub fn setup_router() -> Router {
             ServeDir::new(CONFIG.file_server_directory.as_str()),
         )
         .fallback(fallback)
-        .layer(TraceLayer::new_for_http().on_request(DefaultOnRequest::default().level(Level::DEBUG)))
+        .layer(
+            TraceLayer::new_for_http().on_request(DefaultOnRequest::default().level(Level::DEBUG)),
+        )
         //10MB
         .layer(RequestBodyLimitLayer::new(10240))
         .layer(NormalizePathLayer::trim_trailing_slash())

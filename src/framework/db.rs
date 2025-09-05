@@ -1,4 +1,4 @@
-use std::process::Command;
+use crate::CONFIG;
 use crate::db_models::{Conn, ConnPool, DbType};
 use diesel::query_builder::{AstPass, Query, QueryFragment};
 use diesel::query_dsl::LoadQuery;
@@ -7,8 +7,8 @@ use diesel::r2d2::Pool;
 use diesel::sql_types::BigInt;
 use diesel::{Connection, QueryId, QueryResult, QueryableByName, RunQueryDsl};
 use diesel_logger::LoggingConnection;
+use std::process::Command;
 use tracing::info;
-use crate::CONFIG;
 
 #[derive(QueryableByName)]
 pub struct Count {
@@ -139,9 +139,9 @@ where
 
 #[tokio::test]
 async fn test() {
+    use crate::config::set_env;
     use crate::db_models::user::User;
     use crate::schema::users::table as users;
-    use crate::config::set_env;
     use diesel::QueryDsl;
     use diesel::SelectableHelper;
 
