@@ -1,6 +1,6 @@
-use crate::db_models::group::Group;
-use crate::db_models::user::User;
-use crate::db_models::{ConnPool, DbType};
+use crate::db_model::group::Group;
+use crate::db_model::user::User;
+use crate::db_model::{ConnPool, DbType};
 use crate::framework::errors::{AppError, NoneError};
 use crate::schema::groups::table as groups;
 use crate::schema::users::{table as users, username};
@@ -238,7 +238,7 @@ impl AuthnBackend for AuthBackend {
         &self,
         creds: Self::Credentials,
     ) -> Result<Option<Self::User>, Self::Error> {
-        use crate::db_models::user::NewUser;
+        use crate::db_model::user::NewUser;
         use alloy::signers::Signature;
         use diesel::OptionalExtension;
         use std::str::FromStr;
@@ -280,7 +280,7 @@ impl AuthnBackend for AuthBackend {
         &self,
         creds: Self::Credentials,
     ) -> Result<Option<Self::User>, Self::Error> {
-        use crate::db_models::user::NewUser;
+        use crate::db_model::user::NewUser;
         use diesel::OptionalExtension;
         use std::str::FromStr;
         use std::time::SystemTime;

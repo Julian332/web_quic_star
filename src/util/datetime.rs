@@ -41,9 +41,9 @@ fn from_string(time_str: &String) -> Result<DateTime<Utc>, ParseErrorKind> {
     Err(ParseErrorKind::Impossible)
 }
 
-mod custom_datetime_format {
+pub mod custom_datetime_format {
     use crate::prelude::TimeUtil;
-    use crate::utils::datetime::from_string;
+    use crate::util::datetime::from_string;
     use chrono::{DateTime, TimeZone, Utc};
     use core::fmt;
     use serde::{self, Deserialize, Deserializer, Serializer};

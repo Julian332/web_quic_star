@@ -1,5 +1,5 @@
 use crate::CONFIG;
-use crate::db_models::{Conn, ConnPool, DbType};
+use crate::db_model::{Conn, ConnPool, DbType};
 use diesel::query_builder::{AstPass, Query, QueryFragment};
 use diesel::query_dsl::LoadQuery;
 use diesel::r2d2::ConnectionManager;
@@ -140,7 +140,7 @@ where
 #[tokio::test]
 async fn test() {
     use crate::config::set_env;
-    use crate::db_models::user::User;
+    use crate::db_model::user::User;
     use crate::schema::users::table as users;
     use diesel::QueryDsl;
     use diesel::SelectableHelper;

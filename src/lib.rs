@@ -2,7 +2,7 @@
 extern crate core;
 
 use crate::config::Config;
-use crate::db_models::ConnPool;
+use crate::db_model::ConnPool;
 use crate::framework::db::setup_connection_pool;
 use framework::errors::AppError;
 use std::sync::LazyLock;
@@ -11,7 +11,7 @@ pub mod api_router;
 pub mod api_service;
 pub mod api_wrapper;
 pub mod config;
-pub mod db_models;
+pub mod db_model;
 pub mod domain;
 pub mod framework;
 pub mod scheduled_task;
@@ -19,7 +19,7 @@ pub mod schema;
 pub mod schema_view;
 #[cfg(feature = "solana_mode")]
 pub mod subscribe;
-pub mod utils;
+pub mod util;
 pub mod web_middleware;
 
 pub mod prelude {
@@ -35,12 +35,13 @@ pub mod prelude {
     pub use framework::api::PageRes;
     pub use framework::db::{LogicDeleteQuery, Paginate};
     pub use tracing::{debug, error, info, trace, warn};
-    pub use utils::datetime::TimeUtil;
+    pub use util::datetime::{TimeUtil, custom_datetime_format};
 }
 
 // todo Progress bar
 // todo without native db driver
 // todo workspace for speed up compile
+// todo derive enum
 pub type AppRes<T> = Result<T, AppError>;
 
 #[global_allocator]
@@ -75,7 +76,7 @@ pub static ETH_CLIENT: LazyLock<
         >,
         RootProvider,
     >,
-> = LazyLock::new(utils::contracts::http_provider);
+> = LazyLock::new(util::contracts::http_provider);
 
 pub static CONFIG: LazyLock<Config> = LazyLock::new(|| {
     config::set_env();

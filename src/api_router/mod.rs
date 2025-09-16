@@ -28,7 +28,7 @@ pub fn setup_router() -> Router {
         .nest_api_service("/users", user::user_routes())
         .nest_api_service(
             "/user_with_group",
-            crate::db_models::user_with_group_views::web_routes(),
+            crate::db_model::user_with_group_views::web_routes(),
         )
         .nest_api_service("/groups", group::group_router())
         .nest_api_service("/upload", upload::upload_routes())

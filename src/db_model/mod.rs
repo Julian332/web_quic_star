@@ -4,6 +4,7 @@ pub mod group;
 
 pub mod user;
 pub mod user_with_group_views;
+pub mod db_enum;
 
 #[cfg(feature = "postgres")]
 pub type DbType = diesel::pg::Pg;

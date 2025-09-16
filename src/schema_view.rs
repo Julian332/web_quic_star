@@ -12,6 +12,5 @@ diesel::table! {
         update_by -> Nullable<Int8>,
         is_delete -> Bool,
         group_name -> Nullable<Text>,
-
     }
 }

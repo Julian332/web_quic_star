@@ -11,7 +11,7 @@ use aide::axum::ApiRouter;
 use aide::axum::routing::post_with;
 use axum_login::permission_required;
 
-use crate::db_models::user;
+use crate::db_model::user;
 use crate::framework::api_doc::default_resp_docs;
 use crate::framework::auth::AuthBackend;
 use crate::framework::auth::AuthPermission::*;

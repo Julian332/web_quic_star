@@ -83,7 +83,7 @@ impl JsonSchema for SolAddr {
     }
 }
 
-use crate::db_models::DbType;
+use crate::db_model::DbType;
 use diesel::deserialize::{self, FromSql, FromSqlRow};
 use diesel::expression::AsExpression;
 use diesel::serialize::{self, Output, ToSql};

@@ -15,7 +15,6 @@
 // //     Ok(to)
 // // }
 
-pub mod db_enum;
 #[cfg(feature = "eth_mode")]
 pub mod eth_addr;
 #[cfg(feature = "solana_mode")]
