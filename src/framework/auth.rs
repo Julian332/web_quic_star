@@ -14,9 +14,7 @@ use diesel::associations::HasTable;
 use diesel::deserialize::FromSql;
 use diesel::serialize::{Output, ToSql};
 use diesel::sql_types::{Text, VarChar};
-use diesel::{
-    ExpressionMethods, FromSqlRow, QueryDsl, RunQueryDsl, SelectableHelper, deserialize, serialize,
-};
+use diesel::{ExpressionMethods, FromSqlRow, QueryDsl, RunQueryDsl, SelectableHelper, deserialize, serialize, SaveChangesDsl};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;

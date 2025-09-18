@@ -31,7 +31,8 @@ tracing = "0.1"
 
 #db ========
 diesel = { version = "2", features = ["chrono", "serde_json", "uuid", "r2d2", ] }
-diesel-dynamic-schema = "0.2"
+#todo use 0.2.4
+diesel-dynamic-schema = {git = "https://github.com/diesel-rs/diesel"}
 diesel-enum = { version = "0.2", features = [] }
 diesel_logger = { git = "https://github.com/Julian332/diesel-logger" }
 diesel_migrations = { version = "2" ,features = []}
