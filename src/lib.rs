@@ -41,7 +41,7 @@ pub mod prelude {
 // todo Progress bar
 // todo without native db driver
 // todo workspace for speed up compile
-// todo derive enum
+// todo diesel async
 pub type AppRes<T> = Result<T, AppError>;
 
 #[global_allocator]

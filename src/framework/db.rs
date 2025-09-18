@@ -1,5 +1,5 @@
-use crate::CONFIG;
 use crate::db_model::{Conn, ConnPool, DbType};
+use crate::{CONFIG, DB};
 use diesel::query_builder::{AstPass, Query, QueryFragment};
 use diesel::query_dsl::LoadQuery;
 use diesel::r2d2::ConnectionManager;
@@ -7,7 +7,7 @@ use diesel::r2d2::Pool;
 use diesel::sql_types::BigInt;
 use diesel::{Connection, QueryId, QueryResult, QueryableByName, RunQueryDsl};
 use diesel_logger::LoggingConnection;
-use std::process::Command;
+use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
 use tracing::info;
 
 #[derive(QueryableByName)]
@@ -157,19 +157,10 @@ async fn test() {
 
     println!("{:?}", x);
 }
+const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
 
 pub fn sync_db_schema() {
-    info!(
-        "db update succeed: {:?}",
-        Command::new("diesel")
-            .args([
-                "migration",
-                "run",
-                "--locked-schema",
-                "--database-url",
-                &format!("{}", CONFIG.database_url)
-            ])
-            .output()
-            .unwrap()
-    );
+    let mut connection = DB.get().unwrap();
+    let vec = connection.run_pending_migrations(MIGRATIONS).unwrap();
+    info!("db schema update succeed: {vec:?}",);
 }
