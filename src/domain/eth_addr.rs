@@ -104,7 +104,7 @@ impl JsonSchema for EthAddr {
         })
     }
 }
-use crate::db_model::DbType;
+use crate::framework::db::DbType;
 use diesel::deserialize::{self, FromSql, FromSqlRow};
 use diesel::expression::AsExpression;
 use diesel::serialize::{self, Output, ToSql};

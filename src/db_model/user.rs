@@ -3,6 +3,7 @@ use diesel::{AsChangeset, Insertable, Queryable, Selectable};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use web_api_gen::WebApiGen;
+use crate::framework::db::DbType;
 
 #[derive(
     Queryable,
@@ -16,7 +17,7 @@ use web_api_gen::WebApiGen;
     AsChangeset,
 )]
 #[diesel(table_name = crate::schema::users)]
-#[diesel(check_for_backend(super::DbType))]
+#[diesel(check_for_backend(DbType))]
 pub struct NewUser {
     pub username: String,
     pub password: String,
@@ -40,7 +41,7 @@ pub struct NewUser {
     WebApiGen,
 )]
 #[diesel(table_name = crate::schema::users)]
-#[diesel(check_for_backend(super::DbType))]
+#[diesel(check_for_backend(DbType))]
 pub struct User {
     pub id: i64,
     /// # Username

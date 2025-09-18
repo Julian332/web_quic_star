@@ -32,12 +32,13 @@ tracing = "0.1"
 #db ========
 diesel = { version = "2", features = ["chrono", "serde_json", "uuid", "r2d2", ] }
 diesel-dynamic-schema = "0.2"
-r2d2 = "0.8"
-rust_decimal = { version = "1", features = ["serde-str", "macros", "db-diesel2-postgres", "maths"] }
-chrono = { version = "0.4", features = ["serde"] }
 diesel-enum = { version = "0.2", features = [] }
 diesel_logger = { git = "https://github.com/Julian332/diesel-logger" }
 diesel_migrations = { version = "2" ,features = []}
+r2d2 = "0.8"
+rust_decimal = { version = "1", features = ["serde-str", "macros", "db-diesel2-postgres", "maths"] }
+chrono = { version = "0.4", features = ["serde"] }
+
 #solana ======
 anchor-client = { version = "0.31.1", optional = true, features = ["async"] }
 anchor-spl = { version = "0.31.1", features = ["default"], optional = true }

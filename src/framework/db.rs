@@ -1,4 +1,3 @@
-use crate::db_model::{Conn, ConnPool, DbType};
 use crate::{CONFIG, DB};
 use diesel::query_builder::{AstPass, Query, QueryFragment};
 use diesel::query_dsl::LoadQuery;
@@ -7,7 +6,7 @@ use diesel::r2d2::Pool;
 use diesel::sql_types::BigInt;
 use diesel::{Connection, QueryId, QueryResult, QueryableByName, RunQueryDsl};
 use diesel_logger::LoggingConnection;
-use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
+use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use tracing::info;
 
 #[derive(QueryableByName)]
@@ -164,3 +163,9 @@ pub fn sync_db_schema() {
     let vec = connection.run_pending_migrations(MIGRATIONS).unwrap();
     info!("db schema update succeed: {vec:?}",);
 }
+
+#[cfg(feature = "postgres")]
+pub type DbType = diesel::pg::Pg;
+pub type ConnPool = diesel::r2d2::Pool<diesel::r2d2::ConnectionManager<LoggingConnection<Conn>>>;
+#[cfg(feature = "postgres")]
+pub type Conn = diesel::PgConnection;

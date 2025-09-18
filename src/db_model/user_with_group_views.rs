@@ -1,3 +1,4 @@
+use crate::framework::db::DbType;
 use chrono::{DateTime, Utc};
 use diesel::{AsChangeset, Queryable, Selectable};
 use schemars::JsonSchema;
@@ -17,7 +18,7 @@ use web_api_gen::ViewApiGen;
     ViewApiGen,
 )]
 #[diesel(table_name = crate::schema_view::user_with_group_views)]
-#[diesel(check_for_backend(super::DbType))]
+#[diesel(check_for_backend(DbType))]
 pub struct UserWithGroupView {
     pub id: i64,
     /// # Username

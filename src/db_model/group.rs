@@ -4,12 +4,13 @@ use diesel::{AsChangeset, Identifiable, Insertable, Queryable, Selectable};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use web_api_gen::WebApiGen;
+use crate::framework::db::DbType;
 
 #[derive(
     Queryable, Debug, Selectable, Serialize, Deserialize, JsonSchema, AsChangeset, Insertable,
 )]
 #[diesel(table_name = crate::schema::groups)]
-#[diesel(check_for_backend(super::DbType))]
+#[diesel(check_for_backend(DbType))]
 #[serde(default)]
 pub struct NewGroup {
     pub name: String,
@@ -49,7 +50,7 @@ impl Default for NewGroup {
     Default,
 )]
 #[diesel(table_name = crate::schema::groups)]
-#[diesel(check_for_backend(super::DbType))]
+#[diesel(check_for_backend(DbType))]
 pub struct Group {
     pub id: i64,
     pub name: String,

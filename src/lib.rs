@@ -2,7 +2,7 @@
 extern crate core;
 
 use crate::config::Config;
-use crate::db_model::ConnPool;
+use framework::db::ConnPool;
 use crate::framework::db::setup_connection_pool;
 use framework::errors::AppError;
 use std::sync::LazyLock;
