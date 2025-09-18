@@ -24,8 +24,8 @@ fn from_string(time_str: &String) -> Result<DateTime<Utc>, ParseErrorKind> {
     let formats = [
         "%Y-%m-%dT%H:%M:%S", // 格式 1: "2023-10-05T14:30:00"
         "%Y-%m-%d %H:%M:%S", // 格式 2: "2023-10-05 14:30:00"
-        "%d/%m/%Y %H:%M", // 格式 3: "05/10/2023 14:30"
-        "%Y%m%dT%H%M%S",  // 格式 4: "20231005T143000"
+        "%d/%m/%Y %H:%M",    // 格式 3: "05/10/2023 14:30"
+        "%Y%m%dT%H%M%S",     // 格式 4: "20231005T143000"
         "%Y%m/%d/ %H:%M",
         "%Y-%m-%dT%H:%M",
         "%Y-%m-%d %H:%M",

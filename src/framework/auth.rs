@@ -1,9 +1,10 @@
 use crate::db_model::group::Group;
 use crate::db_model::user::User;
+use crate::framework::db::{ConnPool, DbType};
 use crate::framework::errors::{AppError, NoneError};
 use crate::schema::groups::table as groups;
 use crate::schema::users::{table as users, username};
-use crate::{impl_from, DB};
+use crate::{DB, impl_from};
 use axum_login::tower_sessions::cookie::time::Duration;
 use axum_login::tower_sessions::{Expiry, SessionManagerLayer};
 use axum_login::{
@@ -14,7 +15,7 @@ use diesel::deserialize::FromSql;
 use diesel::serialize::{Output, ToSql};
 use diesel::sql_types::{Text, VarChar};
 use diesel::{
-    deserialize, serialize, ExpressionMethods, FromSqlRow, QueryDsl, RunQueryDsl, SelectableHelper,
+    ExpressionMethods, FromSqlRow, QueryDsl, RunQueryDsl, SelectableHelper, deserialize, serialize,
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -22,7 +23,6 @@ use std::collections::HashSet;
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 use tower_sessions::MemoryStore;
-use crate::framework::db::{ConnPool, DbType};
 
 #[allow(dead_code)]
 const LOGIN_MESSAGE: &str = "welcome";

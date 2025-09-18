@@ -1,10 +1,10 @@
 use crate::framework::auth::AuthPermission;
+use crate::framework::db::DbType;
 use chrono::{DateTime, Utc};
 use diesel::{AsChangeset, Identifiable, Insertable, Queryable, Selectable};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use web_api_gen::WebApiGen;
-use crate::framework::db::DbType;
 
 #[derive(
     Queryable, Debug, Selectable, Serialize, Deserialize, JsonSchema, AsChangeset, Insertable,

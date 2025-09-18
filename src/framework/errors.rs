@@ -186,19 +186,40 @@ const _: () = {
 };
 
 #[doc(hidden)]
-#[allow(non_upper_case_globals, unused_attributes, unused_qualifications, clippy::absolute_paths, )]
+#[allow(
+    non_upper_case_globals,
+    unused_attributes,
+    unused_qualifications,
+    clippy::absolute_paths
+)]
 const _: () = {
     #[allow(unused_extern_crates, clippy::useless_attribute)]
     extern crate serde as _serde;
-    _serde::__require_serde_not_serde_core!();   #[automatically_derived]
+    _serde::__require_serde_not_serde_core!();
+    #[automatically_derived]
     impl _serde::Serialize for AppError {
-        fn serialize<__S>(&self, __serializer: __S) -> _serde::__private225::Result<__S::Ok, __S::Error>
+        fn serialize<__S>(
+            &self,
+            __serializer: __S,
+        ) -> _serde::__private225::Result<__S::Ok, __S::Error>
         where
             __S: _serde::Serializer,
         {
-            let mut __serde_state = _serde::Serializer::serialize_struct(__serializer, "AppError", false as usize + 1 + 1)?;
-            _serde::ser::SerializeStruct::serialize_field(&mut __serde_state, "error_id", &self.error_id)?;
-            _serde::ser::SerializeStruct::serialize_field(&mut __serde_state, "error", &self.error.to_string())?;
+            let mut __serde_state = _serde::Serializer::serialize_struct(
+                __serializer,
+                "AppError",
+                false as usize + 1 + 1,
+            )?;
+            _serde::ser::SerializeStruct::serialize_field(
+                &mut __serde_state,
+                "error_id",
+                &self.error_id,
+            )?;
+            _serde::ser::SerializeStruct::serialize_field(
+                &mut __serde_state,
+                "error",
+                &self.error.to_string(),
+            )?;
             _serde::ser::SerializeStruct::end(__serde_state)
         }
     }

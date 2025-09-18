@@ -6,7 +6,7 @@ use diesel::r2d2::Pool;
 use diesel::sql_types::BigInt;
 use diesel::{Connection, QueryId, QueryResult, QueryableByName, RunQueryDsl};
 use diesel_logger::LoggingConnection;
-use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
+use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
 use tracing::info;
 
 #[derive(QueryableByName)]

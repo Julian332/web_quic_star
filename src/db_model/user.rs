@@ -1,9 +1,9 @@
+use crate::framework::db::DbType;
 use chrono::{DateTime, Utc};
 use diesel::{AsChangeset, Insertable, Queryable, Selectable};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use web_api_gen::WebApiGen;
-use crate::framework::db::DbType;
 
 #[derive(
     Queryable,
