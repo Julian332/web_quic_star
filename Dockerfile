@@ -12,13 +12,8 @@ RUN mv ./target/release/example_app /build/exe
 FROM rust:1.83-slim AS runtime
 #RUN apt install build-essential
 #RUN apt-get install libpq-dev
-RUN apt-get update
-RUN apt-get remove libpq5
-RUN apt-get install libpq-dev -y
-RUN cargo install diesel_cli --no-default-features --features postgres
 
 WORKDIR /app
-#todo db migrate
 COPY --from=builder /build/exe /app/exe
 COPY --from=builder /build/.env /app/.env
 
