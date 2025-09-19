@@ -26,7 +26,7 @@ where
         .expect("cannot join job");
 }
 pub async fn example() -> AppRes<()> {
-    let _connection = DB.get()?;
+    let _connection = DB.get().await?;
     Ok(())
 }
 

@@ -10,7 +10,7 @@ default = ["postgres", "eth_mode", "solana_mode", "dev"]
 eth_mode = ["dep:alloy"]
 solana_mode = ["dep:anchor-client", "dep:anchor-spl"]
 dev = []
-postgres = ["diesel/postgres", "diesel-dynamic-schema/postgres", "rust_decimal/db-diesel-postgres","diesel_migrations/postgres"]
+postgres = [ "diesel-dynamic-schema/postgres", "rust_decimal/db-diesel-postgres", "diesel_migrations/postgres", "diesel-async/postgres"]
 
 
 #mysql = ["diesel/mysql", "diesel-dynamic-schema/mysql", "diesel-derive-enum/mysql","dep:r2d2_mysql"]
@@ -21,7 +21,7 @@ axum = { version = "0.8", features = ["macros", "http2"] }
 axum-login = { git = "https://github.com/Julian332/axum-login" }
 aide = { git = "https://github.com/tamasfe/aide", features = ["swagger", "scalar", "axum", "macros", "axum-tokio", "axum-multipart", "axum-json", "axum-ws", "axum-form", "axum-matched-path", "axum-original-uri", "axum-query"] }
 password-auth = "1"
-tower-http = { version = "0.6", features = [ "cors", "trace", "fs", "limit", "normalize-path"] }
+tower-http = { version = "0.6", features = ["cors", "trace", "fs", "limit", "normalize-path"] }
 http = { version = "1" }
 tower-sessions = { version = "0.14", features = ["memory-store"] }
 url = { version = "2", features = ["serde"] }
@@ -30,13 +30,12 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tracing = "0.1"
 
 #db ========
-diesel = { version = "2", features = ["chrono", "serde_json", "uuid", "r2d2", ] }
-#todo use 0.2.4
-diesel-dynamic-schema = {git = "https://github.com/diesel-rs/diesel"}
+diesel = { version = "2", features = ["chrono", "serde_json", "uuid", ], default-features = false }
+diesel-async = { version = "0.6.1", features = ["deadpool","async-connection-wrapper"] }
+diesel-dynamic-schema = "0.2.3"
 diesel-enum = { version = "0.2", features = [] }
-diesel_logger = { git = "https://github.com/Julian332/diesel-logger" }
-diesel_migrations = { version = "2" ,features = []}
-r2d2 = "0.8"
+deadpool = { version = "0.12" ,features = [],default-features = false}
+diesel_migrations = { version = "2", features = [] }
 rust_decimal = { version = "1", features = ["serde-str", "macros", "db-diesel2-postgres", "maths"] }
 chrono = { version = "0.4", features = ["serde"] }
 

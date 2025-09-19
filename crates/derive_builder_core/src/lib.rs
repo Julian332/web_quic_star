@@ -125,7 +125,6 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
         use aide::axum::routing::{delete_with, get_with, post_with, put_with};
         use aide::axum::ApiRouter;
         use axum::extract::{Path};
-        use diesel::r2d2::{ConnectionManager, Pool};
         use crate::framework::api::{BoolOp, Compare};
         use axum_login::permission_required;
         use crate::DB;
@@ -149,9 +148,9 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
             use crate::framework::api::{PageParam, PageRes,DynFilter,CompareValue};
             use super::*;
             use axum::Json;
-            use axum::extract::State;
-            use diesel::r2d2::{ConnectionManager, Pool};
-            use diesel::{ExpressionMethods,  QueryDsl, RunQueryDsl, SelectableHelper};
+            use diesel::{ExpressionMethods,  QueryDsl, SelectableHelper};
+            use diesel_async::RunQueryDsl;
+
             use crate::framework::errors::AppError;
             use crate::framework::db::{LogicDeleteQuery, Paginate};
 
@@ -206,7 +205,7 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
                 let result = diesel::insert_into(#schema_s)
                     .values(new_entity)
                     .returning(#model::as_returning())
-                    .get_result(&mut DB.get()?)?;
+                    .get_result(&mut DB.get().await?).await?;
 
                 Ok(Json(result))
             }
@@ -218,7 +217,7 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
                 let result = diesel::update(#schema_s.find(id_param))
                     .set(&new)
                     .returning(#model::as_returning())
-                    .get_result(&mut DB.get()?)?;
+                    .get_result(&mut DB.get().await?).await?;
                 Ok(Json(result))
             }
 
@@ -228,7 +227,7 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
                 let result = #schema_s
                     .find(id_param)
                     .select(#model::as_select())
-                    .get_result(&mut DB.get()?)?;
+                    .get_result(&mut DB.get().await?).await?;
                 Ok(Json(result))
             }
 
@@ -238,7 +237,7 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
                 let result = diesel::update(#schema_s.find(id_param))
                     .set(crate::schema::#schema_s::is_delete.eq(true))
                     .returning(#model::as_returning())
-                    .get_result(&mut DB.get()?)?;
+                    .get_result(&mut DB.get().await?).await?;
                 Ok(Json(result))
             }
 
@@ -445,14 +444,14 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
                         .select(#model::as_select())
                         .logic_delete_query()
                         .paginate(page.page_no, page.page_size)
-                        .load_and_count_pages(&mut DB.get()?)?
+                        .load_and_count_pages(&mut DB.get().await?).await?
                 } else {
                     statement
                         .order(order_column.asc().nulls_last())
                         .select(#model::as_select())
                         .logic_delete_query()
                         .paginate(page.page_no, page.page_size)
-                        .load_and_count_pages(&mut DB.get()?)?
+                        .load_and_count_pages(&mut DB.get().await?).await?
                 };
                 let page_res = PageRes::from_param_records_count(page, res.0, res.1);
                 Ok(Json(page_res))
@@ -541,7 +540,6 @@ pub fn query_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::Token
         use aide::axum::routing::{delete_with, get_with, post_with, put_with};
         use aide::axum::ApiRouter;
         use axum::extract::{Path};
-        use diesel::r2d2::{ConnectionManager, Pool};
         use crate::framework::api::{BoolOp, Compare};
         use axum_login::permission_required;
         use crate::DB;
@@ -560,11 +558,10 @@ pub fn query_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::Token
             use crate::framework::api::{PageParam, PageRes,DynFilter,CompareValue};
             use super::*;
             use axum::Json;
-            use axum::extract::State;
-            use diesel::r2d2::{ConnectionManager, Pool};
-            use diesel::{ExpressionMethods,  QueryDsl, RunQueryDsl, SelectableHelper};
+            use diesel::{ExpressionMethods,  QueryDsl,  SelectableHelper};
             use crate::framework::errors::AppError;
             use crate::framework::db::{LogicDeleteQuery, Paginate};
+            use diesel_async::RunQueryDsl;
 
             pub fn get_routers() -> (
                 ApiRouter,
@@ -605,7 +602,7 @@ pub fn query_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::Token
                 let result = #schema_s
                     .find(id_param)
                     .select(#model::as_select())
-                    .get_result(&mut DB.get()?)?;
+                    .get_result(&mut DB.get().await?).await?;
                 Ok(Json(result))
             }
 
@@ -816,14 +813,14 @@ pub fn query_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::Token
                         .select(#model::as_select())
                         .logic_delete_query()
                         .paginate(page.page_no, page.page_size)
-                        .load_and_count_pages(&mut DB.get()?)?
+                        .load_and_count_pages(&mut DB.get().await?).await?
                 } else {
                     statement
                         .order(order_column.asc())
                         .select(#model::as_select())
                         .logic_delete_query()
                         .paginate(page.page_no, page.page_size)
-                        .load_and_count_pages(&mut DB.get()?)?
+                        .load_and_count_pages(&mut DB.get().await?).await?
                 };
                 let page_res = PageRes::from_param_records_count(page, res.0, res.1);
                 Ok(Json(page_res))

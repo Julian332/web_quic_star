@@ -1,6 +1,7 @@
 use derive_more::{Display, Error};
+use diesel::deserialize::FromSqlRow;
+use diesel::expression::AsExpression;
 use diesel::sql_types::VarChar;
-use diesel::{AsExpression, FromSqlRow};
 use diesel_enum::DbEnum;
 use schemars::JsonSchema;
 

@@ -1,11 +1,13 @@
 use crate::{CONFIG, DB};
-use diesel::query_builder::{AstPass, Query, QueryFragment};
-use diesel::query_dsl::LoadQuery;
-use diesel::r2d2::ConnectionManager;
-use diesel::r2d2::Pool;
+use deadpool::managed::Object;
+use diesel::query_builder::{AstPass, Query, QueryFragment, QueryId};
 use diesel::sql_types::BigInt;
-use diesel::{Connection, QueryId, QueryResult, QueryableByName, RunQueryDsl};
-use diesel_logger::LoggingConnection;
+use diesel::{QueryResult, QueryableByName};
+use diesel_async::async_connection_wrapper::AsyncConnectionWrapper;
+use diesel_async::methods::LoadQuery;
+use diesel_async::pooled_connection::deadpool::Pool;
+use diesel_async::pooled_connection::{AsyncDieselConnectionManager, ManagerConfig};
+use diesel_async::{AsyncPgConnection, RunQueryDsl};
 use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
 use tracing::info;
 
@@ -17,29 +19,15 @@ pub struct Count {
 
 pub fn setup_connection_pool() -> ConnPool {
     let database_url = CONFIG.database_url.to_string();
-    let manager = ConnectionManager::<LoggingConnection<Conn>>::new(database_url);
-    // Refer to the `r2d2` documentation for more methods to use
-    // when building a connection pool
-    Pool::builder()
-        .max_size(10)
-        .test_on_check_out(true)
-        .build(manager)
-        .expect("Could not build db connection pool")
-}
-#[test]
-pub fn logger() {
-    use crate::config::set_dev_env;
+    let manager = AsyncDieselConnectionManager::<AsyncPgConnection>::new_with_config(
+        database_url,
+        ManagerConfig::default(),
+    );
 
-    set_dev_env();
-    let database_url = CONFIG.database_url.to_string();
-    let manager = ConnectionManager::<LoggingConnection<Conn>>::new(database_url);
-    // Refer to the `r2d2` documentation for more methods to use
-    // when building a connection pool
-    let _pool = Pool::builder()
+    Pool::builder(manager)
         .max_size(10)
-        .test_on_check_out(true)
-        .build(manager)
-        .expect("Could not build connection pool");
+        .build()
+        .expect("Could not build db connection pool")
 }
 
 pub trait Paginate: Sized {
@@ -66,18 +54,26 @@ pub struct Paginated<T> {
     offset: i64,
 }
 
-impl<T> Paginated<T> {
-    pub fn load_and_count_pages<'a, U, C>(self, conn: &mut C) -> QueryResult<(Vec<U>, i64)>
+impl<T: Query> Paginated<T> {
+    pub fn load_and_count_pages<'a, U>(
+        self,
+        conn: &'a mut Object<AsyncDieselConnectionManager<Conn>>,
+    ) -> impl std::future::Future<Output = QueryResult<(Vec<U>, i64)>> + Send + 'a
     where
-        Self: LoadQuery<'a, C, (U, i64)>,
-        C: Connection,
+        Self: LoadQuery<'a, Object<AsyncDieselConnectionManager<Conn>>, (U, i64)>,
+        U: Send + 'a,
+        T: 'a,
     {
-        // let per_page = self.per_page;
-        let results = self.load::<(U, i64)>(conn)?;
-        let total = results.first().map(|x| x.1).unwrap_or(0);
-        let records = results.into_iter().map(|x| x.0).collect();
-        // let total_pages = (total as f64 / per_page as f64).ceil() as i64;
-        Ok((records, total))
+        // Ignore those linting errors. `get(0)` cannot be replaced with `first()`.
+        #![allow(clippy::get_first)]
+        let results = self.load::<(U, i64)>(conn);
+
+        async move {
+            let results = results.await?;
+            let total = results.get(0).map(|x| x.1).unwrap_or(0);
+            let records = results.into_iter().map(|x| x.0).collect();
+            Ok((records, total))
+        }
     }
 }
 
@@ -85,7 +81,7 @@ impl<T: Query> Query for Paginated<T> {
     type SqlType = (T::SqlType, BigInt);
 }
 
-impl<T, C: Connection> RunQueryDsl<C> for Paginated<T> {}
+// impl<T, C: Connection> RunQueryDsl<C> for Paginated<T> {}
 
 impl<T> QueryFragment<DbType> for Paginated<T>
 where
@@ -121,7 +117,7 @@ impl<T: Query> Query for LogicDeleteStatement<T> {
     type SqlType = T::SqlType;
 }
 
-impl<T, C: Connection> RunQueryDsl<C> for LogicDeleteStatement<T> {}
+// impl<T, C: Connection> RunQueryDsl<C> for LogicDeleteStatement<T> {}
 
 impl<T> QueryFragment<DbType> for LogicDeleteStatement<T>
 where
@@ -146,26 +142,34 @@ async fn test() {
 
     set_env();
     let connection_pool = setup_connection_pool();
-    let mut pooled_connection = connection_pool.get().unwrap();
+    let mut pooled_connection = connection_pool.get().await.unwrap();
     let x = users
         .select(User::as_select())
         .logic_delete_query()
         .paginate(0, 10)
         .load_and_count_pages(&mut pooled_connection)
+        .await
         .unwrap();
 
     println!("{:?}", x);
 }
 const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
 
-pub fn sync_db_schema() {
-    let mut connection = DB.get().unwrap();
-    let vec = connection.run_pending_migrations(MIGRATIONS).unwrap();
-    info!("db schema update succeed: {vec:?}",);
+pub async fn sync_db_schema() {
+    let async_connection = DB.get().await.unwrap();
+    let mut async_wrapper: AsyncConnectionWrapper<_> =
+        AsyncConnectionWrapper::from(async_connection);
+
+    tokio::task::spawn_blocking(move || {
+        let vec = async_wrapper.run_pending_migrations(MIGRATIONS).unwrap();
+        info!("db schema update succeed: {vec:?}",);
+    })
+    .await
+    .unwrap();
 }
 
 #[cfg(feature = "postgres")]
 pub type DbType = diesel::pg::Pg;
-pub type ConnPool = diesel::r2d2::Pool<diesel::r2d2::ConnectionManager<LoggingConnection<Conn>>>;
+pub type ConnPool = diesel_async::pooled_connection::deadpool::Pool<Conn>;
 #[cfg(feature = "postgres")]
-pub type Conn = diesel::PgConnection;
+pub type Conn = diesel_async::AsyncPgConnection;

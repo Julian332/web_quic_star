@@ -3,7 +3,8 @@ use crate::{AppRes, DB};
 use aide::OperationIo;
 use axum::Json;
 use axum_login::{AuthSession, login_required};
-use diesel::{QueryDsl, RunQueryDsl};
+use diesel::QueryDsl;
+use diesel_async::RunQueryDsl;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -37,7 +38,8 @@ pub(crate) async fn modify_password(
             user.password = hash;
             diesel::update(users.find(user.id))
                 .set(user)
-                .execute(&mut DB.get()?)?;
+                .execute(&mut DB.get().await?)
+                .await?;
         }
     }
 

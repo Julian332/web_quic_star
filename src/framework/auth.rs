@@ -11,10 +11,12 @@ use axum_login::{
     AuthManagerLayer, AuthManagerLayerBuilder, AuthUser, AuthnBackend, AuthzBackend, UserId,
 };
 use diesel::associations::HasTable;
-use diesel::deserialize::FromSql;
+use diesel::deserialize::{FromSql, FromSqlRow};
 use diesel::serialize::{Output, ToSql};
 use diesel::sql_types::{Text, VarChar};
-use diesel::{ExpressionMethods, FromSqlRow, QueryDsl, RunQueryDsl, SelectableHelper, deserialize, serialize, SaveChangesDsl};
+use diesel::{ExpressionMethods, QueryDsl, SelectableHelper, deserialize, serialize};
+use diesel_async::RunQueryDsl;
+use diesel_async::pooled_connection::PoolError;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
@@ -76,7 +78,7 @@ impl FromStr for AuthPermission {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let split = s.split(':').collect::<Vec<_>>();
         let perm = split.last().ok_or(NoneError)?;
-        let table = split.first().ok_or(NoneError)?;
+        let table = split.get(0).ok_or(NoneError)?;
         let result = match perm {
             string if string.eq_ignore_ascii_case("Admin") => AuthPermission::Admin,
             permission if permission.eq_ignore_ascii_case("read") => Self::Read(table.to_string()),
@@ -135,7 +137,7 @@ pub fn get_auth_layer() -> AuthManagerLayer<AuthBackend, MemoryStore> {
     AuthManagerLayerBuilder::new(backend, session_layer).build()
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct AuthBackend {
     db: ConnPool,
 }
@@ -222,7 +224,8 @@ impl AuthnBackend for AuthBackend {
         match users
             .filter(username.eq(creds.username))
             .select(User::as_select())
-            .first(&mut self.db.get()?)
+            .first(&mut self.db.get().await?)
+            .await
         {
             Ok(user) => verify_password(creds.password, &user.password)
                 .map_err(|e| AuthError(AppError::from(e)))
@@ -321,7 +324,8 @@ impl AuthnBackend for AuthBackend {
         match users
             .find(user_id)
             .select(User::as_select())
-            .first(&mut self.db.get()?)
+            .first(&mut self.db.get().await?)
+            .await
         {
             Ok(user) => Ok(Some(user)),
             Err(e) => Err(e.into()),
@@ -354,7 +358,8 @@ impl AuthzBackend for AuthBackend {
             .inner_join(groups::table())
             .filter(crate::schema::users::id.eq(user.id))
             .select(Group::as_select())
-            .load(&mut self.db.get()?)
+            .load(&mut self.db.get().await?)
+            .await
         {
             Ok(res) => Ok(res.into_iter().map(|x| x.permissions).flatten().collect()),
             Err(e) => Err(e.into()),
@@ -364,7 +369,7 @@ impl AuthzBackend for AuthBackend {
 
 impl_from!(diesel::result::Error);
 impl_from!(NoneError);
-impl_from!(r2d2::Error);
+impl_from!(deadpool::managed::PoolError<PoolError>);
 #[cfg(feature = "eth_mode")]
 impl_from!(alloy::primitives::SignatureError);
 #[cfg(feature = "solana_mode")]
