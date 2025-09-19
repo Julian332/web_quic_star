@@ -79,7 +79,7 @@ pub struct DynFilter {
 }
 #[derive(Deserialize, Serialize, JsonSchema, Clone)]
 pub enum CompareValue {
-    BigDecimal(Decimal),
+    Decimal(Decimal),
     Bool(bool),
     Float(f64),
     String(String),

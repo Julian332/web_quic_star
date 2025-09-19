@@ -113,7 +113,7 @@ dependencies = [
 [[package]]
 name = "aide"
 version = "0.15.1"
-source = "git+https://github.com/tamasfe/aide#6d0e50027011a98a58365bbb6495f763df5f2796"
+source = "git+https://github.com/Julian332/aide?branch=pg#ca78bb5a1e0e9e93cf93ef08f80ce39e11a80d34"
 dependencies = [
  "aide-macros",
  "axum",
@@ -121,7 +121,7 @@ dependencies = [
  "cfg-if",
  "http 1.3.1",
  "indexmap 2.11.4",
- "schemars 1.0.4",
+ "schemars 1.0.4 (git+https://github.com/Julian332/schemars?branch=pg)",
  "serde",
  "serde_json",
  "serde_qs",
@@ -134,7 +134,7 @@ dependencies = [
 [[package]]
 name = "aide-macros"
 version = "0.15.0"
-source = "git+https://github.com/tamasfe/aide#6d0e50027011a98a58365bbb6495f763df5f2796"
+source = "git+https://github.com/Julian332/aide?branch=pg#ca78bb5a1e0e9e93cf93ef08f80ce39e11a80d34"
 dependencies = [
  "darling 0.20.11",
  "proc-macro2",
@@ -1553,7 +1553,7 @@ dependencies = [
 [[package]]
 name = "axum-login"
 version = "0.18.0"
-source = "git+https://github.com/Julian332/axum-login#6ad4e23f3805551ba452f4dcc440a03fd32f3d96"
+source = "git+https://github.com/Julian332/axum-login?branch=pg#0040c4d063b742bfce3eff46a84724d02bd169c3"
 dependencies = [
  "aide",
  "axum",
@@ -2588,7 +2588,6 @@ dependencies = [
  "chrono",
  "diesel_derives",
  "itoa",
- "pq-sys",
  "serde_json",
  "uuid",
 ]
@@ -4807,16 +4806,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pq-sys"
-version = "0.7.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dfd6cf44cca8f9624bc19df234fc4112873432f5fda1caff174527846d026fa9"
-dependencies = [
- "libc",
- "vcpkg",
-]
-
-[[package]]
 name = "primitive-types"
 version = "0.12.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5437,8 +5426,7 @@ checksum = "48fd7bd8a6377e15ad9d42a8ec25371b94ddc67abe7c8b9127bec79bebaaae18"
 [[package]]
 name = "rust_decimal"
 version = "1.38.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c8975fc98059f365204d635119cf9c5a60ae67b841ed49b5422a9a7e56cdfac0"
+source = "git+https://github.com/Julian332/rust-decimal?branch=pg#d838494bdaa3343a28af2c258b8bc1352766fe50"
 dependencies = [
  "arrayvec",
  "borsh 1.5.7",
@@ -5455,8 +5443,7 @@ dependencies = [
 [[package]]
 name = "rust_decimal_macros"
 version = "1.38.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6dae310b657d2d686616e215c84c3119c675450d64c4b9f9e3467209191c3bcf"
+source = "git+https://github.com/Julian332/rust-decimal?branch=pg#d838494bdaa3343a28af2c258b8bc1352766fe50"
 dependencies = [
  "quote",
  "syn 2.0.106",
@@ -5685,6 +5672,17 @@ version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "82d20c4491bc164fa2f6c5d44565947a52ad80b9505d8e36f8d54c27c739fcd0"
 dependencies = [
+ "dyn-clone",
+ "ref-cast",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "schemars"
+version = "1.0.4"
+source = "git+https://github.com/Julian332/schemars?branch=pg#d87c192af2d21588dd52d0b795723a60fe11ba2e"
+dependencies = [
  "chrono",
  "dyn-clone",
  "indexmap 2.11.4",
@@ -5700,8 +5698,7 @@ dependencies = [
 [[package]]
 name = "schemars_derive"
 version = "1.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "33d020396d1d138dc19f1165df7545479dcd58d93810dc5d646a16e55abefa80"
+source = "git+https://github.com/Julian332/schemars?branch=pg#d87c192af2d21588dd52d0b795723a60fe11ba2e"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -5959,7 +5956,7 @@ dependencies = [
  "indexmap 1.9.3",
  "indexmap 2.11.4",
  "schemars 0.9.0",
- "schemars 1.0.4",
+ "schemars 1.0.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde",
  "serde_derive",
  "serde_json",
@@ -9948,7 +9945,7 @@ dependencies = [
  "r2d2_postgres",
  "reqwest",
  "rust_decimal",
- "schemars 1.0.4",
+ "schemars 1.0.4 (git+https://github.com/Julian332/schemars?branch=pg)",
  "serde",
  "serde_json",
  "sha2 0.10.9",

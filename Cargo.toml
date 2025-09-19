@@ -10,7 +10,7 @@ default = ["postgres", "eth_mode", "solana_mode", "dev"]
 eth_mode = ["dep:alloy"]
 solana_mode = ["dep:anchor-client", "dep:anchor-spl"]
 dev = []
-postgres = [ "diesel-dynamic-schema/postgres", "rust_decimal/db-diesel-postgres", "diesel_migrations/postgres", "diesel-async/postgres"]
+postgres = ["diesel-dynamic-schema/postgres", "rust_decimal/db-diesel-postgres", "diesel_migrations/postgres", "diesel-async/postgres"]
 
 
 #mysql = ["diesel/mysql", "diesel-dynamic-schema/mysql", "diesel-derive-enum/mysql","dep:r2d2_mysql"]
@@ -18,8 +18,8 @@ postgres = [ "diesel-dynamic-schema/postgres", "rust_decimal/db-diesel-postgres"
 [dependencies]
 #web ========
 axum = { version = "0.8", features = ["macros", "http2"] }
-axum-login = { git = "https://github.com/Julian332/axum-login" }
-aide = { git = "https://github.com/tamasfe/aide", features = ["swagger", "scalar", "axum", "macros", "axum-tokio", "axum-multipart", "axum-json", "axum-ws", "axum-form", "axum-matched-path", "axum-original-uri", "axum-query"] }
+axum-login = { git = "https://github.com/Julian332/axum-login", branch = "pg" }
+aide = { git = "https://github.com/Julian332/aide", branch = "pg", features = ["swagger", "scalar", "axum", "macros", "axum-tokio", "axum-multipart", "axum-json", "axum-ws", "axum-form", "axum-matched-path", "axum-original-uri", "axum-query"] }
 password-auth = "1"
 tower-http = { version = "0.6", features = ["cors", "trace", "fs", "limit", "normalize-path"] }
 http = { version = "1" }
@@ -31,12 +31,12 @@ tracing = "0.1"
 
 #db ========
 diesel = { version = "2", features = ["chrono", "serde_json", "uuid", ], default-features = false }
-diesel-async = { version = "0.6.1", features = ["deadpool","async-connection-wrapper"] }
+diesel-async = { version = "0.6.1", features = ["deadpool", "async-connection-wrapper"] }
 diesel-dynamic-schema = "0.2.3"
 diesel-enum = { version = "0.2", features = [] }
-deadpool = { version = "0.12" ,features = [],default-features = false}
+deadpool = { version = "0.12", features = [], default-features = false }
 diesel_migrations = { version = "2", features = [] }
-rust_decimal = { version = "1", features = ["serde-str", "macros", "db-diesel2-postgres", "maths"] }
+rust_decimal = { git = "https://github.com/Julian332/rust-decimal", branch = "pg", features = ["serde-str", "macros", "maths"] }
 chrono = { version = "0.4", features = ["serde"] }
 
 #solana ======
@@ -47,7 +47,7 @@ alloy = { version = "1", features = ["full", "reqwest-rustls-tls", "std", "essen
 
 #etc =======
 tokio = { version = "1", features = ["full"] }
-schemars = { version = "1", features = ["rust_decimal1", "chrono04", "uuid1", "url2"] }
+schemars = { git = "https://github.com/Julian332/schemars", branch = "pg", features = ["rust_decimal1", "chrono04", "uuid1", "url2"] }
 uuid = { version = "1", features = ["serde", "v4"] }
 serde = { version = "1", features = ["derive", "rc"] }
 serde_json = { version = "1", features = ["default"] }

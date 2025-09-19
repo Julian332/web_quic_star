@@ -387,7 +387,7 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
                         },
                     }
                 }
-                CompareValue::BigDecimal(compare_value) => {
+                CompareValue::Decimal(compare_value) => {
                     let filter_column = x_table.column::<diesel::sql_types::Decimal, _>(f.column);
                     match f.op.unwrap_or_default() {
                         BoolOp::And => match f.compare.unwrap_or_default() {
@@ -754,7 +754,7 @@ pub fn query_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::Token
                         },
                     }
                 }
-                CompareValue::BigDecimal(compare_value) => {
+                CompareValue::Decimal(compare_value) => {
                     let filter_column = x_table.column::<diesel::sql_types::Decimal, _>(f.column);
                     match f.op.unwrap_or_default() {
                         BoolOp::And => match f.compare.unwrap_or_default() {
