@@ -9,7 +9,7 @@ use axum::response::{IntoResponse, Redirect};
 use axum_login::AuthSession;
 
 pub async fn login(
-    mut auth_session: AuthSession<AuthBackend>,
+    auth_session: AuthSession<AuthBackend>,
     Json(creds): Json<Credentials>,
 ) -> impl IntoApiResponse {
     let user = match auth_session.authenticate(creds.clone()).await {

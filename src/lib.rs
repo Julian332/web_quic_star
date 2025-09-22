@@ -26,6 +26,7 @@ pub mod prelude {
     pub use super::*;
     pub use chrono::prelude::*;
     pub use diesel::prelude::*;
+    pub use diesel_async::RunQueryDsl;
     pub use rust_decimal::prelude::*;
 
     #[cfg(feature = "eth_mode")]

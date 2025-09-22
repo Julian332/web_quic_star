@@ -34,7 +34,10 @@ pub trait Paginate: Sized {
     fn paginate(self, page_no: i64, page_size: i64) -> Paginated<Self>;
 }
 
-impl<T> Paginate for T {
+impl<T> Paginate for T
+where
+    T: QueryFragment<DbType>,
+{
     fn paginate(self, page_no: i64, page_size: i64) -> Paginated<Self> {
         Paginated {
             query: self,
@@ -107,7 +110,10 @@ pub struct LogicDeleteStatement<T> {
     query: T,
 }
 
-impl<T> LogicDeleteQuery for T {
+impl<T> LogicDeleteQuery for T
+where
+    T: QueryFragment<DbType>,
+{
     fn logic_delete_query(self) -> LogicDeleteStatement<Self> {
         LogicDeleteStatement { query: self }
     }
