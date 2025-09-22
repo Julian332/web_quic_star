@@ -23,20 +23,26 @@ pub mod util;
 pub mod web_middleware;
 
 pub mod prelude {
-    pub use super::*;
     pub use chrono::prelude::*;
     pub use diesel::prelude::*;
-    pub use diesel_async::RunQueryDsl;
+    // pub use diesel_async::RunQueryDsl;
     pub use rust_decimal::prelude::*;
 
+    pub use super::AppRes;
+    pub use super::CONFIG;
+    pub use super::DB;
+    pub use super::framework::errors::AppError;
+    pub use super::unwrap_opt_or_continue;
+    pub use super::unwrap_or_continue;
+
     #[cfg(feature = "eth_mode")]
-    pub use domain::eth_addr::EthAddr;
+    pub use super::domain::eth_addr::EthAddr;
     #[cfg(feature = "solana_mode")]
-    pub use domain::solana_addr::SolAddr;
-    pub use framework::api::PageRes;
-    pub use framework::db::{LogicDeleteQuery, Paginate};
+    pub use super::domain::solana_addr::SolAddr;
+    pub use super::framework::api::PageRes;
+    pub use super::framework::db::{LogicDeleteQuery, Paginate};
+    pub use super::util::datetime::{TimeUtil, custom_datetime_format};
     pub use tracing::{debug, error, info, trace, warn};
-    pub use util::datetime::{TimeUtil, custom_datetime_format};
 }
 
 // todo Progress bar

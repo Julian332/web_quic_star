@@ -10,9 +10,8 @@ extern crate syn;
 
 use proc_macro::TokenStream;
 
-/// Create a builder struct for the deriving struct.
+/// derive basic web api.
 ///
-/// See the `derive_builder` crate documentation for more details.
 #[proc_macro_derive(
     WebApiGen,
     attributes(
@@ -27,7 +26,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
     let ast = parse_macro_input!(input as syn::DeriveInput);
     derive_builder_core::web_api_builder_for_struct(ast).into()
 }
-
+/// derive basic web query api.
 #[proc_macro_derive(
     ViewApiGen,
     attributes(
