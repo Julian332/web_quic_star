@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-nohup cargo run  --bin example_app --features dev
+nohup cargo run  --bin web3_quick --features dev
