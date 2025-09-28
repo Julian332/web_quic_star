@@ -1,6 +1,6 @@
 [package]
 name = "web3_quick"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2024"
 
 [profile.dev]
@@ -25,6 +25,8 @@ tower-http = { version = "0.6", features = ["cors", "trace", "fs", "limit", "nor
 http = { version = "1" }
 tower-sessions = { version = "0.14", features = ["memory-store"] }
 url = { version = "2", features = ["serde"] }
+schemars = { git = "https://github.com/Julian332/schemars", branch = "pg", features = ["rust_decimal1", "chrono04", "uuid1", "url2"] }
+
 #log =======
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tracing = "0.1"
@@ -47,20 +49,22 @@ alloy = { version = "1", features = ["full", "reqwest-rustls-tls", "std", "essen
 
 #etc =======
 tokio = { version = "1", features = ["full"] }
-schemars = { git = "https://github.com/Julian332/schemars", branch = "pg", features = ["rust_decimal1", "chrono04", "uuid1", "url2"] }
-uuid = { version = "1", features = ["serde", "v4"] }
+futures = "0.3"
+tokio-util = "0.7"
+
 serde = { version = "1", features = ["derive", "rc"] }
 serde_json = { version = "1", features = ["default"] }
-anyhow = { version = "1", features = [] }
-#strum = { version = "0.27", features = ["default", "derive"] }
+
 dotenvy = "0.15"
 envy = { version = "0.4" }
+
+uuid = { version = "1", features = ["serde", "v7"] }
+anyhow = { version = "1", features = [] }
+#strum = { version = "0.27", features = ["default", "derive"] }
 reqwest = { version = "0.12", features = ["json", "cookies", "multipart", "rustls-tls", "charset", "http2", "macos-system-configuration", ], default-features = false }
-futures = "0.3"
 tokio-cron-scheduler = { version = "0.14.0", features = ["default"] }
 web_api_gen = { path = "crates/derive_builder" }
 derive_more = { version = "2", features = ["full"] }
-tokio-util = "0.7"
 sha2 = "0.10"
 mimalloc = { version = "0.1", features = [] }
 

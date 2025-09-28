@@ -25,7 +25,7 @@ pub mod web_middleware;
 pub mod prelude {
     pub use chrono::prelude::*;
     pub use diesel::prelude::*;
-    // pub use diesel_async::RunQueryDsl;
+    pub use diesel_async::RunQueryDsl;
     pub use rust_decimal::prelude::*;
 
     pub use super::AppRes;
