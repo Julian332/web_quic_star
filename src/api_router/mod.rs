@@ -37,6 +37,7 @@ pub fn setup_router() -> Router {
             ServeDir::new(CONFIG.file_server_directory.as_str()),
         )
         .fallback(fallback)
+        .layer(from_fn(save_req_to_task_local))
         .layer(
             TraceLayer::new_for_http().on_request(DefaultOnRequest::default().level(Level::DEBUG)),
         )
@@ -48,7 +49,6 @@ pub fn setup_router() -> Router {
                 .allow_origin("*".parse::<HeaderValue>().unwrap())
                 .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE]),
         )
-        .layer(from_fn(save_req_to_task_local))
         .layer(get_auth_layer());
     #[cfg(feature = "dev")]
     {

@@ -32,6 +32,7 @@ pub mod prelude {
     pub use super::CONFIG;
     pub use super::DB;
     pub use super::framework::errors::AppError;
+    pub use super::framework::errors::OkOrErr;
     pub use super::unwrap_opt_or_continue;
     pub use super::unwrap_or_continue;
 
@@ -52,7 +53,7 @@ pub type AppRes<T> = Result<T, AppError>;
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
 task_local! {
-    pub static CURRENT_REQ_HEADER : http::HeaderMap ;
+    pub static CURRENT_REQ : (Uuid,http::HeaderMap) ;
 }
 pub static DB: LazyLock<ConnPool> = LazyLock::new(|| setup_connection_pool());
 pub static HTTP_CLIENT: LazyLock<reqwest::Client> = LazyLock::new(|| reqwest::Client::new());
@@ -71,6 +72,7 @@ use alloy::providers::fillers::{
 use alloy::providers::{Identity, RootProvider};
 use mimalloc::MiMalloc;
 use tokio::task_local;
+use uuid::Uuid;
 
 #[cfg(feature = "eth_mode")]
 pub static ETH_CLIENT: LazyLock<

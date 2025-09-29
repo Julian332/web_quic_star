@@ -42,7 +42,6 @@ where
         Paginated {
             query: self,
             per_page: page_size,
-            page: page_no,
             offset: (page_no - 1) * page_size,
         }
     }
@@ -52,7 +51,6 @@ where
 #[derive(Debug, Clone, Copy, QueryId)]
 pub struct Paginated<T> {
     query: T,
-    page: i64,
     per_page: i64,
     offset: i64,
 }
@@ -61,7 +59,7 @@ impl<T: Query> Paginated<T> {
     pub fn load_and_count_pages<'a, U>(
         self,
         conn: &'a mut Object<AsyncDieselConnectionManager<Conn>>,
-    ) -> impl std::future::Future<Output = QueryResult<(Vec<U>, i64)>> + Send + 'a
+    ) -> impl Future<Output = QueryResult<(Vec<U>, i64)>> + Send + 'a
     where
         Self: LoadQuery<'a, Object<AsyncDieselConnectionManager<Conn>>, (U, i64)>,
         U: Send + 'a,
@@ -86,6 +84,7 @@ impl<T: Query> Query for Paginated<T> {
 
 // impl<T, C: Connection> RunQueryDsl<C> for Paginated<T> {}
 
+#[cfg(feature = "postgres")]
 impl<T> QueryFragment<DbType> for Paginated<T>
 where
     T: QueryFragment<DbType>,
@@ -125,6 +124,7 @@ impl<T: Query> Query for LogicDeleteStatement<T> {
 
 // impl<T, C: Connection> RunQueryDsl<C> for LogicDeleteStatement<T> {}
 
+#[cfg(feature = "postgres")]
 impl<T> QueryFragment<DbType> for LogicDeleteStatement<T>
 where
     T: QueryFragment<DbType>,

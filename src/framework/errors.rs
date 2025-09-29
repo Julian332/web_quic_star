@@ -1,4 +1,4 @@
-use crate::CURRENT_REQ_HEADER;
+use crate::CURRENT_REQ;
 use aide::OperationIo;
 use anyhow::anyhow;
 use axum::response::IntoResponse;
@@ -9,7 +9,15 @@ use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
 use tracing::info;
 use uuid::Uuid;
+pub trait OkOrErr<T> {
+    fn ok_or_err(self) -> Result<T, NoneError>;
+}
 
+impl<T> OkOrErr<T> for Option<T> {
+    fn ok_or_err(self) -> Result<T, NoneError> {
+        self.ok_or(NoneError)
+    }
+}
 #[allow(unused)]
 #[derive(Debug, Display, Error)]
 pub struct NoneError;
@@ -36,8 +44,8 @@ impl<T: Error + Send + Sync + 'static> From<T> for AppError {
 
 impl IntoResponse for AppError {
     fn into_response(self) -> axum::response::Response {
-        match CURRENT_REQ_HEADER.try_with(|x| {
-            tracing::debug!("request header: {x:?};");
+        match CURRENT_REQ.try_with(|x| {
+            tracing::debug!("request id : {};",x.0);
         }) {
             Ok(_) => {
                 info!("web req err: {self:?};");
@@ -64,6 +72,8 @@ fn test_display_error() {
     // println!("{:?}", error);
     // println!("{:?}", serde_json::to_string(&error));
     use alloy::rpc::types::BlockError;
+
+    let result: Result<i32, NoneError> = Some(1).ok_or_err();
 }
 
 impl AppError {
