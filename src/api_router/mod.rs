@@ -4,6 +4,8 @@ use crate::framework::auth::get_auth_layer;
 use crate::web_middleware::save_req_to_task_local;
 use aide::axum::ApiRouter;
 use axum::Router;
+use axum::body::Body;
+use axum::extract::Request;
 use axum::middleware::from_fn;
 use http::{HeaderValue, Method};
 use std::ops::Deref;
@@ -11,8 +13,8 @@ use tower_http::cors::CorsLayer;
 use tower_http::limit::RequestBodyLimitLayer;
 use tower_http::normalize_path::NormalizePathLayer;
 use tower_http::services::ServeDir;
-use tower_http::trace::{DefaultOnRequest, TraceLayer};
-use tracing::Level;
+use tower_http::trace::TraceLayer;
+use tracing::{ info};
 
 pub mod auth;
 pub mod docs;
@@ -37,19 +39,21 @@ pub fn setup_router() -> Router {
             ServeDir::new(CONFIG.file_server_directory.as_str()),
         )
         .fallback(fallback)
+        .layer(TraceLayer::new_for_http().on_request(
+            |request: &Request<Body>, _span: &tracing::Span| {
+                info!("req:{} {}", request.method(), request.uri());
+            },
+        ))
         .layer(from_fn(save_req_to_task_local))
-        .layer(
-            TraceLayer::new_for_http().on_request(DefaultOnRequest::default().level(Level::DEBUG)),
-        )
+        .layer(get_auth_layer())
         //10MB
-        .layer(RequestBodyLimitLayer::new(10240))
         .layer(NormalizePathLayer::trim_trailing_slash())
         .layer(
             CorsLayer::new()
                 .allow_origin("*".parse::<HeaderValue>().unwrap())
                 .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE]),
         )
-        .layer(get_auth_layer());
+        .layer(RequestBodyLimitLayer::new(10240));
     #[cfg(feature = "dev")]
     {
         let server_port = CONFIG.server_port;

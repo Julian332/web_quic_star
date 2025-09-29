@@ -3,7 +3,7 @@ use aide::OperationIo;
 use anyhow::anyhow;
 use axum::response::IntoResponse;
 use derive_more::{Display, Error};
-use schemars::{JsonSchema, json_schema};
+use schemars::{JsonSchema};
 use serde::Serialize;
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};

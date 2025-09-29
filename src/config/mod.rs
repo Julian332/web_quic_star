@@ -1,6 +1,11 @@
+use crate::CURRENT_REQ;
+use derive_more::{Deref, From};
 use serde::Deserialize;
-use tracing::error;
-use tracing_subscriber::EnvFilter;
+use tracing::{Event, Subscriber, error};
+use tracing_subscriber::fmt::format::Format;
+use tracing_subscriber::fmt::{FormatEvent, FormatFields};
+use tracing_subscriber::registry::LookupSpan;
+use tracing_subscriber::{EnvFilter,  fmt};
 use url::Url;
 
 #[allow(unused)]
@@ -49,15 +54,37 @@ pub fn set_log() {
         .pretty()
         .with_env_filter(EnvFilter::from_default_env())
         .with_max_level(tracing::Level::INFO)
-        .event_format(
+        .event_format(TaskLocalFormatter::from(
             tracing_subscriber::fmt::format()
                 // .with_file(true)
                 .with_line_number(true),
-        )
+        ))
         .init();
     aide::generate::on_error(|error| {
         error!("{error}");
     });
+}
+
+#[derive(Default, Deref, From)]
+struct TaskLocalFormatter(Format);
+
+impl<S, N> FormatEvent<S, N> for TaskLocalFormatter
+where
+    S: Subscriber + for<'a> LookupSpan<'a>,
+    N: for<'a> FormatFields<'a> + 'static,
+{
+    fn format_event(
+        &self,
+        ctx: &fmt::FmtContext<'_, S, N>,
+        mut writer: fmt::format::Writer<'_>,
+        event: &Event<'_>,
+    ) -> std::fmt::Result {
+        if CURRENT_REQ
+            .try_with(|id| write!(writer, "[req_id:{}] ", id.0))
+            .is_err()
+        {}
+        self.0.format_event(ctx, writer, event)
+    }
 }
 
 #[test]
