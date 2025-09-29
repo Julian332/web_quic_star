@@ -14,7 +14,7 @@ use tower_http::limit::RequestBodyLimitLayer;
 use tower_http::normalize_path::NormalizePathLayer;
 use tower_http::services::ServeDir;
 use tower_http::trace::TraceLayer;
-use tracing::{ info};
+use tracing::info;
 
 pub mod auth;
 pub mod docs;
@@ -39,11 +39,13 @@ pub fn setup_router() -> Router {
             ServeDir::new(CONFIG.file_server_directory.as_str()),
         )
         .fallback(fallback)
-        .layer(TraceLayer::new_for_http().on_request(
-            |request: &Request<Body>, _span: &tracing::Span| {
-                info!("req:{} {}", request.method(), request.uri());
-            },
-        ))
+        .layer(
+            TraceLayer::new_for_http()
+                .on_request(|request: &Request<Body>, _span: &tracing::Span| {
+                    info!("req:{} {}", request.method(), request.uri());
+                })
+                .on_failure(()),
+        )
         .layer(from_fn(save_req_to_task_local))
         .layer(get_auth_layer())
         //10MB

@@ -3,11 +3,10 @@ use aide::OperationIo;
 use anyhow::anyhow;
 use axum::response::IntoResponse;
 use derive_more::{Display, Error};
-use schemars::{JsonSchema};
+use schemars::JsonSchema;
 use serde::Serialize;
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
-use tracing::info;
 use uuid::Uuid;
 pub trait OkOrErr<T> {
     fn ok_or_err(self) -> Result<T, NoneError>;
@@ -32,7 +31,9 @@ pub struct AppError {
 impl<T: Error + Send + Sync + 'static> From<T> for AppError {
     fn from(value: T) -> Self {
         let value = anyhow!(value);
-        let uuid = Uuid::now_v7();
+        let uuid = CURRENT_REQ
+            .try_with(|x| x.0.clone())
+            .unwrap_or_else(|_| Uuid::now_v7());
         tracing::debug!("Error:{value:?}; Error ID:{uuid};");
         let app_error = Self {
             error: value.into(),
@@ -44,16 +45,7 @@ impl<T: Error + Send + Sync + 'static> From<T> for AppError {
 
 impl IntoResponse for AppError {
     fn into_response(self) -> axum::response::Response {
-        match CURRENT_REQ.try_with(|x| {
-            tracing::debug!("request id : {};",x.0);
-        }) {
-            Ok(_) => {
-                info!("web req err: {self:?};");
-            }
-            Err(_) => {
-                tracing::debug!("internal err: {self:?};");
-            }
-        }
+        tracing::error!("err: {self:?};");
         axum::Json(self).into_response()
     }
 }
@@ -78,9 +70,12 @@ fn test_display_error() {
 
 impl AppError {
     pub fn new(error: &str) -> Self {
+        let uuid = CURRENT_REQ
+            .try_with(|x| x.0.clone())
+            .unwrap_or_else(|_| Uuid::now_v7());
         Self {
             error: anyhow::anyhow!("{error}"),
-            error_id: Uuid::new_v4(),
+            error_id: uuid,
         }
     }
 }

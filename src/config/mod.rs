@@ -5,7 +5,7 @@ use tracing::{Event, Subscriber, error};
 use tracing_subscriber::fmt::format::Format;
 use tracing_subscriber::fmt::{FormatEvent, FormatFields};
 use tracing_subscriber::registry::LookupSpan;
-use tracing_subscriber::{EnvFilter,  fmt};
+use tracing_subscriber::{EnvFilter, fmt};
 use url::Url;
 
 #[allow(unused)]
@@ -79,10 +79,7 @@ where
         mut writer: fmt::format::Writer<'_>,
         event: &Event<'_>,
     ) -> std::fmt::Result {
-        if CURRENT_REQ
-            .try_with(|id| write!(writer, "[req_id:{}] ", id.0))
-            .is_err()
-        {}
+        let _ = CURRENT_REQ.try_with(|id| write!(writer, "[req_id:{}] ", id.0));
         self.0.format_event(ctx, writer, event)
     }
 }
