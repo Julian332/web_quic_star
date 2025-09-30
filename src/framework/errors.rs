@@ -65,7 +65,7 @@ fn test_display_error() {
     // println!("{:?}", serde_json::to_string(&error));
     use alloy::rpc::types::BlockError;
 
-    let result: Result<i32, NoneError> = Some(1).ok_or_err();
+    let _result: Result<i32, NoneError> = Some(1).ok_or_err();
 }
 
 impl AppError {

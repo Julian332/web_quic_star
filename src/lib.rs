@@ -42,12 +42,17 @@ pub mod prelude {
     pub use super::domain::solana_addr::SolAddr;
     pub use super::framework::api::PageRes;
     pub use super::framework::db::{LogicDeleteQuery, Paginate};
-    pub use super::util::datetime::{TimeUtil, custom_datetime_format};
+    pub use super::util::datetime::{TimeUtil, chinese_datetime_format};
+    pub use super::util::num_fmt::NumFmt;
     pub use tracing::{debug, error, info, trace, warn};
 }
 
 // todo Progress bar
 // todo workspace for speed up compile
+// todo slow sql
+// todo req dur
+// todo req user
+// todo  req json body
 pub type AppRes<T> = Result<T, AppError>;
 
 #[global_allocator]

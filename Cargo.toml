@@ -67,6 +67,7 @@ web_api_gen = { path = "crates/derive_builder" }
 derive_more = { version = "2", features = ["full"] }
 sha2 = "0.10"
 mimalloc = { version = "0.1", features = [] }
+num-traits = "0.2.19"
 
 [dev-dependencies]
 

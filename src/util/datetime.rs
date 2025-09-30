@@ -41,7 +41,7 @@ fn from_string(time_str: &String) -> Result<DateTime<Utc>, ParseErrorKind> {
     Err(ParseErrorKind::Impossible)
 }
 
-pub mod custom_datetime_format {
+pub mod chinese_datetime_format {
     use crate::prelude::TimeUtil;
     use crate::util::datetime::from_string;
     use chrono::{DateTime, TimeZone, Utc};
@@ -80,7 +80,7 @@ mod tests {
 
     #[derive(Serialize, Deserialize, Debug)]
     struct MyStruct {
-        #[serde(with = "custom_datetime_format")]
+        #[serde(with = "chinese_datetime_format")]
         timestamp: DateTime<Utc>,
     }
     #[test]
