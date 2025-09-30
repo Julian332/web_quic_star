@@ -93,7 +93,7 @@ mod tests {
     #[test]
     fn main() {
         let data = MyStruct {
-            timestamp: Utc.ymd(2025, 9, 5).and_hms(14, 30, 0),
+            timestamp: Utc.with_ymd_and_hms(2025, 9, 5, 14, 30, 0).unwrap(),
         };
 
         let json = serde_json::to_string(&data).unwrap();

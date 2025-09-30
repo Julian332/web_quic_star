@@ -3,6 +3,9 @@ pub mod api_doc;
 pub mod auth;
 pub mod db;
 pub mod errors;
+
+#[cfg(feature = "postgres")]
+pub mod pg;
 // pub mod handler;
 
 #[macro_export]

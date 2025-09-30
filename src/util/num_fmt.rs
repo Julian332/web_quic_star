@@ -42,10 +42,10 @@ impl<T: ToString> NumFmt for T {
     }
 }
 mod test {
+    #![allow(unused_imports)]
     use crate::util::num_fmt::NumFmt;
     use num_traits::FromPrimitive;
     use rust_decimal::Decimal;
-
     #[test]
     fn test1() {
         let decimal = Decimal::from(123456);

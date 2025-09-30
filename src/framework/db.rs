@@ -3,11 +3,11 @@ use deadpool::managed::Object;
 use diesel::query_builder::{AstPass, Query, QueryFragment, QueryId};
 use diesel::sql_types::BigInt;
 use diesel::{QueryResult, QueryableByName};
+use diesel_async::RunQueryDsl;
 use diesel_async::async_connection_wrapper::AsyncConnectionWrapper;
 use diesel_async::methods::LoadQuery;
 use diesel_async::pooled_connection::deadpool::Pool;
 use diesel_async::pooled_connection::{AsyncDieselConnectionManager, ManagerConfig};
-use diesel_async::{AsyncPgConnection, RunQueryDsl};
 use diesel_migrations::{EmbeddedMigrations, MigrationHarness, embed_migrations};
 use tracing::info;
 
@@ -19,7 +19,7 @@ pub struct Count {
 
 pub fn setup_connection_pool() -> ConnPool {
     let database_url = CONFIG.database_url.to_string();
-    let manager = AsyncDieselConnectionManager::<AsyncPgConnection>::new_with_config(
+    let manager = AsyncDieselConnectionManager::<Conn>::new_with_config(
         database_url,
         ManagerConfig::default(),
     );
