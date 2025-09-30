@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use diesel::connection::Instrumentation;
 use diesel::query_builder::{AsQuery, QueryFragment, QueryId};
 use diesel::{ConnectionResult, QueryResult, debug_query};
@@ -5,9 +7,8 @@ use diesel_async::pooled_connection::PoolableConnection;
 use diesel_async::{
     AnsiTransactionManager, AsyncConnection, AsyncPgConnection, CacheSize, SimpleAsyncConnection,
 };
-use futures::{FutureExt, StreamExt};
 use std::fmt::Display;
-use std::time::{Duration, Instant, SystemTime};
+use std::time::{Duration, Instant};
 
 pub struct PgConn(AsyncPgConnection);
 
