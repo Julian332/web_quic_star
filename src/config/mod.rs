@@ -79,7 +79,7 @@ where
         mut writer: fmt::format::Writer<'_>,
         event: &Event<'_>,
     ) -> std::fmt::Result {
-        let _ = CURRENT_REQ.try_with(|id| write!(writer, "[req_id:{}] ", id.0));
+        let _ = CURRENT_REQ.try_with(|id| write!(writer, "[req_id:{}] ", id.req_id));
         self.0.format_event(ctx, writer, event)
     }
 }

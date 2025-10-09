@@ -4,8 +4,8 @@ pub mod auth;
 pub mod db;
 pub mod errors;
 
-#[cfg(feature = "postgres")]
-pub mod pg;
+// #[cfg(feature = "postgres")]
+// pub mod pg;
 // pub mod handler;
 
 #[macro_export]
@@ -13,7 +13,7 @@ macro_rules! impl_from {
     ($error:path) => {
         impl From<$error> for AuthError {
             fn from(_value: $error) -> Self {
-                AuthError(AppError::new("auth error"))
+                AuthError(AppError::from(_value))
             }
         }
     };

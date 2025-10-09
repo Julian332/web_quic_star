@@ -21,7 +21,7 @@ axum = { version = "0.8", features = ["macros", "http2"] }
 axum-login = { git = "https://github.com/Julian332/axum-login", branch = "pg" }
 aide = { git = "https://github.com/Julian332/aide", branch = "pg", features = ["swagger", "scalar", "axum", "macros", "axum-tokio", "axum-multipart", "axum-json", "axum-ws", "axum-form", "axum-matched-path", "axum-original-uri", "axum-query"] }
 password-auth = "1"
-tower-http = { version = "0.6", features = ["cors", "trace", "fs", "limit", "normalize-path"] }
+tower-http = { version = "0.6", features = ["cors", "fs", "limit", "normalize-path"] }
 http = { version = "1" }
 tower-sessions = { version = "0.14", features = ["memory-store"] }
 url = { version = "2", features = ["serde"] }
@@ -42,8 +42,8 @@ rust_decimal = { git = "https://github.com/Julian332/rust-decimal", branch = "pg
 chrono = { version = "0.4", features = ["serde"] }
 
 #solana ======
-anchor-client = { version = "0.31.1", optional = true, features = ["async"] }
-anchor-spl = { version = "0.31.1", features = ["default"], optional = true }
+anchor-client = { version = "0.31", optional = true, features = ["async"] }
+anchor-spl = { version = "0.31", features = ["default"], optional = true }
 #eth ========
 alloy = { version = "1", features = ["full", "reqwest-rustls-tls", "std", "essentials", ], optional = true, default-features = false }
 
@@ -67,7 +67,6 @@ web_api_gen = { path = "crates/derive_builder" }
 derive_more = { version = "2", features = ["full"] }
 sha2 = "0.10"
 mimalloc = { version = "0.1", features = [] }
-num-traits = "0.2.19"
 
 [dev-dependencies]
 

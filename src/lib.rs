@@ -49,16 +49,14 @@ pub mod prelude {
 
 // todo Progress bar
 // todo workspace for speed up compile
-// todo slow sql
-// todo req dur
-// todo req user
-// todo  req json body
+// todo slow sql , log sql
+
 pub type AppRes<T> = Result<T, AppError>;
 
 #[global_allocator]
 static GLOBAL: MiMalloc = MiMalloc;
 task_local! {
-    pub static CURRENT_REQ : (Uuid,http::HeaderMap) ;
+    pub static CURRENT_REQ : ReqState ;
 }
 pub static DB: LazyLock<ConnPool> = LazyLock::new(|| setup_connection_pool());
 pub static HTTP_CLIENT: LazyLock<reqwest::Client> = LazyLock::new(|| reqwest::Client::new());
@@ -69,6 +67,7 @@ pub static SOL_CLIENT: LazyLock<anchor_client::solana_client::nonblocking::rpc_c
             CONFIG.solana_rpc.to_string(),
         )
     });
+use crate::web_middleware::ReqState;
 #[cfg(feature = "eth_mode")]
 use alloy::providers::fillers::{
     BlobGasFiller, ChainIdFiller, FillProvider, GasFiller, JoinFill, NonceFiller,
@@ -77,7 +76,6 @@ use alloy::providers::fillers::{
 use alloy::providers::{Identity, RootProvider};
 use mimalloc::MiMalloc;
 use tokio::task_local;
-use uuid::Uuid;
 
 #[cfg(feature = "eth_mode")]
 pub static ETH_CLIENT: LazyLock<

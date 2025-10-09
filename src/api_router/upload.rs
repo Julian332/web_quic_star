@@ -4,7 +4,7 @@ use crate::util::file;
 use crate::{AppRes, CONFIG};
 use aide::OperationIo;
 use aide::axum::ApiRouter;
-use aide::axum::routing::get_with;
+use aide::axum::routing::{get_with, post_with};
 use axum::Json;
 use axum::extract::Multipart;
 use axum::response::Html;
@@ -15,11 +15,9 @@ use std::ops::Deref;
 
 pub fn upload_routes() -> ApiRouter {
     ApiRouter::new()
-        .api_route(
-            "/",
-            get_with(show_form, empty_resp_docs).post_with(accept_form, empty_resp_docs),
-        )
+        .api_route("/", post_with(accept_form, empty_resp_docs))
         .route_layer(login_required!(AuthBackend))
+        .api_route("/", get_with(show_form, empty_resp_docs))
 }
 async fn show_form() -> Html<&'static str> {
     Html(
