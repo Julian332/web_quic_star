@@ -18,14 +18,14 @@ postgres = ["diesel-dynamic-schema/postgres", "rust_decimal/db-diesel-postgres",
 [dependencies]
 #web ========
 axum = { version = "0.8", features = ["macros", "http2"] }
-axum-login = { git = "https://github.com/Julian332/axum-login", branch = "pg" }
-aide = { git = "https://github.com/Julian332/aide", branch = "pg", features = ["swagger", "scalar", "axum", "macros", "axum-tokio", "axum-multipart", "axum-json", "axum-ws", "axum-form", "axum-matched-path", "axum-original-uri", "axum-query"] }
+axum-login = { git = "https://github.com/Julian332/axum-login" }
+aide = { git = "https://github.com/tamasfe/aide", features = ["swagger", "scalar", "axum", "macros", "axum-tokio", "axum-multipart", "axum-json", "axum-ws", "axum-form", "axum-matched-path", "axum-original-uri", "axum-query"] }
 password-auth = "1"
 tower-http = { version = "0.6", features = ["cors", "fs", "limit", "normalize-path"] }
 http = { version = "1" }
 tower-sessions = { version = "0.14", features = ["memory-store"] }
 url = { version = "2", features = ["serde"] }
-schemars = { git = "https://github.com/Julian332/schemars", branch = "pg", features = ["rust_decimal1", "chrono04", "uuid1", "url2"] }
+schemars = { version = "1", features = ["rust_decimal1", "chrono04", "uuid1", "url2"] }
 
 #log =======
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
@@ -38,7 +38,7 @@ diesel-dynamic-schema = "0.2"
 diesel-enum = { version = "0.2", features = [] }
 deadpool = { version = "0.12", features = [], default-features = false }
 diesel_migrations = { version = "2", features = [] }
-rust_decimal = { git = "https://github.com/Julian332/rust-decimal", branch = "pg", features = ["serde-str", "macros", "maths"] }
+rust_decimal = { version = "1", features = ["serde-str", "macros", "maths"] }
 chrono = { version = "0.4", features = ["serde"] }
 
 #solana ======
