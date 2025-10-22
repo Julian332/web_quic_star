@@ -1,4 +1,6 @@
+use crate::framework::auth::AuthPermission;
 use crate::framework::db::DbType;
+use crate::prelude::Identifiable;
 use chrono::{DateTime, Utc};
 use diesel::{AsChangeset, Queryable, Selectable};
 use schemars::JsonSchema;
@@ -16,6 +18,7 @@ use web_api_gen::ViewApiGen;
     AsChangeset,
     Debug,
     ViewApiGen,
+    Identifiable,
 )]
 #[diesel(table_name = crate::schema_view::user_with_group_views)]
 #[diesel(check_for_backend(DbType))]
@@ -36,4 +39,5 @@ pub struct UserWithGroupView {
     pub update_by: Option<i64>,
     pub is_delete: bool,
     pub group_name: Option<String>,
+    pub permissions: Vec<AuthPermission>,
 }

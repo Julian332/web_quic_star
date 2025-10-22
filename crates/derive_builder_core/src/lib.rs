@@ -134,10 +134,10 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
             let (router_add, router_read, router_update, router_delete) = web::get_routers();
 
             router_add
-                .route_layer(permission_required!(AuthBackend, Add(stringify!(#schema))))
-                .merge(router_read.route_layer(permission_required!(AuthBackend, Read(stringify!(#schema)))))
-                .merge(router_delete.route_layer(permission_required!(AuthBackend, Delete(stringify!(#schema)))))
-                .merge(router_update.route_layer(permission_required!(AuthBackend, Update(stringify!(#schema)))))
+                .route_layer(crate::permission_layer!(AuthBackend, Add(stringify!(#schema))))
+                .merge(router_read.route_layer(crate::permission_layer!(AuthBackend, Read(stringify!(#schema)))))
+                .merge(router_delete.route_layer(crate::permission_layer!(AuthBackend, Delete(stringify!(#schema)))))
+                .merge(router_update.route_layer(crate::permission_layer!(AuthBackend, Update(stringify!(#schema)))))
 
         }
 
@@ -549,7 +549,7 @@ pub fn query_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::Token
             let (router_add, router_read, router_update, router_delete) = web::get_routers();
 
             router_read
-                .route_layer(permission_required!(AuthBackend, Read(stringify!(#schema))))
+                .route_layer(crate::permission_layer!(AuthBackend, Read(stringify!(#schema))))
         }
 
 

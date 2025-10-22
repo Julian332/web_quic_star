@@ -1,16 +1,14 @@
-use crate::db_model::group::Group;
 use crate::db_model::user::User;
 use crate::framework::db::{ConnPool, DbType};
 use crate::framework::errors::{AppError, NoneError};
-use crate::schema::groups::table as groups;
 use crate::schema::users::{table as users, username};
+use crate::schema_view::user_with_group_views::dsl::user_with_group_views;
 use crate::{DB, impl_from};
 use axum_login::tower_sessions::cookie::time::Duration;
 use axum_login::tower_sessions::{Expiry, SessionManagerLayer};
 use axum_login::{
     AuthManagerLayer, AuthManagerLayerBuilder, AuthUser, AuthnBackend, AuthzBackend, UserId,
 };
-use diesel::associations::HasTable;
 use diesel::deserialize::{FromSql, FromSqlRow};
 use diesel::serialize::{Output, ToSql};
 use diesel::sql_types::{Text, VarChar};
@@ -346,7 +344,6 @@ fn test1() {
     println!("{}", x1);
 }
 
-// #[async_trait]
 impl AuthzBackend for AuthBackend {
     type Permission = AuthPermission;
 
@@ -354,14 +351,17 @@ impl AuthzBackend for AuthBackend {
         &self,
         user: &Self::User,
     ) -> Result<HashSet<Self::Permission>, Self::Error> {
-        match users
-            .inner_join(groups::table())
-            .filter(crate::schema::users::id.eq(user.id))
-            .select(Group::as_select())
-            .load(&mut self.db.get().await?)
+        match user_with_group_views
+            .find(user.id)
+            .select(crate::schema_view::user_with_group_views::permissions)
+            .get_result::<Vec<AuthPermission>>(&mut self.db.get().await?)
             .await
         {
-            Ok(res) => Ok(res.into_iter().map(|x| x.permissions).flatten().collect()),
+            Ok(res) => Ok(res
+                .into_iter()
+                // .map(|x: Vec<AuthPermission>| x.permissions)
+                // .flatten()
+                .collect()),
             Err(e) => Err(e.into()),
         }
     }
