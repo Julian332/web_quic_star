@@ -20,6 +20,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
+use std::sync::Arc;
 use tower_sessions::MemoryStore;
 
 #[allow(dead_code)]
@@ -32,7 +33,7 @@ pub const SUPER_USER: i64 = -2;
 
 #[derive(Debug, FromSqlRow, Serialize, Deserialize, JsonSchema, Clone, Eq, PartialEq, Hash)]
 #[diesel(sql_type = Text)]
-pub enum AuthPermission<Table = String> {
+pub enum AuthPermission<Table = Arc<String>> {
     Admin,
     Read(Table),
     Add(Table),
@@ -40,14 +41,14 @@ pub enum AuthPermission<Table = String> {
     Update(Table),
 }
 
-impl From<AuthPermission<&str>> for AuthPermission<String> {
+impl From<AuthPermission<&str>> for AuthPermission {
     fn from(value: AuthPermission<&str>) -> Self {
         match value {
             AuthPermission::Admin => AuthPermission::Admin,
-            AuthPermission::Read(x) => AuthPermission::Read(x.to_string()),
-            AuthPermission::Add(x) => AuthPermission::Read(x.to_string()),
-            AuthPermission::Delete(x) => AuthPermission::Read(x.to_string()),
-            AuthPermission::Update(x) => AuthPermission::Read(x.to_string()),
+            AuthPermission::Read(x) => AuthPermission::Read(Arc::from(x.to_string())),
+            AuthPermission::Add(x) => AuthPermission::Read(Arc::from(x.to_string())),
+            AuthPermission::Delete(x) => AuthPermission::Read(Arc::from(x.to_string())),
+            AuthPermission::Update(x) => AuthPermission::Read(Arc::from(x.to_string())),
         }
     }
 }
@@ -79,13 +80,17 @@ impl FromStr for AuthPermission {
         let table = split.get(0).ok_or(NoneError)?;
         let result = match perm {
             string if string.eq_ignore_ascii_case("Admin") => AuthPermission::Admin,
-            permission if permission.eq_ignore_ascii_case("read") => Self::Read(table.to_string()),
-            permission if permission.eq_ignore_ascii_case("add") => Self::Add(table.to_string()),
+            permission if permission.eq_ignore_ascii_case("read") => {
+                Self::Read(Arc::from(table.to_string()))
+            }
+            permission if permission.eq_ignore_ascii_case("add") => {
+                Self::Add(Arc::from(table.to_string()))
+            }
             permission if permission.eq_ignore_ascii_case("delete") => {
-                Self::Delete(table.to_string())
+                Self::Delete(Arc::from(table.to_string()))
             }
             permission if permission.eq_ignore_ascii_case("update") => {
-                Self::Update(table.to_string())
+                Self::Update(Arc::from(table.to_string()))
             }
             _ => return Err(AppError::new(&format!("unknown permission: {s}")).into()),
         };
@@ -347,6 +352,17 @@ fn test1() {
 impl AuthzBackend for AuthBackend {
     type Permission = AuthPermission;
 
+    fn get_user_permissions(
+        &self,
+        _user: &Self::User,
+    ) -> impl Future<Output = Result<HashSet<Self::Permission>, Self::Error>> + Send {
+        async {
+            Err(AuthError(AppError::new(
+                "no permission belong to user, use `get_group_permissions` instead",
+            )))
+        }
+    }
+
     async fn get_group_permissions(
         &self,
         user: &Self::User,
@@ -370,19 +386,7 @@ impl AuthzBackend for AuthBackend {
         &self,
         user: &Self::User,
     ) -> Result<HashSet<Self::Permission>, Self::Error> {
-        match user_with_group_views
-            .find(user.id)
-            .select(crate::schema_view::user_with_group_views::permissions)
-            .get_result::<Vec<AuthPermission>>(&mut self.db.get().await?)
-            .await
-        {
-            Ok(res) => Ok(res
-                .into_iter()
-                // .map(|x: Vec<AuthPermission>| x.permissions)
-                // .flatten()
-                .collect()),
-            Err(e) => Err(e.into()),
-        }
+        self.get_group_permissions(user).await
     }
 
     fn has_perm(
@@ -395,7 +399,16 @@ impl AuthzBackend for AuthBackend {
             if perms.contains(&Self::Permission::Admin) {
                 return Ok(true);
             }
-            Ok(perms.contains(&perm))
+            match &perm {
+                AuthPermission::Admin => Ok(perms.contains(&perm)),
+                AuthPermission::Read(table) => Ok(perms.contains(&perm)
+                    || perms.contains(&AuthPermission::Add(table.clone()))
+                    || perms.contains(&AuthPermission::Update(table.clone()))
+                    || perms.contains(&AuthPermission::Delete(table.clone()))),
+                AuthPermission::Add(_table) => Ok(perms.contains(&perm)),
+                AuthPermission::Delete(_table) => Ok(perms.contains(&perm)),
+                AuthPermission::Update(_table) => Ok(perms.contains(&perm)),
+            }
         }
     }
 }
