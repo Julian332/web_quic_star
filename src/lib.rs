@@ -35,7 +35,6 @@ pub mod prelude {
     pub use super::framework::errors::OkOrErr;
     pub use super::unwrap_opt_or_continue;
     pub use super::unwrap_or_continue;
-    pub use crate::permission_layer;
 
     #[cfg(feature = "eth_mode")]
     pub use super::domain::eth_addr::EthAddr;

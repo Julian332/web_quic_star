@@ -365,6 +365,39 @@ impl AuthzBackend for AuthBackend {
             Err(e) => Err(e.into()),
         }
     }
+
+    async fn get_all_permissions(
+        &self,
+        user: &Self::User,
+    ) -> Result<HashSet<Self::Permission>, Self::Error> {
+        match user_with_group_views
+            .find(user.id)
+            .select(crate::schema_view::user_with_group_views::permissions)
+            .get_result::<Vec<AuthPermission>>(&mut self.db.get().await?)
+            .await
+        {
+            Ok(res) => Ok(res
+                .into_iter()
+                // .map(|x: Vec<AuthPermission>| x.permissions)
+                // .flatten()
+                .collect()),
+            Err(e) => Err(e.into()),
+        }
+    }
+
+    fn has_perm(
+        &self,
+        user: &Self::User,
+        perm: Self::Permission,
+    ) -> impl Future<Output = Result<bool, Self::Error>> + Send {
+        async move {
+            let perms = self.get_all_permissions(user).await?;
+            if perms.contains(&Self::Permission::Admin) {
+                return Ok(true);
+            }
+            Ok(perms.contains(&perm))
+        }
+    }
 }
 
 impl_from!(diesel::result::Error);

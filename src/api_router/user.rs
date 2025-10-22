@@ -52,9 +52,17 @@ pub fn user_routes() -> ApiRouter {
         post_with(modify_password, default_resp_docs::<String>),
     );
     router_add
-        .route_layer(crate::permission_layer!(AuthBackend, Add("users")))
-        .merge(router_read.route_layer(crate::permission_layer!(AuthBackend, Read("users"))))
-        .merge(router_delete.route_layer(crate::permission_layer!(AuthBackend, Delete("users"))))
-        .merge(router_update.route_layer(crate::permission_layer!(AuthBackend, Update("users"))))
+        .route_layer(axum_login::permission_required!(AuthBackend, Add("users")))
+        .merge(
+            router_read.route_layer(axum_login::permission_required!(AuthBackend, Read("users"))),
+        )
+        .merge(router_delete.route_layer(axum_login::permission_required!(
+            AuthBackend,
+            Delete("users")
+        )))
+        .merge(router_update.route_layer(axum_login::permission_required!(
+            AuthBackend,
+            Update("users")
+        )))
         .merge(modify_password.route_layer(login_required!(AuthBackend)))
 }
