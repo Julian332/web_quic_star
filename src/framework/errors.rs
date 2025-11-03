@@ -8,12 +8,12 @@ use serde::Serialize;
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
 use uuid::Uuid;
-pub trait OkOrErr<T> {
-    fn ok_or_err(self) -> Result<T, NoneError>;
+pub trait IntoResult<T, E> {
+    fn into_result(self) -> Result<T, E>;
 }
 
-impl<T> OkOrErr<T> for Option<T> {
-    fn ok_or_err(self) -> Result<T, NoneError> {
+impl<T> IntoResult<T, NoneError> for Option<T> {
+    fn into_result(self) -> Result<T, NoneError> {
         self.ok_or(NoneError)
     }
 }
@@ -65,7 +65,7 @@ fn test_display_error() {
     // println!("{:?}", serde_json::to_string(&error));
     use alloy::rpc::types::BlockError;
 
-    let _result: Result<i32, NoneError> = Some(1).ok_or_err();
+    let _result: Result<i32, NoneError> = Some(1).into_result();
 }
 
 impl AppError {

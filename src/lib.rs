@@ -32,7 +32,7 @@ pub mod prelude {
     pub use super::CONFIG;
     pub use super::DB;
     pub use super::framework::errors::AppError;
-    pub use super::framework::errors::OkOrErr;
+    pub use super::framework::errors::IntoResult;
     pub use super::unwrap_opt_or_continue;
     pub use super::unwrap_or_continue;
 
@@ -50,6 +50,7 @@ pub mod prelude {
 // todo Progress bar
 // todo workspace for speed up compile
 // todo slow sql , log sql
+// todo dev token
 
 pub type AppRes<T> = Result<T, AppError>;
 
@@ -89,6 +90,7 @@ pub static ETH_CLIENT: LazyLock<
 > = LazyLock::new(util::contracts::http_provider);
 
 pub static CONFIG: LazyLock<Config> = LazyLock::new(|| {
+    config::set_log();
     config::set_env();
     envy::from_env().unwrap()
 });

@@ -1,10 +1,9 @@
 use web3_quick::framework::db;
 use web3_quick::scheduled_task::set_scheduler;
-use web3_quick::{CONFIG, api_router, config};
+use web3_quick::{CONFIG, api_router};
 
 #[tokio::main]
 async fn main() {
-    config::set_log();
     db::sync_db_schema().await;
     set_scheduler().await;
     let doc_app = api_router::setup_router();

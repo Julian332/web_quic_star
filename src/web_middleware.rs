@@ -4,9 +4,9 @@ use crate::framework::auth::AuthBackend;
 use axum::extract::Request;
 use axum::middleware::Next;
 use axum::response::Response;
-use http::HeaderMap;
+use http::{HeaderMap, Method};
 use tokio::time::Instant;
-use tracing::info;
+use tracing::{error, info};
 use uuid::Uuid;
 
 pub struct ReqState {
@@ -60,4 +60,16 @@ pub async fn req_log(request: Request, next: Next) -> Response {
     // }
 
     response
+}
+
+pub async fn continue_when_drop_req(request: Request, next: Next) -> Response {
+    if request.method() == Method::GET {
+        next.run(request).await
+    } else {
+        let result = tokio::spawn(async move { next.run(request).await }).await;
+        result.unwrap_or_else(|e| {
+            error!("continue_when_drop_req error: {e}");
+            Response::default()
+        })
+    }
 }

@@ -402,11 +402,17 @@ impl AuthzBackend for AuthBackend {
             match &perm {
                 AuthPermission::Admin => Ok(perms.contains(&perm)),
                 AuthPermission::Read(table) => Ok(perms.contains(&perm)
-                    || perms.contains(&AuthPermission::Add(table.clone()))
+                    // || perms.contains(&AuthPermission::Add(table.clone()))
                     || perms.contains(&AuthPermission::Update(table.clone()))
                     || perms.contains(&AuthPermission::Delete(table.clone()))),
-                AuthPermission::Add(_table) => Ok(perms.contains(&perm)),
-                AuthPermission::Delete(_table) => Ok(perms.contains(&perm)),
+                AuthPermission::Add(table) => {
+                    Ok(perms.contains(&perm)
+                        || perms.contains(&AuthPermission::Update(table.clone())))
+                }
+                AuthPermission::Delete(table) => {
+                    Ok(perms.contains(&perm)
+                        || perms.contains(&AuthPermission::Update(table.clone())))
+                }
                 AuthPermission::Update(_table) => Ok(perms.contains(&perm)),
             }
         }
