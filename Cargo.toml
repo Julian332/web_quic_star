@@ -42,8 +42,9 @@ rust_decimal = { version = "1", features = ["serde-str", "macros", "maths"] }
 chrono = { version = "0.4", features = ["serde"] }
 
 #solana ======
-anchor-client = { version = "0.31", optional = true, features = ["async"] }
-anchor-spl = { version = "0.31", features = ["default"], optional = true }
+anchor-client = { version = "0.32", optional = true, features = ["async"] }
+solana-client = "2"
+anchor-spl = { version = "0.32", features = ["default"], optional = true }
 #eth ========
 alloy = { version = "1", features = ["full", "reqwest-rustls-tls", "std", "essentials", ], optional = true, default-features = false }
 

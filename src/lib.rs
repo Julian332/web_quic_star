@@ -51,6 +51,7 @@ pub mod prelude {
 // todo workspace for speed up compile
 // todo slow sql , log sql
 // todo dev token
+// todo log
 
 pub type AppRes<T> = Result<T, AppError>;
 
@@ -62,11 +63,9 @@ task_local! {
 pub static DB: LazyLock<ConnPool> = LazyLock::new(|| setup_connection_pool());
 pub static HTTP_CLIENT: LazyLock<reqwest::Client> = LazyLock::new(|| reqwest::Client::new());
 #[cfg(feature = "solana_mode")]
-pub static SOL_CLIENT: LazyLock<anchor_client::solana_client::nonblocking::rpc_client::RpcClient> =
+pub static SOL_CLIENT: LazyLock<solana_client::nonblocking::rpc_client::RpcClient> =
     LazyLock::new(|| {
-        anchor_client::solana_client::nonblocking::rpc_client::RpcClient::new(
-            CONFIG.solana_rpc.to_string(),
-        )
+        solana_client::nonblocking::rpc_client::RpcClient::new(CONFIG.solana_rpc.to_string())
     });
 use crate::web_middleware::ReqState;
 #[cfg(feature = "eth_mode")]
