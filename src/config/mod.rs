@@ -54,11 +54,11 @@ pub fn set_log() {
         .pretty()
         .with_env_filter(EnvFilter::from_default_env())
         .with_max_level(tracing::Level::INFO)
-        .event_format(TaskLocalFormatter::from(
+        .event_format(
             tracing_subscriber::fmt::format()
                 // .with_file(true)
                 .with_line_number(true),
-        ))
+        )
         .init();
     aide::generate::on_error(|error| {
         error!("{error}");
@@ -66,6 +66,7 @@ pub fn set_log() {
 }
 
 #[derive(Default, Deref, From)]
+#[allow(unused)]
 struct TaskLocalFormatter(Format);
 
 impl<S, N> FormatEvent<S, N> for TaskLocalFormatter

@@ -4,16 +4,19 @@ use crate::framework::auth::AuthBackend;
 use axum::extract::Request;
 use axum::middleware::Next;
 use axum::response::Response;
+use axum_login::AuthUser;
 use http::{HeaderMap, Method};
 use tokio::time::Instant;
 use tracing::{error, info};
 use uuid::Uuid;
+use uuid::fmt::Simple;
 
 pub struct ReqState {
-    pub req_id: Uuid,
+    pub req_id: Simple,
     pub user: Option<User>,
     pub headers: HeaderMap,
 }
+#[tracing::instrument(name = "", level = "info", skip_all, fields(user_id, req_id))]
 pub async fn save_req_to_task_local(
     // you can add more extractors here but the last
     // extractor must implement `FromRequest` which
@@ -23,8 +26,13 @@ pub async fn save_req_to_task_local(
     request: Request,
     next: Next,
 ) -> Response {
-    let req_id = Uuid::now_v7();
+    let req_id = Uuid::now_v7().simple();
     let user = auth_session.user().await;
+    tracing::Span::current().record("req_id", req_id.to_string());
+
+    if let Some(user) = &user {
+        tracing::Span::current().record("user_id", user.id().to_string());
+    }
     let response = CURRENT_REQ
         .scope(
             ReqState {
@@ -45,20 +53,6 @@ pub async fn req_log(request: Request, next: Next) -> Response {
     let response = next.run(request).await;
     let duration = instant.elapsed();
     info!("req:{method} {uri} spent {duration:?}");
-
-    // if CURRENT_REQ
-    //     .try_with(|req| {
-    //         let user = &req.user;
-    //         if let Some(user) = user {
-    //             info!("user:{} req:{method} {uri} spent{duration:?}", user.id);
-    //         } else {
-    //         }
-    //     })
-    //     .is_err()
-    // {
-    //     eprintln!("Router order is wrong ,`save_req_to_task_local` should be called behind `req_log`");
-    // }
-
     response
 }
 

@@ -51,7 +51,6 @@ pub mod prelude {
 // todo workspace for speed up compile
 // todo slow sql , log sql
 // todo dev token
-// todo log
 
 pub type AppRes<T> = Result<T, AppError>;
 
