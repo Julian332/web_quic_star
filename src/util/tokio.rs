@@ -4,6 +4,7 @@ use axum_login::AuthUser;
 use std::sync::atomic::Ordering;
 use std::time::Duration;
 use tokio::task::JoinHandle;
+use tracing::error;
 
 pub async fn sleep_ms(ms: u64) {
     tokio::time::sleep(Duration::from_millis(ms)).await
@@ -26,7 +27,7 @@ where
             }
         })
         .unwrap_or_default();
-    tokio::spawn(async move { CURRENT_REQ.scope(req_state, span(future)).await })
+    tokio::spawn(async move { CURRENT_REQ.scope(req_state, async_span(future)).await })
 }
 #[tracing::instrument(
     name = "spawn",
@@ -34,19 +35,24 @@ where
     skip_all,
     fields(user_id, req_id, spawn_id)
 )]
-async fn span<F>(future: F) -> F::Output
+pub async fn async_span<F>(future: F) -> F::Output
 where
     F: Future + Send + 'static,
     F::Output: Send + 'static,
 {
-    CURRENT_REQ.with(|req_state| {
-        tracing::Span::current().record("req_id", req_state.req_id.to_string());
+    if CURRENT_REQ
+        .try_with(|req_state| {
+            tracing::Span::current().record("req_id", req_state.req_id.to_string());
 
-        if let Some(user) = &req_state.user {
-            tracing::Span::current().record("user_id", user.id().to_string());
-        }
-        tracing::Span::current().record("spawn_id", format!("{:?}", req_state.spawn_id));
-    });
+            if let Some(user) = &req_state.user {
+                tracing::Span::current().record("user_id", user.id().to_string());
+            }
+            tracing::Span::current().record("spawn_id", format!("{:?}", req_state.spawn_id));
+        })
+        .is_err()
+    {
+        error!("CURRENT_REQ not set")
+    };
     future.await
 }
 
