@@ -1,11 +1,6 @@
-use crate::CURRENT_REQ;
-use derive_more::{Deref, From};
 use serde::Deserialize;
-use tracing::{Event, Subscriber, error};
-use tracing_subscriber::fmt::format::Format;
-use tracing_subscriber::fmt::{FormatEvent, FormatFields};
-use tracing_subscriber::registry::LookupSpan;
-use tracing_subscriber::{EnvFilter, fmt};
+use tracing::error;
+use tracing_subscriber::EnvFilter;
 use url::Url;
 
 #[allow(unused)]
@@ -52,8 +47,8 @@ pub fn set_log() {
     // }));
     tracing_subscriber::fmt()
         .pretty()
-        .with_env_filter(EnvFilter::from_default_env())
         .with_max_level(tracing::Level::INFO)
+        .with_env_filter(EnvFilter::from_default_env())
         .event_format(
             tracing_subscriber::fmt::format()
                 // .with_file(true)
@@ -65,25 +60,25 @@ pub fn set_log() {
     });
 }
 
-#[derive(Default, Deref, From)]
-#[allow(unused)]
-struct TaskLocalFormatter(Format);
-
-impl<S, N> FormatEvent<S, N> for TaskLocalFormatter
-where
-    S: Subscriber + for<'a> LookupSpan<'a>,
-    N: for<'a> FormatFields<'a> + 'static,
-{
-    fn format_event(
-        &self,
-        ctx: &fmt::FmtContext<'_, S, N>,
-        mut writer: fmt::format::Writer<'_>,
-        event: &Event<'_>,
-    ) -> std::fmt::Result {
-        let _ = CURRENT_REQ.try_with(|id| write!(writer, "[req_id:{}] ", id.req_id));
-        self.0.format_event(ctx, writer, event)
-    }
-}
+// #[derive(Default, Deref, From)]
+// #[allow(unused)]
+// struct TaskLocalFormatter(Format);
+//
+// impl<S, N> FormatEvent<S, N> for TaskLocalFormatter
+// where
+//     S: Subscriber + for<'a> LookupSpan<'a>,
+//     N: for<'a> FormatFields<'a> + 'static,
+// {
+//     fn format_event(
+//         &self,
+//         ctx: &fmt::FmtContext<'_, S, N>,
+//         mut writer: fmt::format::Writer<'_>,
+//         event: &Event<'_>,
+//     ) -> std::fmt::Result {
+//         let _ = CURRENT_REQ.try_with(|id| write!(writer, "[req_id:{}] ", id.req_id));
+//         self.0.format_event(ctx, writer, event)
+//     }
+// }
 
 #[test]
 pub fn test() {

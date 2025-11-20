@@ -1,7 +1,6 @@
 use crate::AppRes;
+use crate::prelude::sleep_ms;
 use std::future::Future;
-use std::time::Duration;
-use tokio::time::sleep;
 use tracing::error;
 
 pub async fn subscribe_with_retry<F>(func: fn() -> F) -> AppRes<()>
@@ -13,7 +12,7 @@ where
             Ok(_) => {}
             Err(e) => {
                 error!(?e, " Will retry subscribe");
-                sleep(Duration::new(2, 0)).await;
+                sleep_ms(2000).await;
             }
         };
     }

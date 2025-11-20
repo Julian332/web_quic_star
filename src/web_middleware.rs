@@ -5,7 +5,8 @@ use axum::extract::Request;
 use axum::middleware::Next;
 use axum::response::Response;
 use axum_login::AuthUser;
-use http::{HeaderMap, Method};
+use http::Method;
+use std::sync::atomic::AtomicUsize;
 use tokio::time::Instant;
 use tracing::{error, info};
 use uuid::Uuid;
@@ -14,15 +15,28 @@ use uuid::fmt::Simple;
 pub struct ReqState {
     pub req_id: Simple,
     pub user: Option<User>,
-    pub headers: HeaderMap,
+    pub spawn_id: Vec<usize>,
+    pub spawn_count: AtomicUsize,
 }
+
+impl Default for ReqState {
+    fn default() -> Self {
+        let req_id = Uuid::now_v7().simple();
+        Self {
+            req_id,
+            user: None,
+            spawn_id: vec![],
+            spawn_count: Default::default(),
+        }
+    }
+}
+
 #[tracing::instrument(name = "", level = "info", skip_all, fields(user_id, req_id))]
 pub async fn save_req_to_task_local(
     // you can add more extractors here but the last
     // extractor must implement `FromRequest` which
     // `Request` does
     auth_session: axum_login::AuthSession<AuthBackend>,
-    headers: HeaderMap,
     request: Request,
     next: Next,
 ) -> Response {
@@ -38,7 +52,8 @@ pub async fn save_req_to_task_local(
             ReqState {
                 req_id,
                 user,
-                headers,
+                spawn_id: vec![],
+                spawn_count: Default::default(),
             },
             async move { next.run(request).await },
         )

@@ -70,6 +70,6 @@ sha2 = "0.10"
 mimalloc = { version = "0.1", features = [] }
 
 [dev-dependencies]
-
+tracing-test = "0.2"
 [workspace]
 members = ["crates/*"]

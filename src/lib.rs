@@ -23,34 +23,35 @@ pub mod util;
 pub mod web_middleware;
 
 pub mod prelude {
+    pub use super::util::tokio::*;
     pub use chrono::prelude::*;
     pub use diesel::prelude::*;
-    pub use diesel_async::RunQueryDsl;
     pub use rust_decimal::prelude::*;
 
-    pub use super::AppRes;
     pub use super::CONFIG;
     pub use super::DB;
-    pub use super::framework::errors::AppError;
-    pub use super::framework::errors::IntoResult;
-    pub use super::unwrap_opt_or_continue;
-    pub use super::unwrap_or_continue;
 
+    pub use super::framework::db::{LogicDeleteQuery, Paginate};
+    pub use super::framework::errors::IntoResult;
+    pub use super::util::datetime::{TimeUtil, chinese_datetime_format};
+    pub use super::util::num_fmt::NumFmt;
+    pub use diesel_async::RunQueryDsl;
+
+    pub use super::AppRes;
     #[cfg(feature = "eth_mode")]
     pub use super::domain::eth_addr::EthAddr;
     #[cfg(feature = "solana_mode")]
     pub use super::domain::solana_addr::SolAddr;
     pub use super::framework::api::PageRes;
-    pub use super::framework::db::{LogicDeleteQuery, Paginate};
-    pub use super::util::datetime::{TimeUtil, chinese_datetime_format};
-    pub use super::util::num_fmt::NumFmt;
+    pub use super::framework::errors::AppError;
+
+    pub use super::unwrap_opt_or_continue;
+    pub use super::unwrap_or_continue;
     pub use tracing::{debug, error, info, trace, warn};
 }
 
 // todo Progress bar
-// todo workspace for speed up compile
 // todo slow sql , log sql
-// todo dev token
 
 pub type AppRes<T> = Result<T, AppError>;
 
@@ -88,8 +89,8 @@ pub static ETH_CLIENT: LazyLock<
 > = LazyLock::new(util::contracts::http_provider);
 
 pub static CONFIG: LazyLock<Config> = LazyLock::new(|| {
-    config::set_log();
     config::set_env();
+    config::set_log();
     envy::from_env().unwrap()
 });
 #[macro_export]
