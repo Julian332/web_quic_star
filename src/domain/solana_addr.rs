@@ -8,21 +8,9 @@ use std::borrow::Cow;
 use std::str::FromStr;
 
 #[allow(unused)]
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct SolAddrs {}
 
-impl Default for SolAddrs {
-    fn default() -> Self {
-        #[cfg(feature = "dev")]
-        {
-            SolAddrs {}
-        }
-        #[cfg(not(feature = "dev"))]
-        {
-            SolAddrs {}
-        }
-    }
-}
 #[derive(
     OperationIo,
     Default,

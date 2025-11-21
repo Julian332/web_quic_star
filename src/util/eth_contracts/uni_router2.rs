@@ -1,8 +1,7 @@
 use alloy::sol;
-
 sol!(
     #[allow(missing_docs)]
     #[sol(rpc)]
-    ERC_20,
-    "src/util/contracts/abis/erc20.json"
+    UNI_ROUTER2,
+    "src/util/eth_contracts/abis/uni_router2.json"
 );

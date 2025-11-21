@@ -17,6 +17,7 @@ pub struct Count {
     pub count: i64,
 }
 
+#[allow(clippy::expect_used)]
 pub fn setup_connection_pool() -> ConnPool {
     let database_url = CONFIG.database_url.to_string();
     let manager = AsyncDieselConnectionManager::<Conn>::new_with_config(
@@ -161,6 +162,7 @@ async fn test() {
 }
 const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
 
+#[allow(clippy::unwrap_used)]
 pub async fn sync_db_schema() {
     let async_connection = DB.get().await.unwrap();
     let mut async_wrapper: AsyncConnectionWrapper<_> =

@@ -32,14 +32,13 @@ impl<T: Error + Send + Sync + 'static> From<T> for AppError {
     fn from(value: T) -> Self {
         let value = anyhow!(value);
         let uuid = CURRENT_REQ
-            .try_with(|x| x.req_id.clone().into_uuid())
+            .try_with(|x| x.req_id.into_uuid())
             .unwrap_or_else(|_| Uuid::now_v7());
         tracing::debug!("Error:{value:?}; Error ID:{uuid};");
-        let app_error = Self {
-            error: value.into(),
+        Self {
+            error: value,
             error_id: uuid,
-        };
-        app_error
+        }
     }
 }
 
@@ -71,7 +70,7 @@ fn test_display_error() {
 impl AppError {
     pub fn new(error: &str) -> Self {
         let uuid = CURRENT_REQ
-            .try_with(|x| x.req_id.clone().into_uuid())
+            .try_with(|x| x.req_id.into_uuid())
             .unwrap_or_else(|_| Uuid::now_v7());
         Self {
             error: anyhow::anyhow!("{error}"),

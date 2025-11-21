@@ -5,6 +5,7 @@ use std::future::Future;
 use tokio_cron_scheduler::{Job, JobScheduler};
 use tracing::{debug, error};
 
+#[allow(clippy::expect_used)]
 pub async fn add_async_cron<R>(sched: &JobScheduler, cron: &str, task: fn() -> R)
 where
     R: Future<Output = AppRes<()>> + Sized + Send + 'static,
@@ -36,7 +37,7 @@ pub async fn example() -> AppRes<()> {
     debug!("example connection");
     Ok(())
 }
-
+#[allow(clippy::expect_used)]
 pub async fn set_scheduler() {
     let sched = JobScheduler::new()
         .await

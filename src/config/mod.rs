@@ -31,11 +31,13 @@ pub fn set_env() {
     set_prod_env();
 }
 
+#[allow(clippy::expect_used)]
 pub fn set_dev_env() {
     tracing::info!("profile :{} is active", "dev");
     dotenvy::from_filename(".env").expect("no .env file");
 }
 
+#[allow(clippy::expect_used)]
 pub fn set_prod_env() {
     tracing::info!("profile :{} is active", "release");
     dotenvy::from_filename("env_prod.env").expect("no env_prod.env file");

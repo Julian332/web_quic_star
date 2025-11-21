@@ -1,6 +1,6 @@
-#[cfg(feature = "eth_mode")]
-pub mod contracts;
 pub mod datetime;
+#[cfg(feature = "eth_mode")]
+pub mod eth_contracts;
 pub mod file;
 pub mod num_fmt;
 pub mod slice;

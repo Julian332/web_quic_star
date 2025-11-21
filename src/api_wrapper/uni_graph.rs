@@ -1,4 +1,5 @@
 use crate::CONFIG;
+use crate::prelude::IntoResult;
 use chrono::Days;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -97,7 +98,7 @@ async fn _graph() -> Result<(), Box<dyn std::error::Error>> {
 }
 }
 "#;
-    let json: serde_json::Value = serde_json::from_str(&data)?;
+    let json: serde_json::Value = serde_json::from_str(data)?;
 
     let request = client
         .request(
@@ -145,7 +146,7 @@ pub async fn get_user_swaps(user_addr: String) -> Result<Vec<Swap>, Box<dyn std:
 
     let three_day_ago = chrono::Utc::now()
         .checked_sub_days(Days::new(3))
-        .unwrap()
+        .into_result()?
         .timestamp();
     let data = r#"
 {
@@ -158,11 +159,11 @@ pub async fn get_user_swaps(user_addr: String) -> Result<Vec<Swap>, Box<dyn std:
 "#;
 
     let mut json: Value = serde_json::from_str(data)?;
-    let variables = json.get_mut("variables").unwrap();
-    let addr = variables.get_mut("addr").unwrap();
+    let variables = json.get_mut("variables").into_result()?;
+    let addr = variables.get_mut("addr").into_result()?;
     *addr = Value::from(user_addr);
 
-    let timestamp = variables.get_mut("timestamp").unwrap();
+    let timestamp = variables.get_mut("timestamp").into_result()?;
     *timestamp = Value::from(three_day_ago);
     let request = client
         .request(reqwest::Method::POST, CONFIG.uni_graph_url.clone())

@@ -11,6 +11,7 @@ use tokio::io::{AsyncReadExt, BufReader, BufWriter};
 use tokio_util::io::StreamReader;
 use tracing::info;
 
+#[allow(clippy::indexing_slicing)]
 pub async fn sha256_digest(path: &PathBuf) -> AppRes<String> {
     let input = File::open(path).await?;
     let mut reader = BufReader::new(input);
@@ -34,10 +35,10 @@ pub fn path_is_valid(path: &str) -> bool {
     let path = std::path::Path::new(path);
     let mut components = path.components().peekable();
 
-    if let Some(first) = components.peek() {
-        if !matches!(first, std::path::Component::Normal(_)) {
-            return false;
-        }
+    if let Some(first) = components.peek()
+        && !matches!(first, std::path::Component::Normal(_))
+    {
+        return false;
     }
 
     components.count() == 1
@@ -48,7 +49,7 @@ where
     S: Stream<Item = Result<Bytes, E>>,
     E: Into<BoxError>,
 {
-    let extension_name = filename.split('.').last().unwrap_or("");
+    let extension_name = filename.split('.').next_back().unwrap_or("");
 
     if !path_is_valid(filename) {
         return Err(AppError::new("Invalid path"));
@@ -56,7 +57,7 @@ where
 
     let hash_file_name = async {
         // Convert the stream into an `AsyncRead`.
-        let body_with_io_error = stream.map_err(|err| io::Error::new(io::ErrorKind::Other, err));
+        let body_with_io_error = stream.map_err(|err| io::Error::other(err));
         let body_reader = StreamReader::new(body_with_io_error);
         futures::pin_mut!(body_reader);
 

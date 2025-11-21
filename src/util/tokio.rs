@@ -20,7 +20,7 @@ where
             spawn_id.push(x.spawn_count.load(Ordering::SeqCst));
             x.spawn_count.fetch_add(1, Ordering::SeqCst);
             ReqState {
-                req_id: x.req_id.clone(),
+                req_id: x.req_id,
                 user: x.user.clone(),
                 spawn_id,
                 spawn_count: Default::default(),

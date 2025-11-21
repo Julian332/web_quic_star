@@ -1,6 +1,10 @@
 #![forbid(unsafe_code)]
+#![deny(clippy::panic)]
+#![deny(clippy::unwrap_used)]
+#![deny(clippy::expect_used)]
+#![deny(clippy::indexing_slicing)]
+#![allow(clippy::get_first)]
 extern crate core;
-
 use crate::config::Config;
 use crate::framework::db::setup_connection_pool;
 use framework::db::ConnPool;
@@ -60,38 +64,27 @@ static GLOBAL: MiMalloc = MiMalloc;
 task_local! {
     pub static CURRENT_REQ : ReqState ;
 }
-pub static DB: LazyLock<ConnPool> = LazyLock::new(|| setup_connection_pool());
-pub static HTTP_CLIENT: LazyLock<reqwest::Client> = LazyLock::new(|| reqwest::Client::new());
+pub static DB: LazyLock<ConnPool> = LazyLock::new(setup_connection_pool);
+pub static HTTP_CLIENT: LazyLock<reqwest::Client> = LazyLock::new(reqwest::Client::new);
 #[cfg(feature = "solana_mode")]
 pub static SOL_CLIENT: LazyLock<solana_client::nonblocking::rpc_client::RpcClient> =
     LazyLock::new(|| {
         solana_client::nonblocking::rpc_client::RpcClient::new(CONFIG.solana_rpc.to_string())
     });
 use crate::web_middleware::ReqState;
-#[cfg(feature = "eth_mode")]
-use alloy::providers::fillers::{
-    BlobGasFiller, ChainIdFiller, FillProvider, GasFiller, JoinFill, NonceFiller,
-};
-#[cfg(feature = "eth_mode")]
-use alloy::providers::{Identity, RootProvider};
+
 use mimalloc::MiMalloc;
 use tokio::task_local;
 
 #[cfg(feature = "eth_mode")]
-pub static ETH_CLIENT: LazyLock<
-    FillProvider<
-        JoinFill<
-            Identity,
-            JoinFill<GasFiller, JoinFill<BlobGasFiller, JoinFill<NonceFiller, ChainIdFiller>>>,
-        >,
-        RootProvider,
-    >,
-> = LazyLock::new(util::contracts::http_provider);
+pub static ETH_CLIENT: LazyLock<util::eth_contracts::ReadOnlyProvider> =
+    LazyLock::new(util::eth_contracts::http_provider);
 
+#[allow(clippy::expect_used)]
 pub static CONFIG: LazyLock<Config> = LazyLock::new(|| {
     config::set_env();
     config::set_log();
-    envy::from_env().unwrap()
+    envy::from_env().expect(".env error")
 });
 #[macro_export]
 macro_rules! unwrap_opt_or_continue {

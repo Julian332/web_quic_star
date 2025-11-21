@@ -1,6 +1,7 @@
 use crate::db_model::user::User;
 use crate::framework::db::{ConnPool, DbType};
 use crate::framework::errors::{AppError, NoneError};
+use crate::prelude::IntoResult;
 use crate::schema::users::{table as users, username};
 use crate::schema_view::user_with_group_views::dsl::user_with_group_views;
 use crate::{DB, impl_from};
@@ -56,7 +57,7 @@ impl From<AuthPermission<&str>> for AuthPermission {
 impl Display for AuthPermission {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            AuthPermission::Admin => write!(f, "{}", "Admin"),
+            AuthPermission::Admin => write!(f, "Admin"),
             AuthPermission::Read(x) => write!(f, "{x}:read"),
             AuthPermission::Add(x) => write!(f, "{x}:add"),
             AuthPermission::Delete(x) => write!(f, "{x}:delete"),
@@ -76,8 +77,8 @@ impl FromStr for AuthPermission {
     type Err = AuthError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let split = s.split(':').collect::<Vec<_>>();
-        let perm = split.last().ok_or(NoneError)?;
-        let table = split.get(0).ok_or(NoneError)?;
+        let perm = split.last().into_result()?;
+        let table = split.get(0).into_result()?;
         let result = match perm {
             string if string.eq_ignore_ascii_case("Admin") => AuthPermission::Admin,
             permission if permission.eq_ignore_ascii_case("read") => {
@@ -115,13 +116,14 @@ impl FromSql<Text, DbType> for AuthPermission {
 }
 
 #[test]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 fn permissions_test() {
     let perm = AuthPermission::from_str("t:add").unwrap();
     let perm2 = AuthPermission::from_str("t:Add").unwrap();
     println!("{:?}", perm);
     println!("{:?}", perm2);
-    println!("{}", perm.to_string());
-    println!("{}", perm2.to_string());
+    println!("{}", perm);
+    println!("{}", perm2);
 }
 
 #[test]
@@ -352,15 +354,13 @@ fn test1() {
 impl AuthzBackend for AuthBackend {
     type Permission = AuthPermission;
 
-    fn get_user_permissions(
+    async fn get_user_permissions(
         &self,
         _user: &Self::User,
-    ) -> impl Future<Output = Result<HashSet<Self::Permission>, Self::Error>> + Send {
-        async {
-            Err(AuthError(AppError::new(
-                "no permission belong to user, use `get_group_permissions` instead",
-            )))
-        }
+    ) -> Result<HashSet<Self::Permission>, Self::Error> {
+        Err(AuthError(AppError::new(
+            "no permission belong to user, use `get_group_permissions` instead",
+        )))
     }
 
     async fn get_group_permissions(
@@ -389,32 +389,28 @@ impl AuthzBackend for AuthBackend {
         self.get_group_permissions(user).await
     }
 
-    fn has_perm(
+    async fn has_perm(
         &self,
         user: &Self::User,
         perm: Self::Permission,
-    ) -> impl Future<Output = Result<bool, Self::Error>> + Send {
-        async move {
-            let perms = self.get_all_permissions(user).await?;
-            if perms.contains(&Self::Permission::Admin) {
-                return Ok(true);
-            }
-            match &perm {
-                AuthPermission::Admin => Ok(perms.contains(&perm)),
-                AuthPermission::Read(table) => Ok(perms.contains(&perm)
+    ) -> Result<bool, Self::Error> {
+        let perms = self.get_all_permissions(user).await?;
+        if perms.contains(&Self::Permission::Admin) {
+            return Ok(true);
+        }
+        match &perm {
+            AuthPermission::Admin => Ok(perms.contains(&perm)),
+            AuthPermission::Read(table) => Ok(perms.contains(&perm)
                     // || perms.contains(&AuthPermission::Add(table.clone()))
                     || perms.contains(&AuthPermission::Update(table.clone()))
                     || perms.contains(&AuthPermission::Delete(table.clone()))),
-                AuthPermission::Add(table) => {
-                    Ok(perms.contains(&perm)
-                        || perms.contains(&AuthPermission::Update(table.clone())))
-                }
-                AuthPermission::Delete(table) => {
-                    Ok(perms.contains(&perm)
-                        || perms.contains(&AuthPermission::Update(table.clone())))
-                }
-                AuthPermission::Update(_table) => Ok(perms.contains(&perm)),
+            AuthPermission::Add(table) => {
+                Ok(perms.contains(&perm) || perms.contains(&AuthPermission::Update(table.clone())))
             }
+            AuthPermission::Delete(table) => {
+                Ok(perms.contains(&perm) || perms.contains(&AuthPermission::Update(table.clone())))
+            }
+            AuthPermission::Update(_table) => Ok(perms.contains(&perm)),
         }
     }
 }

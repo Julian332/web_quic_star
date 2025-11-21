@@ -1,8 +1,10 @@
+#![allow(clippy::too_many_arguments)]
 use crate::CONFIG;
 use alloy::network::EthereumWallet;
 use alloy::providers::fillers::{
     BlobGasFiller, ChainIdFiller, FillProvider, GasFiller, JoinFill, NonceFiller,
 };
+
 use alloy::providers::{Identity, Provider, ProviderBuilder, RootProvider};
 
 mod erc20;
@@ -20,13 +22,13 @@ pub fn signer_http_provider() -> impl Provider {
         .wallet(get_project_signer())
         .connect_http(CONFIG.eth_rpc.clone())
 }
-
-pub fn http_provider() -> FillProvider<
+pub type ReadOnlyProvider = FillProvider<
     JoinFill<
         Identity,
         JoinFill<GasFiller, JoinFill<BlobGasFiller, JoinFill<NonceFiller, ChainIdFiller>>>,
     >,
     RootProvider,
-> {
+>;
+pub fn http_provider() -> ReadOnlyProvider {
     ProviderBuilder::new().connect_http(CONFIG.eth_rpc.clone())
 }

@@ -18,6 +18,7 @@ pub mod group;
 pub mod upload;
 pub mod user;
 
+#[allow(clippy::unwrap_used)]
 pub fn setup_router() -> Router {
     aide::generate::extract_schemas(true);
 

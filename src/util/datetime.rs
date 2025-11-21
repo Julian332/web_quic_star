@@ -1,22 +1,27 @@
+use crate::framework::errors::NoneError;
+use crate::prelude::IntoResult;
 use chrono::format::ParseErrorKind;
 use chrono::{DateTime, FixedOffset, NaiveDateTime, TimeZone, Utc};
 use core::fmt;
 
 pub trait TimeUtil {
-    fn to_common_chinese(&self) -> String;
+    type Err;
+    fn to_common_chinese(&self) -> Result<String, Self::Err>;
 }
 impl<Tz: TimeZone> TimeUtil for DateTime<Tz>
 where
     Tz::Offset: fmt::Display,
 {
-    fn to_common_chinese(&self) -> String {
+    type Err = NoneError;
+
+    fn to_common_chinese(&self) -> Result<String, Self::Err> {
         let format = self
-            .with_timezone(&FixedOffset::east_opt(8 * 3600).unwrap())
+            .with_timezone(&FixedOffset::east_opt(8 * 3600).into_result()?)
             .format("%Y-%m-%d %H:%M:%S");
-        format!("{format}")
+        Ok(format!("{format}"))
     }
 }
-fn from_string(time_str: &String) -> Result<DateTime<Utc>, ParseErrorKind> {
+fn from_string(time_str: &str) -> Result<DateTime<Utc>, ParseErrorKind> {
     if let Ok(datetime) = DateTime::parse_from_rfc3339(time_str) {
         return Ok(datetime.with_timezone(&Utc));
     }
@@ -32,10 +37,10 @@ fn from_string(time_str: &String) -> Result<DateTime<Utc>, ParseErrorKind> {
     ];
 
     for format in formats.iter() {
-        if let Ok(naive_datetime) = NaiveDateTime::parse_from_str(time_str, format) {
-            if let Some(datetime_east_8) = Utc.from_local_datetime(&naive_datetime).single() {
-                return Ok(datetime_east_8);
-            }
+        if let Ok(naive_datetime) = NaiveDateTime::parse_from_str(time_str, format)
+            && let Some(datetime_east_8) = Utc.from_local_datetime(&naive_datetime).single()
+        {
+            return Ok(datetime_east_8);
         }
     }
     Err(ParseErrorKind::Impossible)
@@ -53,7 +58,9 @@ pub mod chinese_datetime_format {
         S: Serializer,
         Tz::Offset: fmt::Display,
     {
-        let s = date.to_common_chinese();
+        let s = date
+            .to_common_chinese()
+            .map_err(serde::ser::Error::custom)?;
         serializer.serialize_str(&s)
     }
 
@@ -86,9 +93,9 @@ mod tests {
     #[test]
     fn sync_test1() {
         let time = Local::now();
-        println!("{}", time.to_common_chinese());
+        println!("{}", time.to_common_chinese().unwrap());
         let time = Utc::now();
-        println!("{}", time.to_common_chinese());
+        println!("{}", time.to_common_chinese().unwrap());
     }
     #[test]
     fn main() {

@@ -47,7 +47,7 @@ pub async fn save_req_to_task_local(
     if let Some(user) = &user {
         tracing::Span::current().record("user_id", user.id().to_string());
     }
-    let response = CURRENT_REQ
+    CURRENT_REQ
         .scope(
             ReqState {
                 req_id,
@@ -57,8 +57,7 @@ pub async fn save_req_to_task_local(
             },
             async move { next.run(request).await },
         )
-        .await;
-    response
+        .await
 }
 
 pub async fn req_log(request: Request, next: Next) -> Response {
