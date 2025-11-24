@@ -258,7 +258,8 @@ impl AuthnBackend for AuthBackend {
         match users
             .filter(username.eq(user_addr.to_string()))
             .select(User::as_select())
-            .first(&mut self.db.get()?)
+            .first(&mut self.db.get().await?)
+            .await
             .optional()
         {
             Ok(Some(user)) => Ok(Some(user)),
@@ -275,7 +276,8 @@ impl AuthnBackend for AuthBackend {
                         is_delete: false,
                     })
                     .returning(User::as_select())
-                    .get_result(&mut self.db.get()?)?;
+                    .get_result(&mut self.db.get().await?)
+                    .await?;
                 Ok(Some(user))
             }
             Err(e) => Err(e.into()),
@@ -301,7 +303,8 @@ impl AuthnBackend for AuthBackend {
         match users
             .filter(username.eq(user_addr.to_string()))
             .select(User::as_select())
-            .first(&mut self.db.get()?)
+            .first(&mut self.db.get().await?)
+            .await
             .optional()
         {
             Ok(Some(user)) => Ok(Some(user)),
@@ -318,7 +321,8 @@ impl AuthnBackend for AuthBackend {
                         is_delete: false,
                     })
                     .returning(User::as_select())
-                    .get_result(&mut self.db.get()?)?;
+                    .get_result(&mut self.db.get().await?)
+                    .await?;
                 Ok(Some(user))
             }
             Err(e) => Err(e.into()),

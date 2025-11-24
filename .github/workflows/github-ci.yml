@@ -111,7 +111,7 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
 
       - name: check --feature-powerset
-        run: cargo hack check --feature-powerset --no-dev-deps -p web3_quick
+        run: cargo hack check --feature-powerset --features postgres --no-dev-deps -p web3_quick
 
 
   rust-clippy-analyze:
@@ -162,7 +162,7 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     needs:
-      [ feature_set, format, udeps, msrv,  rust-clippy-analyze]
+      [ feature_set, format, udeps, msrv,  rust-clippy-analyze,test ]
     steps:
       - uses: re-actors/alls-green@release/v1
         with:
