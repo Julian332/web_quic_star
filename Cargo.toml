@@ -8,7 +8,7 @@ codegen-units = 32
 [features]
 default = ["postgres", "eth_mode", "solana_mode", "dev"]
 eth_mode = ["dep:alloy"]
-solana_mode = ["dep:anchor-client", "dep:anchor-spl"]
+solana_mode = ["dep:anchor-client"]
 dev = []
 postgres = ["diesel-dynamic-schema/postgres", "rust_decimal/db-diesel-postgres", "diesel_migrations/postgres", "diesel-async/postgres"]
 
@@ -44,7 +44,7 @@ chrono = { version = "0.4", features = ["serde"] }
 #solana ======
 anchor-client = { version = "0.32", optional = true, features = ["async"] }
 solana-client = "2"
-anchor-spl = { version = "0.32", features = ["default"], optional = true }
+#anchor-spl = { version = "0.32", features = ["default"], optional = true }
 #eth ========
 alloy = { version = "1", features = ["full", "reqwest-rustls-tls", "std", "essentials", ], optional = true, default-features = false }
 
@@ -73,3 +73,4 @@ mimalloc = { version = "0.1", features = [] }
 tracing-test = "0.2"
 [workspace]
 members = ["crates/*"]
+package = { rust-version = "1.89.0" }

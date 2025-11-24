@@ -83,16 +83,15 @@ pub fn set_log() {
 // }
 
 #[test]
+#[tracing_test::traced_test]
 pub fn test() {
     use std::ops::Deref;
-    set_log();
-    use tracing::error;
 
     let (err_info, port) = ("No connection", 22);
 
-    error!(err_info);
-    error!(target: "app_events", "App Error: {}", err_info);
-    error!({ info = err_info }, "error on port: {}", port);
-    error!(name: "invalid_input", "Invalid input: {}", err_info);
+    tracing::info!(err_info);
+    tracing::info!(target: "app_events", "App Error: {}", err_info);
+    tracing::info!({ info = err_info }, "error on port: {}", port);
+    tracing::info!(name: "invalid_input", "Invalid input: {}", err_info);
     println!("{:?}", crate::CONFIG.deref());
 }

@@ -1104,21 +1104,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "anchor-spl"
-version = "0.32.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3397ab3fc5b198bbfe55d827ff58bd69f2a8d3f9f71c3732c23c2093fec4d3ef"
-dependencies = [
- "anchor-lang",
- "spl-associated-token-account",
- "spl-pod",
- "spl-token",
- "spl-token-2022",
- "spl-token-group-interface",
- "spl-token-metadata-interface",
-]
-
-[[package]]
 name = "anchor-syn"
 version = "0.32.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8357,32 +8342,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "spl-associated-token-account"
-version = "7.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ae179d4a26b3c7a20c839898e6aed84cb4477adf108a366c95532f058aea041b"
-dependencies = [
- "borsh 1.5.7",
- "num-derive",
- "num-traits",
- "solana-program",
- "spl-associated-token-account-client",
- "spl-token",
- "spl-token-2022",
- "thiserror 2.0.17",
-]
-
-[[package]]
-name = "spl-associated-token-account-client"
-version = "2.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d6f8349dbcbe575f354f9a533a21f272f3eb3808a49e2fdc1c34393b88ba76cb"
-dependencies = [
- "solana-instruction",
- "solana-pubkey",
-]
-
-[[package]]
 name = "spl-discriminator"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -9855,7 +9814,6 @@ dependencies = [
  "aide",
  "alloy",
  "anchor-client",
- "anchor-spl",
  "anyhow",
  "axum",
  "axum-login",

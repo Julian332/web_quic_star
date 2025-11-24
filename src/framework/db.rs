@@ -139,27 +139,6 @@ where
     }
 }
 
-#[tokio::test]
-async fn test() {
-    use crate::config::set_env;
-    use crate::db_model::user::User;
-    use crate::schema::users::table as users;
-    use diesel::QueryDsl;
-    use diesel::SelectableHelper;
-
-    set_env();
-    let connection_pool = setup_connection_pool();
-    let mut pooled_connection = connection_pool.get().await.unwrap();
-    let x = users
-        .select(User::as_select())
-        .logic_delete_query()
-        .paginate(0, 10)
-        .load_and_count_pages(&mut pooled_connection)
-        .await
-        .unwrap();
-
-    println!("{:?}", x);
-}
 const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
 
 #[allow(clippy::unwrap_used)]

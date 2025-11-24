@@ -83,7 +83,6 @@ pub static ETH_CLIENT: LazyLock<util::eth_contracts::ReadOnlyProvider> =
 #[allow(clippy::expect_used)]
 pub static CONFIG: LazyLock<Config> = LazyLock::new(|| {
     config::set_env();
-    config::set_log();
     envy::from_env().expect(".env error")
 });
 #[macro_export]
