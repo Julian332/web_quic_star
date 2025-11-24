@@ -2624,7 +2624,7 @@ dependencies = [
 name = "derive_builder_core"
 version = "0.20.2"
 dependencies = [
- "darling 0.20.11",
+ "darling 0.21.3",
  "log",
  "proc-macro2",
  "quote",
