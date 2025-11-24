@@ -43,7 +43,7 @@ chrono = { version = "0.4", features = ["serde"] }
 
 #solana ======
 anchor-client = { version = "0.32", optional = true, features = ["async"] }
-solana-client = "2"
+solana-client = "3"
 #anchor-spl = { version = "0.32", features = ["default"], optional = true }
 #eth ========
 alloy = { version = "1", features = ["full", "reqwest-rustls-tls", "std", "essentials", ], optional = true, default-features = false }
