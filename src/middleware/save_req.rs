@@ -28,20 +28,14 @@ pub async fn save_req_to_db(mut request: Request, next: Next) -> Response {
         let type_flag = request
             .headers()
             .get(CONTENT_TYPE)
-            .map(|content_type| {
+            .map_or(false, |content_type| {
                 content_type == HeaderValue::from_static("application/x-www-form-urlencoded")
                     || content_type == HeaderValue::from_static("application/json")
-            })
-            .unwrap_or(false);
-        let length_flag = request
-            .headers()
-            .get(CONTENT_LENGTH)
-            .map(|x| {
-                x.to_str()
-                    .map(|x| usize::from_str(x).map(|x| true).unwrap_or(false))
-                    .unwrap_or(false)
-            })
-            .unwrap_or(false);
+            });
+        let length_flag = request.headers().get(CONTENT_LENGTH).map_or(false, |x| {
+            x.to_str()
+                .map_or(false, |x| usize::from_str(x).map_or(false, |x| true))
+        });
 
         let req_body = if length_flag && type_flag && sensitive_flag {
             let body = mem::take(request.body_mut());
@@ -86,7 +80,7 @@ async fn record(
     path: String,
     status_code: StatusCode,
 ) -> AppRes<()> {
-    let user_id = user.as_ref().map(|x| x.id).unwrap_or(ANONYMOUS_USER);
+    let user_id = user.as_ref().map_or(ANONYMOUS_USER, |x| x.id);
     let req_body = req_body.map(|x| {
         str::from_utf8(x.as_ref())
             .unwrap_or(" decoding utf8 err")
