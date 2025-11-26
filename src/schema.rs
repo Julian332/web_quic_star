@@ -31,7 +31,7 @@ diesel::table! {
 }
 
 diesel::table! {
-    req_record (id) {
+    req_records (id) {
         id -> Int8,
 
         username -> Nullable<Text>,
