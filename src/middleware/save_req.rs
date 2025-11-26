@@ -18,7 +18,7 @@ use tracing::log::warn;
 use uuid::fmt::Simple;
 
 #[allow(unused)]
-pub async fn save_req(mut request: Request, next: Next) -> Response {
+pub async fn save_req_to_db(mut request: Request, next: Next) -> Response {
     if request.method() == Method::GET {
         next.run(request).await
     } else {

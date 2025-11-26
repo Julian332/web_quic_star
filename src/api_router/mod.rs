@@ -36,7 +36,8 @@ pub fn setup_router() -> Router {
             ServeDir::new(CONFIG.file_server_directory.as_str()),
         )
         .fallback(fallback)
-        .layer(from_fn(crate::middleware::save_req::save_req))
+        // enable if needed
+        // .layer(from_fn(crate::middleware::save_req::save_req_to_db))
         // enable if needed
         // .layer(from_fn(crate::middleware::continue_when_drop_req))
         .layer(from_fn(log_req))
