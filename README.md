@@ -53,8 +53,6 @@ create table in [schema.rs](src/schema.rs)
 ```shell
 diesel migration generate --diff-schema create_table
 
-diesel migration run --locked-schema
-
 ```
 
 ### 生成实体类 注意 `crate::schema::` 后面要补全

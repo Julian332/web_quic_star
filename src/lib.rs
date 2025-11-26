@@ -18,13 +18,13 @@ pub mod config;
 pub mod db_model;
 pub mod domain;
 pub mod framework;
+pub mod middleware;
 pub mod scheduled_task;
 pub mod schema;
 pub mod schema_view;
 #[cfg(feature = "solana_mode")]
 pub mod subscribe;
 pub mod util;
-pub mod web_middleware;
 
 pub mod prelude {
     pub use super::util::tokio::*;
@@ -71,7 +71,7 @@ pub static SOL_CLIENT: LazyLock<solana_client::nonblocking::rpc_client::RpcClien
     LazyLock::new(|| {
         solana_client::nonblocking::rpc_client::RpcClient::new(CONFIG.solana_rpc.to_string())
     });
-use crate::web_middleware::ReqState;
+use middleware::ReqState;
 
 use mimalloc::MiMalloc;
 use tokio::task_local;
@@ -83,6 +83,7 @@ pub static ETH_CLIENT: LazyLock<util::eth_contracts::ReadOnlyProvider> =
 #[allow(clippy::expect_used)]
 pub static CONFIG: LazyLock<Config> = LazyLock::new(|| {
     config::set_env();
+    config::set_log();
     envy::from_env().expect(".env error")
 });
 #[macro_export]

@@ -1,7 +1,7 @@
 use crate::CONFIG;
 use crate::framework::api_doc::{fallback, set_api_doc};
 use crate::framework::auth::get_auth_layer;
-use crate::web_middleware::{req_log, save_req_to_task_local};
+use crate::middleware::{global_req_state, log_req};
 use aide::axum::ApiRouter;
 use axum::Router;
 use axum::middleware::from_fn;
@@ -36,8 +36,11 @@ pub fn setup_router() -> Router {
             ServeDir::new(CONFIG.file_server_directory.as_str()),
         )
         .fallback(fallback)
-        .layer(from_fn(req_log))
-        .layer(from_fn(save_req_to_task_local))
+        .layer(from_fn(crate::middleware::save_req::save_req))
+        // enable if needed
+        // .layer(from_fn(crate::middleware::continue_when_drop_req))
+        .layer(from_fn(log_req))
+        .layer(from_fn(global_req_state))
         .layer(get_auth_layer())
         .layer(NormalizePathLayer::trim_trailing_slash())
         .layer(

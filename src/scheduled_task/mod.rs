@@ -1,5 +1,5 @@
+use crate::middleware::ReqState;
 use crate::prelude::async_span;
-use crate::web_middleware::ReqState;
 use crate::{AppRes, CURRENT_REQ, DB};
 use std::future::Future;
 use tokio_cron_scheduler::{Job, JobScheduler};

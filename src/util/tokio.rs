@@ -1,5 +1,5 @@
 use crate::CURRENT_REQ;
-use crate::web_middleware::ReqState;
+use crate::middleware::ReqState;
 use axum_login::AuthUser;
 use std::sync::atomic::Ordering;
 use std::time::Duration;

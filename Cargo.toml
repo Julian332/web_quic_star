@@ -26,7 +26,6 @@ http = { version = "1" }
 tower-sessions = { version = "0.14", features = ["memory-store"] }
 url = { version = "2", features = ["serde"] }
 schemars = { version = "1", features = ["rust_decimal1", "chrono04", "uuid1", "url2"] }
-
 #log =======
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tracing = "0.1"
@@ -68,6 +67,7 @@ web_api_gen = { path = "crates/derive_builder" }
 derive_more = { version = "2", features = ["full"] }
 sha2 = "0.10"
 mimalloc = { version = "0.1", features = [] }
+log = "0.4.28"
 
 [dev-dependencies]
 tracing-test = "0.2"

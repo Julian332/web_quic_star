@@ -13,7 +13,9 @@ use axum_login::{
 use diesel::deserialize::{FromSql, FromSqlRow};
 use diesel::serialize::{Output, ToSql};
 use diesel::sql_types::{Text, VarChar};
-use diesel::{ExpressionMethods, QueryDsl, SelectableHelper, deserialize, serialize};
+use diesel::{
+    ExpressionMethods, OptionalExtension, QueryDsl, SelectableHelper, deserialize, serialize,
+};
 use diesel_async::RunQueryDsl;
 use diesel_async::pooled_connection::PoolError;
 use schemars::JsonSchema;
@@ -28,9 +30,11 @@ use tower_sessions::MemoryStore;
 const LOGIN_MESSAGE: &str = "welcome";
 pub const DEFAULT_TENANTRY: &str = "default";
 pub const COMMON_USER_ROLE: i64 = -1;
-pub const COMMON_USER: i64 = -1;
 pub const SUPER_USER_ROLE: i64 = -2;
+
+pub const COMMON_USER: i64 = -1;
 pub const SUPER_USER: i64 = -2;
+pub const ANONYMOUS_USER: i64 = -3;
 
 #[derive(Debug, FromSqlRow, Serialize, Deserialize, JsonSchema, Clone, Eq, PartialEq, Hash)]
 #[diesel(sql_type = Text)]
@@ -231,11 +235,13 @@ impl AuthnBackend for AuthBackend {
             .select(User::as_select())
             .first(&mut self.db.get().await?)
             .await
+            .optional()
         {
-            Ok(user) => verify_password(creds.password, &user.password)
+            Ok(Some(user)) => verify_password(creds.password, &user.password)
                 .map_err(|e| AuthError(AppError::from(e)))
                 .map(|_| Some(user)),
             Err(e) => Err(e.into()),
+            Ok(None) => Ok(None),
         }
     }
 

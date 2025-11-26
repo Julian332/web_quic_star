@@ -30,8 +30,6 @@ impl<T: Default> PageParam<T> {
     }
 }
 
-const _LOGIN_URL: &str = "/auth/login";
-
 #[derive(Deserialize, Serialize, JsonSchema, Clone, Default)]
 pub enum Compare {
     NotEqual,
