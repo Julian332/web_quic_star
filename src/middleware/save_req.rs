@@ -28,13 +28,13 @@ pub async fn save_req_to_db(mut request: Request, next: Next) -> Response {
         let type_flag = request
             .headers()
             .get(CONTENT_TYPE)
-            .map_or(false, |content_type| {
+            .is_some_and(|content_type| {
                 content_type == HeaderValue::from_static("application/x-www-form-urlencoded")
                     || content_type == HeaderValue::from_static("application/json")
             });
-        let length_flag = request.headers().get(CONTENT_LENGTH).map_or(false, |x| {
+        let length_flag = request.headers().get(CONTENT_LENGTH).is_some_and(|x| {
             x.to_str()
-                .map_or(false, |x| usize::from_str(x).map_or(false, |x| true))
+                .is_ok_and(|x| usize::from_str(x).is_ok_and(|x| true))
         });
 
         let req_body = if length_flag && type_flag && sensitive_flag {
