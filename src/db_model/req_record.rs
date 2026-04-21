@@ -15,6 +15,7 @@ use web_api_gen::WebApiGen;
     AsChangeset,
     Insertable,
     Default,
+    Clone,
 )]
 #[diesel(table_name = crate::schema::req_records)]
 #[diesel(check_for_backend(DbType))]

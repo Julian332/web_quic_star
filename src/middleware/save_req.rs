@@ -2,7 +2,7 @@ use crate::db_model::req_record::NewReqRecord;
 use crate::db_model::user::User;
 use crate::framework::auth::ANONYMOUS_USER;
 use crate::schema::req_records::dsl::req_records;
-use crate::{AppRes, CURRENT_REQ, DB};
+use crate::{AppRes, CURRENT_REQ, DB, WEB_API_BROADCAST};
 use alloy::rlp::Bytes;
 use axum::body::{Body, to_bytes};
 use axum::extract::Request;
@@ -14,6 +14,7 @@ use http::{HeaderValue, Method, StatusCode};
 use std::mem;
 use std::str::FromStr;
 use std::time::SystemTime;
+use tokio::sync::broadcast::Sender;
 use tracing::log::warn;
 use uuid::fmt::Simple;
 
@@ -83,20 +84,36 @@ async fn record(
     let user_id = user.as_ref().map_or(ANONYMOUS_USER, |x| x.id);
     let req_body = req_body.map(|x| {
         str::from_utf8(x.as_ref())
-            .unwrap_or(" decoding utf8 err")
+            .unwrap_or("decoding utf8 err")
             .to_string()
     });
+    let temp = path.as_str();
+    let new_req_record = NewReqRecord {
+        username: user.map(|x| x.username),
+        req_id: req_id.to_string(),
+        req_body,
+        path: path.clone(),
+        status_code: status_code.to_string(),
+        create_time: SystemTime::now().into(),
+        create_by: user_id,
+    };
     diesel::insert_into(req_records)
-        .values(NewReqRecord {
-            username: user.map(|x| x.username),
-            req_id: req_id.to_string(),
-            req_body,
-            path,
-            status_code: status_code.to_string(),
-            create_time: SystemTime::now().into(),
-            create_by: user_id,
-        })
+        .values(new_req_record.clone())
         .execute(&mut DB.get().await?)
         .await?;
+    let guard = WEB_API_BROADCAST.read().await;
+    let option = guard.get(temp);
+    match option {
+        None => {
+            drop(guard);
+            let sender = Sender::new(1024);
+            let mut write_guard = WEB_API_BROADCAST.write().await;
+            write_guard.insert(temp.to_string(), sender);
+        }
+        Some(x) => {
+            x.send(new_req_record.clone())?;
+        }
+    }
+
     Ok(())
 }

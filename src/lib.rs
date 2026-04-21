@@ -5,10 +5,12 @@
 #![deny(clippy::indexing_slicing)]
 #![allow(clippy::get_first)]
 extern crate core;
+
 use crate::config::Config;
 use crate::framework::db::setup_connection_pool;
 use framework::db::ConnPool;
 use framework::errors::AppError;
+use std::collections::HashMap;
 use std::sync::LazyLock;
 
 pub mod api_router;
@@ -73,7 +75,10 @@ pub static SOL_CLIENT: LazyLock<solana_client::nonblocking::rpc_client::RpcClien
     });
 use middleware::ReqState;
 
+use crate::db_model::req_record::NewReqRecord;
 use mimalloc::MiMalloc;
+use tokio::sync::RwLock;
+use tokio::sync::broadcast::Sender;
 use tokio::task_local;
 
 #[cfg(feature = "eth_mode")]
@@ -86,6 +91,10 @@ pub static CONFIG: LazyLock<Config> = LazyLock::new(|| {
     config::set_log();
     envy::from_env().expect(".env error")
 });
+
+#[allow(clippy::expect_used)]
+pub static WEB_API_BROADCAST: LazyLock<RwLock<HashMap<String, Sender<NewReqRecord>>>> =
+    LazyLock::new(|| RwLock::new(HashMap::new()));
 #[macro_export]
 macro_rules! unwrap_opt_or_continue {
     ($res:expr) => {
