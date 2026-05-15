@@ -67,10 +67,10 @@ fn find_inserted_after_confirmed<P: AsRef<Path>>(path: P) -> Vec<String> {
 
         if let Some(rest) = payload.strip_prefix("tx:") {
             // confirmed 行: <pending> tx:<SIG> confirmed
-            if let Some(sig) = rest.split_whitespace().next() {
-                if rest.contains("confirmed") {
-                    confirmed.insert(sig.to_string());
-                }
+            if let Some(sig) = rest.split_whitespace().next()
+                && rest.contains("confirmed")
+            {
+                confirmed.insert(sig.to_string());
             }
         } else {
             // inserted 行: <pending> <SIG> inserted ,token:...,wallet:...
@@ -119,14 +119,12 @@ fn time_first_insert_to_confirm<P: AsRef<Path>>(path: P) -> Vec<(String, i64)> {
         };
 
         if let Some(rest) = payload.strip_prefix("tx:") {
-            if rest.contains("confirmed") {
-                if let Some(sig) = rest.split_whitespace().next() {
-                    if seen_confirm.insert(sig.to_string()) {
-                        if let Some(&start) = first_insert.get(sig) {
-                            results.push((sig.to_string(), ts - start));
-                        }
-                    }
-                }
+            if rest.contains("confirmed")
+                && let Some(sig) = rest.split_whitespace().next()
+                && seen_confirm.insert(sig.to_string())
+                && let Some(&start) = first_insert.get(sig)
+            {
+                results.push((sig.to_string(), ts - start));
             }
         } else {
             let mut it = payload.split_whitespace();

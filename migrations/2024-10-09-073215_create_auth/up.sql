@@ -84,13 +84,9 @@ SELECT users.id,
 FROM users
          LEFT JOIN groups ON users.group_id = groups.id;
 
-alter table user_with_group_views
-    owner to postgres;
 
 
 
-alter table user_with_group_views
-    owner to postgres;
 
 -- auto cast
 -- CREATE CAST (text AS bigint) WITH INOUT AS IMPLICIT;
