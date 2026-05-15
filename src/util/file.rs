@@ -28,7 +28,11 @@ pub async fn sha256_digest(path: &PathBuf) -> AppRes<String> {
         }
         hasher.finalize()
     };
-    Ok(format!("{:X}", digest))
+    let bytes: &[u8] = digest.as_ref();
+    Ok(bytes
+        .iter()
+        .map(|b| format!("{:02X}", b))
+        .collect::<String>())
 }
 
 pub fn path_is_valid(path: &str) -> bool {

@@ -13,9 +13,7 @@ use axum_login::{
 use diesel::deserialize::{FromSql, FromSqlRow};
 use diesel::serialize::{Output, ToSql};
 use diesel::sql_types::{Text, VarChar};
-use diesel::{
-    ExpressionMethods, OptionalExtension, QueryDsl, SelectableHelper, deserialize, serialize,
-};
+use diesel::{ExpressionMethods, QueryDsl, SelectableHelper, deserialize, serialize};
 use diesel_async::RunQueryDsl;
 use diesel_async::pooled_connection::PoolError;
 use schemars::JsonSchema;

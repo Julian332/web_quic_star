@@ -32,10 +32,10 @@ tracing = "0.1"
 
 #db ========
 diesel = { version = "2", features = ["chrono", "serde_json", "uuid", ], default-features = false }
-diesel-async = { version = "0.9.0", features = ["deadpool", "async-connection-wrapper"] }
+diesel-async = { version = "0.9", features = ["deadpool", "async-connection-wrapper"] }
 diesel-dynamic-schema = "0.2"
 diesel-enum = { version = "0.2", features = [] }
-deadpool = { version = "0.13.0", features = [], default-features = false }
+deadpool = { version = "0.13", features = [], default-features = false }
 diesel_migrations = { version = "2", features = [] }
 rust_decimal = { version = "1", features = ["serde-str", "macros", "maths"] }
 chrono = { version = "0.4", features = ["serde"] }
@@ -65,7 +65,7 @@ reqwest = { version = "0.13", features = ["json", "cookies", "multipart", "chars
 tokio-cron-scheduler = { version = "0.15", features = ["default"] }
 web_api_gen = { path = "crates/derive_builder" }
 derive_more = { version = "2", features = ["full"] }
-sha2 = "0.11.0"
+sha2 = "0.11"
 mimalloc = { version = "0.1", features = [] }
 
 [dev-dependencies]
