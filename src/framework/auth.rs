@@ -272,6 +272,7 @@ impl AuthnBackend for AuthBackend {
     ) -> Result<Option<Self::User>, Self::Error> {
         use crate::db_model::user::NewUser;
         use solana_client::rpc_response::transaction::Signature;
+        use std::str::FromStr;
         use std::time::SystemTime;
 
         let signature = Signature::from_str(&creds.signature)?;
@@ -321,19 +322,6 @@ impl AuthnBackend for AuthBackend {
             Err(e) => Err(e.into()),
         }
     }
-}
-#[test]
-#[cfg(feature = "solana_mode")]
-fn test1() {
-    use anchor_client::solana_sdk::signature::Keypair;
-    use anchor_client::solana_sdk::signer::Signer;
-
-    let keypair = Keypair::new();
-    let x = b"messagee";
-    // let result = Signature::from_str("asd").unwrap();
-    let signature = keypair.sign_message(x);
-    let x1 = signature.verify(keypair.pubkey().as_ref(), x);
-    println!("{}", x1);
 }
 
 impl AuthzBackend for AuthBackend {

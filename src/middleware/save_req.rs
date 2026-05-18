@@ -110,7 +110,7 @@ async fn record(
             write_guard.insert(temp.to_string(), sender);
         }
         Some(x) => {
-            x.send(new_req_record.clone())?;
+            x.send(new_req_record)?;
         }
     }
 

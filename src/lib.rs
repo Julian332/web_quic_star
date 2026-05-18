@@ -7,12 +7,17 @@
 extern crate core;
 
 use crate::config::Config;
+use crate::db_model::req_record::NewReqRecord;
 use crate::framework::db::setup_connection_pool;
 use framework::db::ConnPool;
 use framework::errors::AppError;
+use middleware::ReqState;
+use mimalloc::MiMalloc;
 use std::collections::HashMap;
 use std::sync::LazyLock;
-
+use tokio::sync::RwLock;
+use tokio::sync::broadcast::Sender;
+use tokio::task_local;
 pub mod api_router;
 pub mod api_service;
 pub mod api_wrapper;
@@ -58,6 +63,7 @@ pub mod prelude {
 
 // todo Progress bar
 // todo slow sql , log sql
+// page enum col
 
 pub type AppRes<T> = Result<T, AppError>;
 
@@ -68,23 +74,6 @@ task_local! {
 }
 pub static DB: LazyLock<ConnPool> = LazyLock::new(setup_connection_pool);
 pub static HTTP_CLIENT: LazyLock<reqwest::Client> = LazyLock::new(reqwest::Client::new);
-#[cfg(feature = "solana_mode")]
-pub static SOL_CLIENT: LazyLock<solana_client::nonblocking::rpc_client::RpcClient> =
-    LazyLock::new(|| {
-        solana_client::nonblocking::rpc_client::RpcClient::new(CONFIG.solana_rpc.to_string())
-    });
-use middleware::ReqState;
-
-use crate::db_model::req_record::NewReqRecord;
-use mimalloc::MiMalloc;
-use tokio::sync::RwLock;
-use tokio::sync::broadcast::Sender;
-use tokio::task_local;
-
-#[cfg(feature = "eth_mode")]
-pub static ETH_CLIENT: LazyLock<util::eth_contracts::ReadOnlyProvider> =
-    LazyLock::new(util::eth_contracts::http_provider);
-
 #[allow(clippy::expect_used)]
 pub static CONFIG: LazyLock<Config> = LazyLock::new(|| {
     config::set_env();
@@ -95,6 +84,16 @@ pub static CONFIG: LazyLock<Config> = LazyLock::new(|| {
 #[allow(clippy::expect_used)]
 pub static WEB_API_BROADCAST: LazyLock<RwLock<HashMap<String, Sender<NewReqRecord>>>> =
     LazyLock::new(|| RwLock::new(HashMap::new()));
+#[cfg(feature = "solana_mode")]
+pub static SOL_CLIENT: LazyLock<solana_client::nonblocking::rpc_client::RpcClient> =
+    LazyLock::new(|| {
+        solana_client::nonblocking::rpc_client::RpcClient::new(CONFIG.solana_rpc.to_string())
+    });
+
+#[cfg(feature = "eth_mode")]
+pub static ETH_CLIENT: LazyLock<util::eth_contracts::ReadOnlyProvider> =
+    LazyLock::new(util::eth_contracts::http_provider);
+
 #[macro_export]
 macro_rules! unwrap_opt_or_continue {
     ($res:expr) => {

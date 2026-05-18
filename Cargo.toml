@@ -6,7 +6,7 @@ edition = "2024"
 [profile.dev]
 codegen-units = 32
 [features]
-default = ["postgres", "dev",]
+default = ["postgres", "dev", "solana_mode"]
 eth_mode = ["dep:alloy"]
 solana_mode = ["dep:solana-client", "solana-signature", "solana-pubkey"]
 dev = []

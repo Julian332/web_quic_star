@@ -119,14 +119,12 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
     // }
 
     let f = quote!(
-        use crate::framework::auth::AuthBackend;
         use crate::framework::api_doc::{default_resp_docs, empty_resp_docs};
         use crate::schema::#schema_s::dsl::#schema_s;
         use aide::axum::routing::{delete_with, get_with, post_with, put_with};
         use aide::axum::ApiRouter;
         use axum::extract::{Path};
         use crate::framework::api::{BoolOp, Compare};
-        use axum_login::permission_required;
         use crate::DB;
         use diesel::PgSortExpressionMethods;
         use crate::framework::auth::AuthPermission::*;
@@ -155,6 +153,7 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
 
             use crate::framework::errors::AppError;
             use crate::framework::db::{LogicDeleteQuery, Paginate};
+            use crate::prelude::IntoResult;
 
             pub fn get_routers() -> (
                 ApiRouter,
@@ -181,7 +180,7 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
             let router_update = ApiRouter::new().api_route(
                 concat!("/",stringify!(#update),"/{id}"),
                 put_with(
-                    web::update_entity_by_id,
+                    web::update_entity_by_ids,
                     default_resp_docs::<#model>,
                 ),
             );
@@ -212,15 +211,20 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
                 Ok(Json(result))
             }
 
-            pub async fn update_entity_by_id(
-                Path(id_param): Path<#id_type>,
-                Json(new): Json<#update_builder_ident>,
-            ) -> Result<Json<#model>, AppError> {
-                let result = diesel::update(#schema_s.find(id_param))
-                    .set(&new)
-                    .returning(#model::as_returning())
-                    .get_result(&mut DB.get().await?).await?;
-                Ok(Json(result))
+            pub async fn update_entity_by_ids(
+                Json(news): Json<std::collections::HashMap<#id_type,#update_builder_ident>>,
+            ) -> Result<Json<Vec<#model>>, AppError> {
+            let task = news.into_iter().map(async |(id, mut new)| {
+            new.id = None;
+            let result = diesel::update(#schema_s.find(id))
+                .set(&new)
+                .returning(#model::as_returning())
+                .get_result(&mut DB.get().await?)
+                .await?;
+            crate::prelude::AppRes::Ok(result)
+        });
+        let result = futures::future::try_join_all(task).await?;
+        Ok(Json(result))
             }
 
             pub async fn get_entity_by_id(
@@ -536,14 +540,12 @@ pub fn query_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::Token
     // }
 
     let f = quote!(
-        use crate::framework::auth::AuthBackend;
         use crate::framework::api_doc::{default_resp_docs, empty_resp_docs};
         use crate::schema_view::#schema_s::dsl::#schema_s;
         use aide::axum::routing::{delete_with, get_with, post_with, put_with};
         use aide::axum::ApiRouter;
         use axum::extract::{Path};
         use crate::framework::api::{BoolOp, Compare};
-        use axum_login::permission_required;
         use crate::DB;
         use crate::framework::auth::AuthPermission::Read;
         use crate::api_router::require_permissions;
@@ -564,6 +566,7 @@ pub fn query_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::Token
             use crate::framework::errors::AppError;
             use crate::framework::db::{LogicDeleteQuery, Paginate};
             use diesel_async::RunQueryDsl;
+            use crate::prelude::IntoResult;
 
             pub fn get_routers() -> (
                 ApiRouter,
