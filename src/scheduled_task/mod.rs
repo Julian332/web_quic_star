@@ -43,7 +43,6 @@ pub async fn set_scheduler() {
         .await
         .expect("cannot create jobs scheduler");
     #[cfg(feature = "dev")]
-    add_async_cron(&sched, "1/5 * * * * *", example).await;
-
+    // add_async_cron(&sched, "1/5 * * * * *", example).await;
     sched.start().await.expect("cannot start jobs scheduler");
 }

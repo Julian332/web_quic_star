@@ -1,9 +1,9 @@
 use aide::OperationIo;
-use anchor_client::anchor_lang::prelude::Pubkey;
 use derive_more::{AsMut, AsRef, Deref, DerefMut, Display, From, FromStr, Into};
 use schemars::generate::SchemaGenerator;
 use schemars::{JsonSchema, Schema, json_schema};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use solana_pubkey::Pubkey;
 use std::borrow::Cow;
 use std::str::FromStr;
 

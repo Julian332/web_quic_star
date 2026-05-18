@@ -1,5 +1,5 @@
+use crate::api_router::require_login;
 use crate::framework::api_doc::empty_resp_docs;
-use crate::framework::auth::AuthBackend;
 use crate::util::file;
 use crate::{AppRes, CONFIG};
 use aide::OperationIo;
@@ -8,7 +8,6 @@ use aide::axum::routing::{get_with, post_with};
 use axum::Json;
 use axum::extract::Multipart;
 use axum::response::Html;
-use axum_login::login_required;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::ops::Deref;
@@ -16,7 +15,7 @@ use std::ops::Deref;
 pub fn upload_routes() -> ApiRouter {
     ApiRouter::new()
         .api_route("/", post_with(accept_form, empty_resp_docs))
-        .route_layer(login_required!(AuthBackend))
+        .route_layer(require_login())
         .api_route("/", get_with(show_form, empty_resp_docs))
 }
 async fn show_form() -> Html<&'static str> {

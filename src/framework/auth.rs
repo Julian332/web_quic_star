@@ -13,15 +13,15 @@ use axum_login::{
 use diesel::deserialize::{FromSql, FromSqlRow};
 use diesel::serialize::{Output, ToSql};
 use diesel::sql_types::{Text, VarChar};
-use diesel::{ExpressionMethods, QueryDsl, SelectableHelper, deserialize, serialize};
+use diesel::{
+    ExpressionMethods, OptionalExtension, QueryDsl, SelectableHelper, deserialize, serialize,
+};
 use diesel_async::RunQueryDsl;
 use diesel_async::pooled_connection::PoolError;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fmt::{Display, Formatter};
-use std::str::FromStr;
-use std::sync::Arc;
 use tower_sessions::MemoryStore;
 
 #[allow(dead_code)]
@@ -36,22 +36,22 @@ pub const ANONYMOUS_USER: i64 = -3;
 
 #[derive(Debug, FromSqlRow, Serialize, Deserialize, JsonSchema, Clone, Eq, PartialEq, Hash)]
 #[diesel(sql_type = Text)]
-pub enum AuthPermission<Table = Arc<String>> {
+pub enum AuthPermission<Table = String> {
     Admin,
     Read(Table),
     Add(Table),
     Delete(Table),
     Update(Table),
 }
-
+//
 impl From<AuthPermission<&str>> for AuthPermission {
     fn from(value: AuthPermission<&str>) -> Self {
         match value {
             AuthPermission::Admin => AuthPermission::Admin,
-            AuthPermission::Read(x) => AuthPermission::Read(Arc::from(x.to_string())),
-            AuthPermission::Add(x) => AuthPermission::Read(Arc::from(x.to_string())),
-            AuthPermission::Delete(x) => AuthPermission::Read(Arc::from(x.to_string())),
-            AuthPermission::Update(x) => AuthPermission::Read(Arc::from(x.to_string())),
+            AuthPermission::Read(x) => AuthPermission::Read(x.to_string()),
+            AuthPermission::Add(x) => AuthPermission::Read(x.to_string()),
+            AuthPermission::Delete(x) => AuthPermission::Read(x.to_string()),
+            AuthPermission::Update(x) => AuthPermission::Read(x.to_string()),
         }
     }
 }
@@ -68,32 +68,22 @@ impl Display for AuthPermission {
     }
 }
 
-impl TryFrom<String> for AuthPermission {
+impl TryFrom<String> for AuthPermission<String> {
     type Error = AuthError;
 
     fn try_from(s: String) -> Result<Self, Self::Error> {
-        s.parse()
-    }
-}
-impl FromStr for AuthPermission {
-    type Err = AuthError;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
         let split = s.split(':').collect::<Vec<_>>();
         let perm = split.last().into_result()?;
         let table = split.get(0).into_result()?;
         let result = match perm {
             string if string.eq_ignore_ascii_case("Admin") => AuthPermission::Admin,
-            permission if permission.eq_ignore_ascii_case("read") => {
-                Self::Read(Arc::from(table.to_string()))
-            }
-            permission if permission.eq_ignore_ascii_case("add") => {
-                Self::Add(Arc::from(table.to_string()))
-            }
+            permission if permission.eq_ignore_ascii_case("read") => Self::Read(table.to_string()),
+            permission if permission.eq_ignore_ascii_case("add") => Self::Add(table.to_string()),
             permission if permission.eq_ignore_ascii_case("delete") => {
-                Self::Delete(Arc::from(table.to_string()))
+                Self::Delete(table.to_string())
             }
             permission if permission.eq_ignore_ascii_case("update") => {
-                Self::Update(Arc::from(table.to_string()))
+                Self::Update(table.to_string())
             }
             _ => return Err(AppError::new(&format!("unknown permission: {s}")).into()),
         };
@@ -101,31 +91,20 @@ impl FromStr for AuthPermission {
     }
 }
 
-impl ToSql<Text, DbType> for AuthPermission {
+impl ToSql<Text, DbType> for AuthPermission<String> {
     fn to_sql<'b>(&'b self, out: &mut Output<'b, '_, DbType>) -> serialize::Result {
         <String as ToSql<VarChar, DbType>>::to_sql(&self.to_string(), &mut out.reborrow())
     }
 }
 
-impl FromSql<Text, DbType> for AuthPermission {
+impl FromSql<Text, DbType> for AuthPermission<String> {
     fn from_sql(
         bytes: <DbType as diesel::backend::Backend>::RawValue<'_>,
     ) -> deserialize::Result<Self> {
         let string = <String as FromSql<VarChar, DbType>>::from_sql(bytes)?;
-        let perm = AuthPermission::try_from(string).map_err(Box::new)?;
+        let perm = AuthPermission::<String>::try_from(string).map_err(Box::new)?;
         Ok(perm)
     }
-}
-
-#[test]
-#[allow(clippy::unwrap_used, clippy::expect_used)]
-fn permissions_test() {
-    let perm = AuthPermission::from_str("t:add").unwrap();
-    let perm2 = AuthPermission::from_str("t:Add").unwrap();
-    println!("{:?}", perm);
-    println!("{:?}", perm2);
-    println!("{}", perm);
-    println!("{}", perm2);
 }
 
 #[test]
@@ -155,8 +134,8 @@ pub struct AuthBackend {
 ))]
 #[derive(Debug, Clone, Deserialize, JsonSchema)]
 pub struct Credentials {
-    pub username: String,
     pub password: String,
+    pub username: String,
     pub next: Option<String>,
 }
 
@@ -250,7 +229,6 @@ impl AuthnBackend for AuthBackend {
     ) -> Result<Option<Self::User>, Self::Error> {
         use crate::db_model::user::NewUser;
         use alloy::signers::Signature;
-        use diesel::OptionalExtension;
         use std::str::FromStr;
         use std::time::SystemTime;
         let signature = Signature::from_str(&creds.signature)?;
@@ -293,11 +271,10 @@ impl AuthnBackend for AuthBackend {
         creds: Self::Credentials,
     ) -> Result<Option<Self::User>, Self::Error> {
         use crate::db_model::user::NewUser;
-        use diesel::OptionalExtension;
-        use std::str::FromStr;
+        use solana_client::rpc_response::transaction::Signature;
         use std::time::SystemTime;
-        let signature =
-            anchor_client::solana_sdk::signature::Signature::from_str(&creds.signature)?;
+
+        let signature = Signature::from_str(&creds.signature)?;
         let user_addr = creds.user_addr.0;
         let is_validate = signature.verify(LOGIN_MESSAGE.as_ref(), user_addr.as_ref());
         if !is_validate {
@@ -378,7 +355,7 @@ impl AuthzBackend for AuthBackend {
         match user_with_group_views
             .find(user.id)
             .select(crate::schema_view::user_with_group_views::permissions)
-            .get_result::<Vec<AuthPermission>>(&mut self.db.get().await?)
+            .get_result::<Vec<AuthPermission<String>>>(&mut self.db.get().await?)
             .await
         {
             Ok(res) => Ok(res
@@ -429,4 +406,4 @@ impl_from!(deadpool::managed::PoolError<PoolError>);
 #[cfg(feature = "eth_mode")]
 impl_from!(alloy::primitives::SignatureError);
 #[cfg(feature = "solana_mode")]
-impl_from!(anchor_client::solana_sdk::signature::ParseSignatureError);
+impl_from!(solana_signature::ParseSignatureError);

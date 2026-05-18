@@ -2,20 +2,20 @@ use crate::framework::errors::AppError;
 use crate::{AppRes, DB};
 use aide::OperationIo;
 use axum::Json;
-use axum_login::{AuthSession, login_required};
+use axum_login::AuthSession;
 use diesel::QueryDsl;
 use diesel_async::RunQueryDsl;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use aide::axum::ApiRouter;
-use aide::axum::routing::post_with;
-
+use crate::api_router::{require_login, require_permissions};
 use crate::db_model::user;
 use crate::framework::api_doc::default_resp_docs;
 use crate::framework::auth::AuthBackend;
 use crate::framework::auth::AuthPermission::*;
 use crate::schema::users::dsl::users;
+use aide::axum::ApiRouter;
+use aide::axum::routing::post_with;
 
 #[derive(Serialize, Deserialize, OperationIo, Debug, Default, JsonSchema)]
 pub struct ModifyPassword {
@@ -52,17 +52,9 @@ pub fn user_routes() -> ApiRouter {
         post_with(modify_password, default_resp_docs::<String>),
     );
     router_add
-        .route_layer(axum_login::permission_required!(AuthBackend, Add("users")))
-        .merge(
-            router_read.route_layer(axum_login::permission_required!(AuthBackend, Read("users"))),
-        )
-        .merge(router_delete.route_layer(axum_login::permission_required!(
-            AuthBackend,
-            Delete("users")
-        )))
-        .merge(router_update.route_layer(axum_login::permission_required!(
-            AuthBackend,
-            Update("users")
-        )))
-        .merge(modify_password.route_layer(login_required!(AuthBackend)))
+        .route_layer(require_permissions([Add("users")]))
+        .merge(router_read.route_layer(require_permissions([Read("users")])))
+        .merge(router_delete.route_layer(require_permissions([Delete("users")])))
+        .merge(router_update.route_layer(require_permissions([Update("users")])))
+        .merge(modify_password.route_layer(require_login()))
 }
