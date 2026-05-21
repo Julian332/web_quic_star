@@ -54,18 +54,6 @@ impl Display for AppError {
         write!(f, "error:{}, +error_id:{}", self.error, self.error_id)
     }
 }
-#[test]
-fn test_display_error() {
-    let x: AppError = BlockError::InvalidSignature.into();
-    println!("{:?}", x);
-    // let error = AppError::new("eee");
-    // println!("{}", error);
-    // println!("{:?}", error);
-    // println!("{:?}", serde_json::to_string(&error));
-    use alloy::rpc::types::BlockError;
-
-    let _result: Result<i32, NoneError> = Some(1).into_result();
-}
 
 impl AppError {
     pub fn new(error: &str) -> Self {
