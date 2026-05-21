@@ -46,7 +46,7 @@ solana-signature = { version = "3", optional = true }
 solana-pubkey = { version = "3", optional = true }
 #anchor-spl = { version = "0.32", features = ["default"], optional = true }
 #eth ========
-alloy = { version = "2", optional = true, }
+alloy = { version = "2", optional = true }
 
 #etc =======
 tokio = { version = "1", features = ["rt-multi-thread"] }
