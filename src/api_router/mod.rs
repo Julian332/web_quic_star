@@ -55,8 +55,7 @@ pub fn setup_router() -> Router {
         )
         //10MB
         .layer(RequestBodyLimitLayer::new(102400));
-    #[cfg(feature = "dev")]
-    {
+    if CONFIG.is_dev {
         let server_port = CONFIG.server_port;
         tracing::info!("swagger docs are accessible at http://127.0.0.1:{server_port}/docs");
         tracing::info!(

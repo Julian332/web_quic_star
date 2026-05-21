@@ -1,6 +1,6 @@
 use crate::middleware::ReqState;
 use crate::prelude::async_span;
-use crate::{AppRes, CURRENT_REQ, DB};
+use crate::{AppRes, CONFIG, CURRENT_REQ, DB};
 use std::future::Future;
 use tokio_cron_scheduler::{Job, JobScheduler};
 use tracing::{debug, error};
@@ -42,7 +42,8 @@ pub async fn set_scheduler() {
     let sched = JobScheduler::new()
         .await
         .expect("cannot create jobs scheduler");
-    #[cfg(feature = "dev")]
-    // add_async_cron(&sched, "1/5 * * * * *", example).await;
+    if CONFIG.is_dev {
+        // add_async_cron(&sched, "1/5 * * * * *", example).await;
+    }
     sched.start().await.expect("cannot start jobs scheduler");
 }

@@ -1,4 +1,4 @@
-#![forbid(unsafe_code)]
+#![warn(unsafe_code)]
 #![deny(clippy::panic)]
 #![deny(clippy::unwrap_used)]
 #![deny(clippy::expect_used)]
@@ -63,7 +63,8 @@ pub mod prelude {
 
 // todo Progress bar
 // todo slow sql , log sql
-// page enum col
+// todo dev 2 env
+// todo multi config
 
 pub type AppRes<T> = Result<T, AppError>;
 
@@ -78,7 +79,7 @@ pub static HTTP_CLIENT: LazyLock<reqwest::Client> = LazyLock::new(reqwest::Clien
 pub static CONFIG: LazyLock<Config> = LazyLock::new(|| {
     config::set_env();
     config::set_log();
-    envy::from_env().expect(".env error")
+    envy::from_env().expect("env error")
 });
 
 #[allow(clippy::expect_used)]

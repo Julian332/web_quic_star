@@ -2,4 +2,5 @@
 /assets
 /.idea/*
 /.env
-/env_prod.env
+/prod.env
+/dev.env

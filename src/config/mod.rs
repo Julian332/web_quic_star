@@ -1,4 +1,8 @@
+#![allow(unsafe_code)]
+#![allow(clippy::expect_used)]
+#![allow(clippy::expect_fun_call)]
 use serde::Deserialize;
+use std::env;
 use tracing::error;
 use tracing_subscriber::EnvFilter;
 use url::Url;
@@ -7,11 +11,15 @@ use url::Url;
 #[derive(Deserialize, Debug)]
 pub struct Config {
     pub database_url: Url,
+    #[cfg(feature = "eth_mode")]
     pub eth_rpc: Url,
+    #[cfg(feature = "solana_mode")]
     pub solana_rpc: Url,
+    #[cfg(feature = "eth_mode")]
     pub ws_eth_rpc: Url,
+    #[cfg(feature = "solana_mode")]
     pub ws_solana_rpc: Url,
-    pub uni_graph_url: Url,
+    // pub uni_graph_url: Url,
     pub server_port: u64,
     pub file_server_directory: String,
 
@@ -21,26 +29,28 @@ pub struct Config {
     #[cfg(feature = "solana_mode")]
     #[serde(skip)]
     pub sol_addrs: crate::domain::solana_addr::SolAddrs,
+    pub is_dev: bool,
 }
 
 pub fn set_env() {
-    #[cfg(feature = "dev")]
-    set_dev_env();
-
-    #[cfg(not(feature = "dev"))]
-    set_prod_env();
-}
-
-#[allow(clippy::expect_used)]
-pub fn set_dev_env() {
-    tracing::info!("profile :{} is active", "dev");
-    dotenvy::from_filename(".env").expect("no .env file");
-}
-
-#[allow(clippy::expect_used)]
-pub fn set_prod_env() {
-    tracing::info!("profile :{} is active", "release");
-    dotenvy::from_filename("env_prod.env").expect("no env_prod.env file");
+    let dev_config = "dev";
+    dotenvy::from_filename_override(".env").expect("no .env file");
+    let binding = env::var("ACTIVE_CONFIG");
+    let active_config = binding.as_ref().map(|x| x.as_str()).unwrap_or(dev_config);
+    if active_config == dev_config {
+        unsafe {
+            //  single thread in start stage
+            env::set_var("IS_DEV", "true")
+        }
+    } else {
+        unsafe {
+            //  single thread in start stage
+            env::set_var("IS_DEV", "false")
+        }
+    }
+    println!(" profile :{active_config} is active");
+    dotenvy::from_filename_override(format!("{active_config}.env"))
+        .expect(&format!("no {active_config}.env file"));
 }
 
 pub fn set_log() {

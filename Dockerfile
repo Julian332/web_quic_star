@@ -13,7 +13,7 @@ FROM rust:1.83-slim AS runtime
 WORKDIR /app
 COPY --from=builder /build/exe /app/exe
 COPY --from=builder /build/.env /app/.env
-COPY --from=builder /build/env_prod.env /app/env_prod.env
+COPY --from=builder /build/prod.env /app/prod.env
 
 EXPOSE 5090
 ENTRYPOINT ["/app/exe"]

@@ -6,10 +6,9 @@ edition = "2024"
 [profile.dev]
 codegen-units = 32
 [features]
-default = ["postgres", "dev", "solana_mode"]
+default = ["postgres", "solana_mode"]
 eth_mode = ["dep:alloy"]
 solana_mode = ["dep:solana-client", "solana-signature", "solana-pubkey"]
-dev = []
 postgres = ["diesel-dynamic-schema/postgres", "rust_decimal/db-diesel-postgres", "diesel_migrations/postgres", "diesel-async/postgres"]
 
 
@@ -47,10 +46,10 @@ solana-signature = { version = "3", optional = true }
 solana-pubkey = { version = "3", optional = true }
 #anchor-spl = { version = "0.32", features = ["default"], optional = true }
 #eth ========
-alloy = { version = "2", features = ["full", "reqwest-rustls-tls", "std", "essentials", ], optional = true, default-features = false }
+alloy = { version = "2", optional = true, }
 
 #etc =======
-tokio = { version = "1", features = ["full"] }
+tokio = { version = "1", features = ["rt-multi-thread"] }
 futures = "0.3"
 tokio-util = "0.7"
 

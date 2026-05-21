@@ -52,16 +52,13 @@ pub struct EthAddrs {
 
 impl Default for EthAddrs {
     fn default() -> Self {
-        #[cfg(not(feature = "dev"))]
-        {
+        if CONFIG.is_dev {
             EthAddrs {
                 uni_router2_addr: address!("0x1689E7B1F10000AE47eBfE339a4f69dECd19F602").into(),
                 weth_addr: address!("0x4200000000000000000000000000000000000006").into(),
                 usdt_addr: address!("0x2ab0c976EB9551c5d18e80178C92bAf17391Bc79").into(),
             }
-        }
-        #[cfg(feature = "dev")]
-        {
+        } else {
             EthAddrs {
                 uni_router2_addr: address!("0x1689E7B1F10000AE47eBfE339a4f69dECd19F602").into(),
                 weth_addr: address!("0x4200000000000000000000000000000000000006").into(),
@@ -104,6 +101,7 @@ impl JsonSchema for EthAddr {
         })
     }
 }
+use crate::CONFIG;
 use crate::framework::db::DbType;
 use diesel::deserialize::{self, FromSql, FromSqlRow};
 use diesel::expression::AsExpression;
