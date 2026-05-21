@@ -73,4 +73,4 @@ mimalloc = { version = "0.1", features = [] }
 tracing-test = "0.2"
 [workspace]
 members = ["crates/*"]
-package = { rust-version = "1.89.0" }
+package = { rust-version = "1.95.0" }
