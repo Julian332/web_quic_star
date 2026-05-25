@@ -145,6 +145,7 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
 
 
         pub mod web {
+            use std::ops::Deref;
             use crate::framework::api::{PageParam, PageRes,DynFilter,CompareValue};
             use super::*;
             use axum::Json;
@@ -153,7 +154,6 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
 
             use crate::framework::errors::AppError;
             use crate::framework::db::{LogicDeleteQuery, Paginate};
-            use crate::prelude::IntoResult;
 
             pub fn get_routers() -> (
                 ApiRouter,
@@ -214,12 +214,15 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
             pub async fn update_entity_by_ids(
                 Json(news): Json<std::collections::HashMap<#id_type,#update_builder_ident>>,
             ) -> Result<Json<Vec<#model>>, AppError> {
+            let object = DB.get().await?;
+            let conn = object.deref();
             let task = news.into_iter().map(async |(id, mut new)| {
             new.id = None;
+            let mut conn_copy = conn;
             let result = diesel::update(#schema_s.find(id))
                 .set(&new)
                 .returning(#model::as_returning())
-                .get_result(&mut DB.get().await?)
+                .get_result(&mut conn_copy)
                 .await?;
             crate::prelude::AppRes::Ok(result)
         });
@@ -566,7 +569,6 @@ pub fn query_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::Token
             use crate::framework::errors::AppError;
             use crate::framework::db::{LogicDeleteQuery, Paginate};
             use diesel_async::RunQueryDsl;
-            use crate::prelude::IntoResult;
 
             pub fn get_routers() -> (
                 ApiRouter,

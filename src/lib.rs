@@ -63,8 +63,6 @@ pub mod prelude {
 
 // todo Progress bar
 // todo slow sql , log sql
-// todo dev 2 env
-// todo multi config
 
 pub type AppRes<T> = Result<T, AppError>;
 
