@@ -72,13 +72,13 @@ impl Filter {
         GB: 'a,
     {
         use diesel::query_dsl::methods::FilterDsl;
-        match self.to_boxed_expr::<QS>(table) {
+        match self.into_boxed_expr::<QS>(table) {
             Some(expr) => FilterDsl::filter(statement, expr),
             None => statement,
         }
     }
 
-    fn to_boxed_expr<'a, QS>(
+    fn into_boxed_expr<'a, QS>(
         self,
         table: &'a Table<&'a str, &'a str>,
     ) -> Option<Box<dyn BoxableExpression<QS, DbType, (), SqlType = Bool> + 'a>>
@@ -89,12 +89,12 @@ impl Filter {
         use diesel::ExpressionMethods;
         match self {
             Filter::And(list) => {
-                let mut iter = list.into_iter().filter_map(|f| f.to_boxed_expr(table));
+                let mut iter = list.into_iter().filter_map(|f| f.into_boxed_expr(table));
                 let first = iter.next()?;
                 Some(iter.fold(first, |acc, e| Box::new(acc.and(e))))
             }
             Filter::Or(list) => {
-                let mut iter = list.into_iter().filter_map(|f| f.to_boxed_expr(table));
+                let mut iter = list.into_iter().filter_map(|f| f.into_boxed_expr(table));
                 let first = iter.next()?;
                 Some(iter.fold(first, |acc, e| Box::new(acc.or(e))))
             }
@@ -181,9 +181,9 @@ impl From<String> for CompareValue {
         }
     }
 }
-impl Into<String> for CompareValue {
-    fn into(self) -> String {
-        match self {
+impl From<CompareValue> for String {
+    fn from(val: CompareValue) -> Self {
+        match val {
             CompareValue::Decimal(x) => x.to_string(),
             CompareValue::Bool(x) => x.to_string(),
             CompareValue::Float(x) => x.to_string(),
