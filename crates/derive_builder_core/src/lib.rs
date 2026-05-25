@@ -124,7 +124,6 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
         use aide::axum::routing::{delete_with, get_with, post_with, put_with};
         use aide::axum::ApiRouter;
         use axum::extract::{Path};
-        use crate::framework::api::{BoolOp, Compare};
         use crate::DB;
         use diesel::PgSortExpressionMethods;
         use crate::framework::auth::AuthPermission::*;
@@ -146,7 +145,7 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
 
         pub mod web {
             use std::ops::Deref;
-            use crate::framework::api::{PageParam, PageRes,DynFilter,CompareValue};
+            use crate::framework::api::{PageParam, PageRes,Filter};
             use super::*;
             use axum::Json;
             use diesel::{ExpressionMethods,  QueryDsl, SelectableHelper};
@@ -251,201 +250,14 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
             }
 
             pub async fn get_entity_page(
-                Json(page): Json<PageParam<Vec<DynFilter>>>,
-            ) -> Result<Json<PageRes<#model, Vec<DynFilter>>>, AppError> {
+                Json(page): Json<PageParam<Filter>>,
+            ) -> Result<Json<PageRes<#model, Filter>>, AppError> {
 
-                let mut statement = crate::schema::#schema_s::dsl::#schema_s.into_boxed();
+                let statement = crate::schema::#schema_s::dsl::#schema_s.into_boxed();
                 let x_table = diesel_dynamic_schema::table(stringify!(#schema_s));
 
                 let filters = page.filters.clone();
-        for f in filters {
-            match f.compare_value {
-                // CompareValue::Null => return Err(AppError::new("not allowed null param")),
-                CompareValue::Bool(compare_value) => {
-                    let filter_column = x_table.column::<diesel::sql_types::Bool, _>(f.column);
-                    match f.op.unwrap_or_default() {
-                        BoolOp::And => match f.compare.unwrap_or_default() {
-                            Compare::NotEqual => {
-                                statement = statement.filter(filter_column.ne(compare_value));
-                            }
-                            Compare::Equal => {
-                                statement = statement.filter(filter_column.eq(compare_value));
-                            }
-                            Compare::Greater => {
-                                statement = statement.filter(filter_column.gt(compare_value));
-                            }
-                            Compare::GreaterAndEqual => {
-                                statement = statement.filter(filter_column.ge(compare_value));
-                            }
-                            Compare::Less => {
-                                statement = statement.filter(filter_column.lt(compare_value));
-                            }
-                            Compare::LessAndEqual => {
-                                statement = statement.filter(filter_column.le(compare_value));
-                            }
-                        },
-                        BoolOp::Or => match f.compare.unwrap_or_default() {
-                            Compare::NotEqual => {
-                                statement = statement.or_filter(filter_column.ne(compare_value));
-                            }
-                            Compare::Equal => {
-                                statement = statement.or_filter(filter_column.eq(compare_value));
-                            }
-                            Compare::Greater => {
-                                statement = statement.or_filter(filter_column.gt(compare_value));
-                            }
-                            Compare::GreaterAndEqual => {
-                                statement = statement.or_filter(filter_column.ge(compare_value));
-                            }
-                            Compare::Less => {
-                                statement = statement.or_filter(filter_column.lt(compare_value));
-                            }
-                            Compare::LessAndEqual => {
-                                statement = statement.or_filter(filter_column.le(compare_value));
-                            }
-                        },
-                    }
-                }
-                CompareValue::Float(compare_value) => {
-                    let filter_column = x_table.column::<diesel::sql_types::Float8, _>(f.column);
-                    match f.op.unwrap_or_default() {
-                        BoolOp::And => match f.compare.unwrap_or_default() {
-                            Compare::NotEqual => {
-                                statement = statement.filter(filter_column.ne(compare_value));
-                            }
-                            Compare::Equal => {
-                                statement = statement.filter(filter_column.eq(compare_value));
-                            }
-                            Compare::Greater => {
-                                statement = statement.filter(filter_column.gt(compare_value));
-                            }
-                            Compare::GreaterAndEqual => {
-                                statement = statement.filter(filter_column.ge(compare_value));
-                            }
-                            Compare::Less => {
-                                statement = statement.filter(filter_column.lt(compare_value));
-                            }
-                            Compare::LessAndEqual => {
-                                statement = statement.filter(filter_column.le(compare_value));
-                            }
-                        },
-                        BoolOp::Or => match f.compare.unwrap_or_default() {
-                            Compare::NotEqual => {
-                                statement = statement.or_filter(filter_column.ne(compare_value));
-                            }
-                            Compare::Equal => {
-                                statement = statement.or_filter(filter_column.eq(compare_value));
-                            }
-                            Compare::Greater => {
-                                statement = statement.or_filter(filter_column.gt(compare_value));
-                            }
-                            Compare::GreaterAndEqual => {
-                                statement = statement.or_filter(filter_column.ge(compare_value));
-                            }
-                            Compare::Less => {
-                                statement = statement.or_filter(filter_column.lt(compare_value));
-                            }
-                            Compare::LessAndEqual => {
-                                statement = statement.or_filter(filter_column.le(compare_value));
-                            }
-                        },
-                    }
-                }
-                CompareValue::String(compare_value) => {
-                    let filter_column = x_table.column::<diesel::sql_types::Text, _>(f.column);
-                    match f.op.unwrap_or_default() {
-                        BoolOp::And => match f.compare.unwrap_or_default() {
-                            Compare::NotEqual => {
-                                statement = statement.filter(filter_column.ne(compare_value));
-                            }
-                            Compare::Equal => {
-                                statement = statement.filter(filter_column.eq(compare_value));
-                            }
-                            Compare::Greater => {
-                                statement = statement.filter(filter_column.gt(compare_value));
-                            }
-                            Compare::GreaterAndEqual => {
-                                statement = statement.filter(filter_column.ge(compare_value));
-                            }
-                            Compare::Less => {
-                                statement = statement.filter(filter_column.lt(compare_value));
-                            }
-                            Compare::LessAndEqual => {
-                                statement = statement.filter(filter_column.le(compare_value));
-                            }
-                        },
-                        BoolOp::Or => match f.compare.unwrap_or_default() {
-                            Compare::NotEqual => {
-                                statement = statement.or_filter(filter_column.ne(compare_value));
-                            }
-                            Compare::Equal => {
-                                statement = statement.or_filter(filter_column.eq(compare_value));
-                            }
-                            Compare::Greater => {
-                                statement = statement.or_filter(filter_column.gt(compare_value));
-                            }
-                            Compare::GreaterAndEqual => {
-                                statement = statement.or_filter(filter_column.ge(compare_value));
-                            }
-                            Compare::Less => {
-                                statement = statement.or_filter(filter_column.lt(compare_value));
-                            }
-                            Compare::LessAndEqual => {
-                                statement = statement.or_filter(filter_column.le(compare_value));
-                            }
-                        },
-                    }
-                }
-                CompareValue::Decimal(compare_value) => {
-                    let filter_column = x_table.column::<diesel::sql_types::Decimal, _>(f.column);
-                    match f.op.unwrap_or_default() {
-                        BoolOp::And => match f.compare.unwrap_or_default() {
-                            Compare::NotEqual => {
-                                statement = statement.filter(filter_column.ne(compare_value));
-                            }
-                            Compare::Equal => {
-                                statement = statement.filter(filter_column.eq(compare_value));
-                            }
-                            Compare::Greater => {
-                                statement = statement.filter(filter_column.gt(compare_value));
-                            }
-                            Compare::GreaterAndEqual => {
-                                statement = statement.filter(filter_column.ge(compare_value));
-                            }
-                            Compare::Less => {
-                                statement = statement.filter(filter_column.lt(compare_value));
-                            }
-                            Compare::LessAndEqual => {
-                                statement = statement.filter(filter_column.le(compare_value));
-                            }
-                        },
-                        BoolOp::Or => match f.compare.unwrap_or_default() {
-                            Compare::NotEqual => {
-                                statement = statement.or_filter(filter_column.ne(compare_value));
-                            }
-                            Compare::Equal => {
-                                statement = statement.or_filter(filter_column.eq(compare_value));
-                            }
-                            Compare::Greater => {
-                                statement = statement.or_filter(filter_column.gt(compare_value));
-                            }
-                            Compare::GreaterAndEqual => {
-                                statement = statement.or_filter(filter_column.ge(compare_value));
-                            }
-                            Compare::Less => {
-                                statement = statement.or_filter(filter_column.lt(compare_value));
-                            }
-                            Compare::LessAndEqual => {
-                                statement = statement.or_filter(filter_column.le(compare_value));
-                            }
-                        },
-                    }
-                }
-            };
-        }
-
-
-
+                let statement = filters.append_to_sql(statement, &x_table);
                 let order_column = x_table.column::<diesel::sql_types::Text, _>(page.order_column.clone());
                 let res = if page.is_desc {
                     statement
@@ -548,7 +360,6 @@ pub fn query_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::Token
         use aide::axum::routing::{delete_with, get_with, post_with, put_with};
         use aide::axum::ApiRouter;
         use axum::extract::{Path};
-        use crate::framework::api::{BoolOp, Compare};
         use crate::DB;
         use crate::framework::auth::AuthPermission::Read;
         use crate::api_router::require_permissions;
@@ -562,7 +373,7 @@ pub fn query_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::Token
 
 
         pub mod web {
-            use crate::framework::api::{PageParam, PageRes,DynFilter,CompareValue};
+            use crate::framework::api::{PageParam, PageRes,Filter};
             use super::*;
             use axum::Json;
             use diesel::{ExpressionMethods,  QueryDsl,  SelectableHelper};
@@ -616,203 +427,14 @@ pub fn query_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::Token
 
 
             pub async fn get_entity_page(
-                Json(page): Json<PageParam<Vec<DynFilter>>>,
-            ) -> Result<Json<PageRes<#model, Vec<DynFilter>>>, AppError> {
+                Json(page): Json<PageParam<Filter>>,
+            ) -> Result<Json<PageRes<#model, Filter>>, AppError> {
 
-                let mut statement = crate::schema_view::#schema_s::dsl::#schema_s.into_boxed();
+                let statement = crate::schema_view::#schema_s::dsl::#schema_s.into_boxed();
                 let x_table = diesel_dynamic_schema::table(stringify!(#schema_s));
 
                 let filters = page.filters.clone();
-           for f in filters {
-            match f.compare_value {
-                // CompareValue::Null => return Err(AppError::new("not allowed null param")),
-                CompareValue::Bool(compare_value) => {
-                    let filter_column = x_table.column::<diesel::sql_types::Bool, _>(f.column);
-                    match f.op.unwrap_or_default() {
-                        BoolOp::And => match f.compare.unwrap_or_default() {
-                            Compare::NotEqual => {
-                                statement = statement.filter(filter_column.ne(compare_value));
-                            }
-                            Compare::Equal => {
-                                statement = statement.filter(filter_column.eq(compare_value));
-                            }
-                            Compare::Greater => {
-                                statement = statement.filter(filter_column.gt(compare_value));
-                            }
-                            Compare::GreaterAndEqual => {
-                                statement = statement.filter(filter_column.ge(compare_value));
-                            }
-                            Compare::Less => {
-                                statement = statement.filter(filter_column.lt(compare_value));
-                            }
-                            Compare::LessAndEqual => {
-                                statement = statement.filter(filter_column.le(compare_value));
-                            }
-                        },
-                        BoolOp::Or => match f.compare.unwrap_or_default() {
-                            Compare::NotEqual => {
-                                statement = statement.or_filter(filter_column.ne(compare_value));
-                            }
-                            Compare::Equal => {
-                                statement = statement.or_filter(filter_column.eq(compare_value));
-                            }
-                            Compare::Greater => {
-                                statement = statement.or_filter(filter_column.gt(compare_value));
-                            }
-                            Compare::GreaterAndEqual => {
-                                statement = statement.or_filter(filter_column.ge(compare_value));
-                            }
-                            Compare::Less => {
-                                statement = statement.or_filter(filter_column.lt(compare_value));
-                            }
-                            Compare::LessAndEqual => {
-                                statement = statement.or_filter(filter_column.le(compare_value));
-                            }
-                        },
-                    }
-                }
-                CompareValue::Float(compare_value) => {
-                    let filter_column = x_table.column::<diesel::sql_types::Float8, _>(f.column);
-                    match f.op.unwrap_or_default() {
-                        BoolOp::And => match f.compare.unwrap_or_default() {
-                            Compare::NotEqual => {
-                                statement = statement.filter(filter_column.ne(compare_value));
-                            }
-                            Compare::Equal => {
-                                statement = statement.filter(filter_column.eq(compare_value));
-                            }
-                            Compare::Greater => {
-                                statement = statement.filter(filter_column.gt(compare_value));
-                            }
-                            Compare::GreaterAndEqual => {
-                                statement = statement.filter(filter_column.ge(compare_value));
-                            }
-                            Compare::Less => {
-                                statement = statement.filter(filter_column.lt(compare_value));
-                            }
-                            Compare::LessAndEqual => {
-                                statement = statement.filter(filter_column.le(compare_value));
-                            }
-                        },
-                        BoolOp::Or => match f.compare.unwrap_or_default() {
-                            Compare::NotEqual => {
-                                statement = statement.or_filter(filter_column.ne(compare_value));
-                            }
-                            Compare::Equal => {
-                                statement = statement.or_filter(filter_column.eq(compare_value));
-                            }
-                            Compare::Greater => {
-                                statement = statement.or_filter(filter_column.gt(compare_value));
-                            }
-                            Compare::GreaterAndEqual => {
-                                statement = statement.or_filter(filter_column.ge(compare_value));
-                            }
-                            Compare::Less => {
-                                statement = statement.or_filter(filter_column.lt(compare_value));
-                            }
-                            Compare::LessAndEqual => {
-                                statement = statement.or_filter(filter_column.le(compare_value));
-                            }
-                        },
-                    }
-                }
-                CompareValue::String(compare_value) => {
-                    let filter_column = x_table.column::<diesel::sql_types::Text, _>(f.column);
-                    match f.op.unwrap_or_default() {
-                        BoolOp::And => match f.compare.unwrap_or_default() {
-                            Compare::NotEqual => {
-                                statement = statement.filter(filter_column.ne(compare_value));
-                            }
-                            Compare::Equal => {
-                                statement = statement.filter(filter_column.eq(compare_value));
-                            }
-                            Compare::Greater => {
-                                statement = statement.filter(filter_column.gt(compare_value));
-                            }
-                            Compare::GreaterAndEqual => {
-                                statement = statement.filter(filter_column.ge(compare_value));
-                            }
-                            Compare::Less => {
-                                statement = statement.filter(filter_column.lt(compare_value));
-                            }
-                            Compare::LessAndEqual => {
-                                statement = statement.filter(filter_column.le(compare_value));
-                            }
-                        },
-                        BoolOp::Or => match f.compare.unwrap_or_default() {
-                            Compare::NotEqual => {
-                                statement = statement.or_filter(filter_column.ne(compare_value));
-                            }
-                            Compare::Equal => {
-                                statement = statement.or_filter(filter_column.eq(compare_value));
-                            }
-                            Compare::Greater => {
-                                statement = statement.or_filter(filter_column.gt(compare_value));
-                            }
-                            Compare::GreaterAndEqual => {
-                                statement = statement.or_filter(filter_column.ge(compare_value));
-                            }
-                            Compare::Less => {
-                                statement = statement.or_filter(filter_column.lt(compare_value));
-                            }
-                            Compare::LessAndEqual => {
-                                statement = statement.or_filter(filter_column.le(compare_value));
-                            }
-                        },
-                    }
-                }
-                CompareValue::Decimal(compare_value) => {
-                    let filter_column = x_table.column::<diesel::sql_types::Decimal, _>(f.column);
-                    match f.op.unwrap_or_default() {
-                        BoolOp::And => match f.compare.unwrap_or_default() {
-                            Compare::NotEqual => {
-                                statement = statement.filter(filter_column.ne(compare_value));
-                            }
-                            Compare::Equal => {
-                                statement = statement.filter(filter_column.eq(compare_value));
-                            }
-                            Compare::Greater => {
-                                statement = statement.filter(filter_column.gt(compare_value));
-                            }
-                            Compare::GreaterAndEqual => {
-                                statement = statement.filter(filter_column.ge(compare_value));
-                            }
-                            Compare::Less => {
-                                statement = statement.filter(filter_column.lt(compare_value));
-                            }
-                            Compare::LessAndEqual => {
-                                statement = statement.filter(filter_column.le(compare_value));
-                            }
-                        },
-                        BoolOp::Or => match f.compare.unwrap_or_default() {
-                            Compare::NotEqual => {
-                                statement = statement.or_filter(filter_column.ne(compare_value));
-                            }
-                            Compare::Equal => {
-                                statement = statement.or_filter(filter_column.eq(compare_value));
-                            }
-                            Compare::Greater => {
-                                statement = statement.or_filter(filter_column.gt(compare_value));
-                            }
-                            Compare::GreaterAndEqual => {
-                                statement = statement.or_filter(filter_column.ge(compare_value));
-                            }
-                            Compare::Less => {
-                                statement = statement.or_filter(filter_column.lt(compare_value));
-                            }
-                            Compare::LessAndEqual => {
-                                statement = statement.or_filter(filter_column.le(compare_value));
-                            }
-                        },
-                    }
-                }
-            };
-        }
-
-
-
-
-
+                let statement = filters.append_to_sql(statement, &x_table);
                 let order_column = x_table.column::<diesel::sql_types::Text, _>(page.order_column.clone());
                 let res = if page.is_desc {
                     statement
