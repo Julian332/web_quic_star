@@ -6,6 +6,7 @@ use diesel_dynamic_schema::Table;
 use rust_decimal::Decimal;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use std::str::FromStr;
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 #[serde(default)]
@@ -37,27 +38,13 @@ impl<T: Default> PageParam<T> {
 
 #[derive(Deserialize, Serialize, JsonSchema, Clone, Default)]
 pub enum Compare {
-    NotEqual,
     #[default]
     Equal,
+    NotEqual,
     Greater,
     GreaterAndEqual,
     Less,
     LessAndEqual,
-}
-
-impl Compare {
-    pub fn to_ident(self) -> String {
-        match self {
-            Compare::NotEqual => "ne",
-            Compare::Equal => "eq",
-            Compare::Greater => "gt",
-            Compare::GreaterAndEqual => "ge",
-            Compare::Less => "lt",
-            Compare::LessAndEqual => "le",
-        }
-        .to_string()
-    }
 }
 
 #[derive(Deserialize, Serialize, JsonSchema, Clone)]
@@ -113,7 +100,9 @@ impl Filter {
             }
             Filter::Condition(cond) => {
                 let compare = cond.compare.unwrap_or_default();
-                match cond.compare_value {
+                let string = cond.compare_value;
+                let compare_value = CompareValue::from(string);
+                match compare_value {
                     CompareValue::Bool(v) => {
                         let col = table.column::<Bool, _>(cond.column);
                         Some(match compare {
@@ -168,16 +157,41 @@ impl Filter {
 pub struct Condition {
     pub column: String,
     pub compare: Option<Compare>,
-    pub compare_value: CompareValue,
+    /// bool:"true"|number:"0.11"|string:"string"
+    pub compare_value: String,
 }
 
-#[derive(Deserialize, Serialize, JsonSchema, Clone)]
+#[derive(Serialize, JsonSchema, Clone)]
 pub enum CompareValue {
     Decimal(Decimal),
     Bool(bool),
     Float(f64),
     String(String),
 }
+
+impl From<String> for CompareValue {
+    fn from(str: String) -> Self {
+        match str.as_str() {
+            "true" => Self::Bool(true),
+            "false" => Self::Bool(false),
+            _ => match Decimal::from_str(str.as_str()) {
+                Ok(x) => Self::Decimal(x),
+                Err(_) => Self::String(str),
+            },
+        }
+    }
+}
+impl Into<String> for CompareValue {
+    fn into(self) -> String {
+        match self {
+            CompareValue::Decimal(x) => x.to_string(),
+            CompareValue::Bool(x) => x.to_string(),
+            CompareValue::Float(x) => x.to_string(),
+            CompareValue::String(x) => x,
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Default, JsonSchema)]
 #[serde(default)]
 pub struct PageRes<T: Default, TBuilder: Default> {
@@ -234,7 +248,7 @@ mod tests {
         Filter::Condition(Condition {
             column: column.to_string(),
             compare: Some(compare),
-            compare_value: value,
+            compare_value: value.into(),
         })
     }
 
