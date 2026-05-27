@@ -6,7 +6,7 @@ edition = "2024"
 [profile.dev]
 codegen-units = 32
 [features]
-default = ["postgres", "solana_mode"]
+default = ["postgres","redis"]
 eth_mode = ["dep:alloy"]
 solana_mode = ["dep:solana-client", "solana-signature", "solana-pubkey"]
 postgres = ["diesel-dynamic-schema/postgres", "rust_decimal/db-diesel-postgres", "diesel_migrations/postgres", "diesel-async/postgres"]
@@ -52,6 +52,8 @@ alloy = { version = "2", optional = true }
 tokio = { version = "1", features = ["rt-multi-thread"] }
 futures = "0.3"
 tokio-util = "0.7"
+
+redis = { version = "1", features = ["rust_decimal", "tokio-comp", "uuid", "connection-manager"], optional = true }
 
 serde = { version = "1", features = ["derive", "rc"] }
 serde_json = { version = "1", features = ["default"] }

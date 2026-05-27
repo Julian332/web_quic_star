@@ -1,6 +1,5 @@
 /target
 /assets
 /.idea/*
-/.env
 /prod.env
 /dev.env

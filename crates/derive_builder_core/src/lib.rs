@@ -213,15 +213,13 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
             pub async fn update_entity_by_ids(
                 Json(news): Json<std::collections::HashMap<#id_type,#update_builder_ident>>,
             ) -> Result<Json<Vec<#model>>, AppError> {
-            let object = DB.get().await?;
-            let conn = object.deref();
+            let conn = DB.get().await?;
             let task = news.into_iter().map(async |(id, mut new)| {
             new.id = None;
-            let mut conn_copy = conn;
             let result = diesel::update(#schema_s.find(id))
                 .set(&new)
                 .returning(#model::as_returning())
-                .get_result(&mut conn_copy)
+                .get_result(&mut conn.deref().clone())
                 .await?;
             crate::prelude::AppRes::Ok(result)
         });

@@ -93,6 +93,16 @@ pub static SOL_CLIENT: LazyLock<solana_client::nonblocking::rpc_client::RpcClien
 pub static ETH_CLIENT: LazyLock<util::eth_contracts::ReadOnlyProvider> =
     LazyLock::new(util::eth_contracts::http_provider);
 
+#[cfg(feature = "redis")]
+#[allow(clippy::expect_used)]
+pub static REDIS: LazyLock<redis::aio::ConnectionManager> = LazyLock::new(|| {
+    let client = redis::Client::open(CONFIG.redis.clone()).expect("can not open redis");
+    redis::aio::ConnectionManager::new_lazy_with_config(
+        client,
+        redis::aio::ConnectionManagerConfig::default(),
+    )
+    .expect("lazy error")
+});
 #[macro_export]
 macro_rules! unwrap_opt_or_continue {
     ($res:expr) => {

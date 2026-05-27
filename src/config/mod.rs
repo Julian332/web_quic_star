@@ -30,6 +30,8 @@ pub struct Config {
     #[serde(skip)]
     pub sol_addrs: crate::domain::solana_addr::SolAddrs,
     pub is_dev: bool,
+    #[cfg(feature = "redis")]
+    pub redis: String,
 }
 
 pub fn set_env() {

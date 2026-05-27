@@ -161,7 +161,7 @@ pub struct Condition {
     pub compare_value: String,
 }
 
-#[derive(Serialize, JsonSchema, Clone)]
+// #[derive(Serialize, JsonSchema, Clone)]
 pub enum CompareValue {
     Decimal(Decimal),
     Bool(bool),
