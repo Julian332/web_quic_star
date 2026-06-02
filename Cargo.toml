@@ -6,9 +6,9 @@ edition = "2024"
 [profile.dev]
 codegen-units = 32
 [features]
-default = ["postgres","redis"]
-eth_mode = ["dep:alloy"]
-solana_mode = ["dep:solana-client", "solana-signature", "solana-pubkey"]
+default = ["postgres", "solana_mode","redis"]
+eth_mode = ["alloy"]
+solana_mode = ["solana-client", "solana-signature", "solana-pubkey"]
 postgres = ["diesel-dynamic-schema/postgres", "rust_decimal/db-diesel-postgres", "diesel_migrations/postgres", "diesel-async/postgres"]
 
 

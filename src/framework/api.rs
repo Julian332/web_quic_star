@@ -48,6 +48,32 @@ pub enum Compare {
 }
 
 #[derive(Deserialize, Serialize, JsonSchema, Clone)]
+///  example using or:
+///   "filters": { "Or": [
+///       {
+///         "Condition": {
+///           "column": "id",
+///           "compare": "Equal",
+///           "compare_value": "-1"
+///         }
+///       },
+///       {
+///         "Condition": {
+///           "column": "id",
+///           "compare": "Equal",
+///           "compare_value": "-2"
+///         }
+///       }
+///     ]}
+/// example single filter:
+/// "filters":
+///     {
+///       "Condition": {
+///         "column": "id",
+///         "compare": "Equal",
+///         "compare_value": "-1"
+///       }
+///     }
 pub enum Filter {
     Condition(Condition),
     And(Vec<Filter>),

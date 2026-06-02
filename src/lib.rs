@@ -62,7 +62,7 @@ pub mod prelude {
 }
 
 // todo Progress bar
-// todo slow sql , log sql
+//  流程模板
 
 pub type AppRes<T> = Result<T, AppError>;
 

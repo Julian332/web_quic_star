@@ -83,8 +83,6 @@ impl<T: Query> Query for Paginated<T> {
     type SqlType = (T::SqlType, BigInt);
 }
 
-// impl<T, C: Connection> RunQueryDsl<C> for Paginated<T> {}
-
 #[cfg(feature = "postgres")]
 impl<T> QueryFragment<DbType> for Paginated<T>
 where
@@ -159,4 +157,4 @@ pub async fn sync_db_schema() {
 pub type DbType = diesel::pg::Pg;
 pub type ConnPool = diesel_async::pooled_connection::deadpool::Pool<Conn>;
 #[cfg(feature = "postgres")]
-pub type Conn = diesel_async::AsyncPgConnection;
+pub type Conn = crate::framework::pg::LogPgConn;

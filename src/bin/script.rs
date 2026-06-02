@@ -15,15 +15,20 @@ async fn main() {
             let option = x.as_object().unwrap().get("label").unwrap();
             let is_dev = option.as_str().unwrap().contains("Dev");
             if is_dev {
-                let option1 = x.get("address").unwrap().as_str().unwrap();
-                Some((option1, "true"))
+                let option1 = x
+                    .get("address")
+                    .unwrap()
+                    .as_str()
+                    .unwrap()
+                    .to_ascii_lowercase();
+                Some((format!(r#""{option1}""#), "true"))
             } else {
                 None
             }
         })
         .collect();
     println!("{:?}", resp);
-    let pin = REDIS
+    REDIS
         .clone()
         .hset_multiple("devWalletMap:8453", resp.as_slice())
         .await
