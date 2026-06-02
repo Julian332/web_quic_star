@@ -39,7 +39,7 @@ impl AsyncConnectionCore for LogPgConn {
             let instant = Instant::now();
             let result = future.await;
             let duration = instant.elapsed();
-            if duration >= Duration::from_secs(0) {
+            if duration >= Duration::from_secs(SLOW_SQL_THRESHOLD) {
                 warn!("slow sql detected: {sql} ,duration:{duration:?}");
             }
             result

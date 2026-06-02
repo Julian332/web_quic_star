@@ -70,7 +70,7 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
     let get = format_ident!("get_{schema}_by_id");
     let create = format_ident!("create_{schema}");
     let delete = format_ident!("delete_{schema}_by_id");
-    let update = format_ident!("update_{schema}_by_id");
+    let update = format_ident!("update_{schema}_by_ids");
     let page = format_ident!("page_of_{schema}");
     let schema_s = format_ident!("{}s", schema);
     let new_model = format_ident!("New{}", model);
@@ -177,7 +177,7 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
                     post_with(web::get_entity_page, empty_resp_docs),
                 );
             let router_update = ApiRouter::new().api_route(
-                concat!("/",stringify!(#update),"/{id}"),
+                concat!("/",stringify!(#update)),
                 put_with(
                     web::update_entity_by_ids,
                     default_resp_docs::<#model>,

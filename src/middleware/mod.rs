@@ -67,9 +67,10 @@ pub async fn log_req(request: Request, next: Next) -> Response {
     let instant = Instant::now();
     let method = request.method().to_string();
     let uri = request.uri().to_string();
+    info!("{method} {uri} started");
     let response = next.run(request).await;
     let duration = instant.elapsed();
-    info!("req:{method} {uri} spent {duration:?}");
+    info!("{method} {uri} finished, spent {duration:?}");
     response
 }
 
