@@ -57,7 +57,7 @@ pub async fn save_req_to_db(mut request: Request, next: Next) -> Response {
         let status_code = response.status();
         if CURRENT_REQ
             .try_with(move |x| {
-                tokio::spawn(record(
+                crate::prelude::spawn(record(
                     x.user.clone(),
                     x.req_id,
                     req_body,

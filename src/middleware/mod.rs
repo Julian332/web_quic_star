@@ -79,7 +79,7 @@ pub async fn continue_when_drop_req(request: Request, next: Next) -> Response {
     if request.method() == Method::GET {
         next.run(request).await
     } else {
-        let result = tokio::spawn(next.run(request)).await;
+        let result = crate::prelude::spawn(next.run(request)).await;
         result.unwrap_or_else(|e| {
             error!("continue_when_drop_req error: {e}");
             StatusCode::INTERNAL_SERVER_ERROR.into_response()

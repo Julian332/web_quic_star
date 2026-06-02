@@ -41,9 +41,9 @@ pub fn setup_router() -> Router {
         )
         .fallback(fallback)
         // enable if needed
-        // .layer(from_fn(crate::middleware::save_req::save_req_to_db))
+        .layer(from_fn(crate::middleware::save_req::save_req_to_db))
         // enable if needed
-        // .layer(from_fn(crate::middleware::continue_when_drop_req))
+        .layer(from_fn(crate::middleware::continue_when_drop_req))
         .layer(from_fn(log_req))
         .layer(from_fn(global_req_state))
         .layer(get_auth_layer())
