@@ -127,7 +127,7 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
         use crate::DB;
         use diesel::PgSortExpressionMethods;
         use crate::framework::auth::AuthPermission::*;
-        use crate::api_router::require_permissions;
+        use crate::framework::api::require_permissions;
 
         pub fn web_routes() -> ApiRouter {
             let (router_add, router_read, router_update, router_delete) = web::get_routers();
@@ -360,7 +360,7 @@ pub fn query_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::Token
         use axum::extract::{Path};
         use crate::DB;
         use crate::framework::auth::AuthPermission::Read;
-        use crate::api_router::require_permissions;
+        use crate::framework::api::require_permissions;
         pub fn web_routes() -> ApiRouter {
             let (router_add, router_read, router_update, router_delete) = web::get_routers();
 

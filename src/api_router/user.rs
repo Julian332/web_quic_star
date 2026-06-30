@@ -8,8 +8,8 @@ use diesel_async::RunQueryDsl;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use crate::api_router::{require_login, require_permissions};
 use crate::db_model::user;
+use crate::framework::api::{require_login, require_permissions};
 use crate::framework::api_doc::default_resp_docs;
 use crate::framework::auth::AuthBackend;
 use crate::framework::auth::AuthPermission::*;

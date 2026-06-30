@@ -36,10 +36,13 @@ pub struct Config {
 
 pub fn set_env() {
     let dev_config = "dev";
-    dotenvy::from_filename_override(".env").expect("no .env file");
+    let local_config = "local_config";
+    dotenvy::from_filename(".env").expect("no .env file");
     let binding = env::var("ACTIVE_CONFIG");
     let active_config = binding.as_ref().map(|x| x.as_str()).unwrap_or(dev_config);
-    if active_config == dev_config {
+    if active_config.eq_ignore_ascii_case(dev_config)
+        || active_config.eq_ignore_ascii_case(local_config)
+    {
         unsafe {
             //  single thread in start stage
             env::set_var("IS_DEV", "true")

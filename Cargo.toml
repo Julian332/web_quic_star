@@ -2,7 +2,7 @@
 name = "web3_quick"
 version = "1.0.0"
 edition = "2024"
-
+default-run = "web3_quick"
 [profile.dev]
 codegen-units = 32
 [features]

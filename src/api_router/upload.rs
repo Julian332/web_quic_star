@@ -1,4 +1,4 @@
-use crate::api_router::require_login;
+use crate::framework::api::require_login;
 use crate::framework::api_doc::empty_resp_docs;
 use crate::util::file;
 use crate::{AppRes, CONFIG};
@@ -65,6 +65,8 @@ async fn accept_form(mut multipart: Multipart) -> AppRes<Json<Vec<FileSave>>> {
 
 #[derive(Serialize, Deserialize, JsonSchema, OperationIo)]
 struct FileSave {
+    /// 文件名
     filename: String,
+    ///文件hash
     hash: String,
 }

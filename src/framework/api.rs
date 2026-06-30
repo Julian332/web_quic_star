@@ -1,4 +1,8 @@
+use crate::framework::auth::AuthPermission::Admin;
+use crate::framework::auth::{AuthBackend, AuthPermission};
 use crate::framework::db::DbType;
+use axum_login::require::{BoxFuture, Decision, DecisionPredicate, Require};
+use axum_login::{AuthSession, AuthzBackend};
 use diesel::expression::BoxableExpression;
 use diesel::query_builder::{BoxedSelectStatement, FromClause};
 use diesel::sql_types::Bool;
@@ -7,6 +11,7 @@ use rust_decimal::Decimal;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
+use std::sync::Arc;
 
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 #[serde(default)]
@@ -369,4 +374,61 @@ mod tests {
             "AND should appear before grouped OR, got: {sql}"
         );
     }
+}
+
+pub struct PermissionsPredicateWithAdmin {
+    perms: Arc<Vec<AuthPermission>>,
+    require_all: bool,
+}
+
+impl DecisionPredicate<AuthBackend> for PermissionsPredicateWithAdmin {
+    fn decide(
+        &self,
+        auth_session: AuthSession<AuthBackend>,
+        _state: Arc<()>,
+    ) -> BoxFuture<'static, Decision> {
+        let required_permissions = Arc::clone(&self.perms);
+        let require_all = self.require_all;
+        Box::pin(async move {
+            let Some(user) = auth_session.user().await else {
+                return Decision::Unauthenticated;
+            };
+
+            match auth_session.backend().get_all_permissions(&user).await {
+                Err(_) => Decision::Unauthorized,
+                Ok(perms) => {
+                    if perms.contains(&Admin) {
+                        return Decision::Allow;
+                    };
+                    let allow = if require_all {
+                        required_permissions.iter().all(|x| perms.contains(x))
+                    } else {
+                        required_permissions.iter().any(|x| perms.contains(x))
+                    };
+                    if allow {
+                        Decision::Allow
+                    } else {
+                        Decision::Unauthorized
+                    }
+                }
+            }
+        })
+    }
+}
+
+pub fn require_permissions<Perms: IntoIterator<Item = AuthPermission<&'static str>>>(
+    perms: Perms,
+) -> Require<AuthBackend> {
+    let predicate_with_admin = PermissionsPredicateWithAdmin {
+        perms: Arc::new(perms.into_iter().map(|x| x.into()).collect()),
+        require_all: true,
+    };
+
+    Require::<AuthBackend>::builder()
+        .decision(predicate_with_admin)
+        .build()
+}
+
+pub fn require_login() -> Require<AuthBackend> {
+    Require::<AuthBackend>::builder().build()
 }
