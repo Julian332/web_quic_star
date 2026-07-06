@@ -37,7 +37,7 @@ pub struct UserWithGroupView {
     pub create_time: DateTime<Utc>,
     pub create_by: i64,
     pub update_by: Option<i64>,
-    pub is_delete: bool,
+    pub delete_time: Option<DateTime<Utc>>,
     pub group_name: Option<String>,
     pub permissions: Vec<AuthPermission>,
 }

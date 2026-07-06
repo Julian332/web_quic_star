@@ -19,7 +19,7 @@ pub struct NewGroup {
     pub create_time: DateTime<Utc>,
     pub create_by: i64,
     pub update_by: Option<i64>,
-    pub is_delete: bool,
+    pub delete_time: Option<DateTime<Utc>>,
     pub permissions: Vec<AuthPermission>,
 }
 
@@ -32,7 +32,7 @@ impl Default for NewGroup {
             create_time: Default::default(),
             create_by: 0,
             update_by: None,
-            is_delete: false,
+            delete_time: None,
             permissions: vec![],
         }
     }
@@ -59,6 +59,6 @@ pub struct Group {
     pub create_time: DateTime<Utc>,
     pub create_by: i64,
     pub update_by: Option<i64>,
-    pub is_delete: bool,
+    pub delete_time: Option<DateTime<Utc>>,
     pub permissions: Vec<AuthPermission>,
 }

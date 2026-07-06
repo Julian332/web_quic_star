@@ -9,7 +9,7 @@ diesel::table! {
         create_time -> Timestamptz,
         create_by -> Int8,
         update_by -> Nullable<Int8>,
-        is_delete -> Bool,
+        delete_time -> Nullable<Timestamptz>,
         permissions -> Array<Text>,
     }
 }
@@ -26,7 +26,7 @@ diesel::table! {
         create_time -> Timestamptz,
         create_by -> Int8,
         update_by -> Nullable<Int8>,
-        is_delete -> Bool,
+        delete_time -> Nullable<Timestamptz>,
     }
 }
 
@@ -44,7 +44,7 @@ diesel::table! {
         create_time -> Timestamptz,
         create_by -> Int8,
         update_by -> Nullable<Int8>,
-        is_delete -> Bool,
+        delete_time -> Nullable<Timestamptz>,
     }
 }
 

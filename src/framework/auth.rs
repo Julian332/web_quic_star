@@ -255,7 +255,7 @@ impl AuthnBackend for AuthBackend {
                         remark: None,
                         create_time: SystemTime::now().into(),
                         create_by: SUPER_USER,
-                        is_delete: false,
+                        delete_time: None,
                     })
                     .returning(User::as_select())
                     .get_result(&mut self.db.get().await?)
@@ -300,7 +300,7 @@ impl AuthnBackend for AuthBackend {
                         remark: None,
                         create_time: SystemTime::now().into(),
                         create_by: SUPER_USER,
-                        is_delete: false,
+                        delete_time: None,
                     })
                     .returning(User::as_select())
                     .get_result(&mut self.db.get().await?)

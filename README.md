@@ -114,7 +114,6 @@ curl --request POST \
   "create_by": -2,
   "create_time": "2024-12-05T10:00:00Z",
   "group_id": -2,
-  "is_delete": false,
   "password": "wd2",
   "remark": null,
   "tenantry": "",
@@ -145,8 +144,7 @@ Vary: origin, access-control-request-method, access-control-request-headers
   "update_time": null,
   "create_time": "2024-12-05T10:00:00Z",
   "create_by": -2,
-  "update_by": null,
-  "is_delete": false
+  "update_by": null
 }
 
 ```
@@ -184,8 +182,7 @@ Vary: origin, access-control-request-method, access-control-request-headers
   "update_time": null,
   "create_time": "2024-12-04T10:03:24.511666Z",
   "create_by": -2,
-  "update_by": null,
-  "is_delete": false
+  "update_by": null
 }
 
 ```

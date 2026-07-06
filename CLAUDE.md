@@ -209,4 +209,3 @@ pub async fn find_by_platform(platform: &str, novel_id: &str) -> AppRes<Option<n
 
 ## Key Conventions
 - 数据库表统一使用 `deleted_at` 软删除
-- 数据库启动时自动建库（如不存在）并执行迁移，无需手动 `migrate up`

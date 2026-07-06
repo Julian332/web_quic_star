@@ -10,7 +10,7 @@ CREATE TABLE "groups"
     "create_time" TIMESTAMPTZ                 NOT NULL,
     "create_by"   INT8                        NOT NULL,
     "update_by"   INT8,
-    "is_delete"   BOOL                        NOT NULL,
+    "delete_time" TIMESTAMPTZ,
     "permissions" TEXT[] default '{}'::TEXT[] not null
 
 
@@ -28,7 +28,7 @@ CREATE TABLE "users"
     "create_time" TIMESTAMPTZ NOT NULL,
     "create_by"   INT8        NOT NULL,
     "update_by"   INT8,
-    "is_delete"   BOOL        NOT NULL,
+    "delete_time" TIMESTAMPTZ,
     FOREIGN KEY ("group_id") REFERENCES "groups" ("id")
 );
 alter table users
@@ -44,29 +44,29 @@ CREATE TYPE sell_buy AS ENUM ('sell', 'buy');
 
 
 
-INSERT INTO groups (id, name, remark, update_time, create_time, create_by, update_by, is_delete)
-VALUES (-1, 'common_user', null, null, now(), -2, null, false);
+INSERT INTO groups (id, name, remark, update_time, create_time, create_by, update_by, delete_time)
+VALUES (-1, 'common_user', null, null, now(), -2, null, null);
 
-INSERT INTO groups (id, name, remark, update_time, create_time, create_by, update_by, is_delete, permissions)
-VALUES (-2, 'super_admin', null, null, now(), -2, null, false, array ['Admin']);
+INSERT INTO groups (id, name, remark, update_time, create_time, create_by, update_by, delete_time, permissions)
+VALUES (-2, 'super_admin', null, null, now(), -2, null, null, array ['Admin']);
 
 
 
 INSERT INTO users (id, username, password, group_id, tenantry, remark, update_time, create_time, create_by, update_by,
-                   is_delete)
+                   delete_time)
 VALUES (-1, 'common_user',
         '$argon2id$v=19$m=19456,t=2,p=1$pHJK4Msog1E+V7R4++t+Zg$QnzTOC3JNu50cn0fJcdO5P33WnUUeQRK3oa9M054nko', -1,
-        'default', null, null, now(), -2, null, false);
+        'default', null, null, now(), -2, null, null);
 
 INSERT INTO users (id, username, password, group_id, tenantry, remark, update_time, create_time, create_by, update_by,
-                   is_delete)
+                   delete_time)
 VALUES (-2, 'super_admin',
         '$argon2id$v=19$m=19456,t=2,p=1$pHJK4Msog1E+V7R4++t+Zg$QnzTOC3JNu50cn0fJcdO5P33WnUUeQRK3oa9M054nko', -2,
-        'default', null, null, now(), -2, null, false);
+        'default', null, null, now(), -2, null, null);
 
 create view user_with_group_views
             (id, username, password, group_id, tenantry, remark, update_time, create_time, create_by, update_by,
-             is_delete, group_name, permissions)
+             delete_time, group_name, permissions)
 as
 SELECT users.id,
        users.username,
@@ -78,13 +78,11 @@ SELECT users.id,
        users.create_time,
        users.create_by,
        users.update_by,
-       users.is_delete,
+       users.delete_time,
        groups.name AS group_name,
        groups.permissions
 FROM users
          LEFT JOIN groups ON users.group_id = groups.id;
-
-
 
 
 

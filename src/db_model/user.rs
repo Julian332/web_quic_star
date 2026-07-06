@@ -26,7 +26,7 @@ pub struct NewUser {
     pub remark: Option<String>,
     pub create_time: DateTime<Utc>,
     pub create_by: i64,
-    pub is_delete: bool,
+    pub delete_time: Option<DateTime<Utc>>,
 }
 #[derive(
     Queryable,
@@ -59,5 +59,5 @@ pub struct User {
     pub create_time: DateTime<Utc>,
     pub create_by: i64,
     pub update_by: Option<i64>,
-    pub is_delete: bool,
+    pub delete_time: Option<DateTime<Utc>>,
 }

@@ -10,7 +10,7 @@ diesel::table! {
         create_time -> Timestamptz,
         create_by -> Int8,
         update_by -> Nullable<Int8>,
-        is_delete -> Bool,
+        delete_time -> Nullable<Timestamptz>,
         group_name -> Nullable<Text>,
         permissions -> Array<Text>,
     }

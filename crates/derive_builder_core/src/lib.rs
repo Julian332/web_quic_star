@@ -241,7 +241,7 @@ pub fn web_api_builder_for_struct(ast: syn::DeriveInput) -> proc_macro2::TokenSt
                 Path(id_param): Path<#id_type>,
             ) -> Result<Json<#model>, AppError> {
                 let result = diesel::update(#schema_s.find(id_param))
-                    .set(crate::schema::#schema_s::is_delete.eq(true))
+                    .set(crate::schema::#schema_s::delete_time.eq(Some(chrono::Utc::now())))
                     .returning(#model::as_returning())
                     .get_result(&mut DB.get().await?).await?;
                 Ok(Json(result))
