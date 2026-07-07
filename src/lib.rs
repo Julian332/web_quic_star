@@ -63,7 +63,6 @@ pub mod prelude {
 
 // todo Progress bar
 // todo 流程模板
-// todo jwt+cookie
 
 pub type AppRes<T> = Result<T, AppError>;
 

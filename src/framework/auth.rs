@@ -18,6 +18,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fmt::{Display, Formatter};
+use std::time::Duration;
 use tracing::warn;
 
 #[allow(dead_code)]
@@ -110,7 +111,7 @@ pub fn test() {
 
 pub fn get_auth_layer() -> JwtManagerLayer<AuthBackend> {
     let backend = AuthBackend::new(DB.clone());
-    let config = JwtConfig::from_secret(b"a-very-secret-key");
+    let config = JwtConfig::from_secret(b"a-very-secret-key").with_ttl(Duration::from_hours(36));
     let config = if CONFIG.is_dev {
         config.with_secure(false)
     } else {
