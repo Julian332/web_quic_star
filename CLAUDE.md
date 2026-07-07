@@ -4,12 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Rust 后端 API 模板项目，基于 axum + diesel-async + Tokio，使用 PostgreSQL 和 Redis。使用 cookie 认证
+Rust 后端 API 模板项目，基于 axum + diesel-async + Tokio，使用 PostgreSQL 和 Redis。使用 cookie+jwt 认证
 
 ## Common Commands
 
 ```bash
-# 开发（热重载）
+# 开发
 ACTIVE_CONFIG="local" cargo run          # 本地开发
 cargo check          # 仅类型检查（更快）
 
@@ -86,14 +86,11 @@ curl -X POST http://127.0.0.1:5090/<endpoint> \
 - `src/util/` — 工具方法位置
 - `migrations/` — 数据库版本管理
 
+## 创建数据库表
+
 ## Adding a New API Endpoint
 
 参考 src/api_router/user.rs#L21-53
-额外要求:
-
-1. 返回值一律使用 crate::AppRes
-2. 逻辑实现一律使用diesel_async 的异步实现 , 不要直接使用diesel 的同步实现
-
 **开发完成后必须**：
 
 1. 使用 curl 测试每个接口，验证请求/响应格式、参数校验、错误处理是否符合需求
@@ -199,13 +196,23 @@ pub async fn find_by_platform(platform: &str, novel_id: &str) -> AppRes<Option<n
 
 1. **需求分析** — 分析需求，明确功能边界、输入输出、错误处理
 2. **数据库设计** — 如需新表，参考migrations/2025-11-26-071432_create_req_record,创建数据库版本管理
-   sql ,时间使用当前时间，参考src/db_model/req_record.rs生成 Entity ,entity 要求 , 尽量严格的限制类型 比如日期使用DateTime<Utc> ,有符号数字使用i64 ,uuid 使用 Uuid等等;  
-3. **编写代码** — 按分层架构编写 router → service → model，添加完整 doc comment , 函数参数尽量严格的限制类型 比如日期使用DateTime<Utc> ,有符号数字使用i64 ,uuid 使用 Uuid等等;
+   sql ,时间使用当前时间;参考src/db_model/req_record.rs生成 Entity ,entity 要求 , 尽量严格的限制类型
+   比如日期使用DateTime<Utc> ,有符号数字使用i64 ,uuid 使用 Uuid等等; 如果表有对应的 增删改查 接口 , 优先使用
+   ```#[derive(WebApiGen)]``` 派生宏 生成基础 crud 接口 ,eg: @src/db_model/group.rs#L46 与 @src/api_router/group.rs ;
+   如果是view 则使用 ```#[derive(ViewApiGen)]``` ,eg: @src/db_model/user_with_group_views.rs#L20 与
+   @src/db_model/user_with_group_views.rs
+3. **编写代码** — 按分层架构编写 router → service → model，添加完整 doc comment , 函数参数尽量严格的限制类型
+   比如日期使用DateTime<Utc> ,有符号数字使用i64 ,uuid 使用 Uuid等等;
 4. **编写测试** — 集成测试覆盖完整链路
-5. **本地验证** — `ACTIVE_CONFIG="local" cargo run` 启动服务，用 curl 测试所有接口 ,测试完成后关闭 
+5. **本地验证** — `ACTIVE_CONFIG="local" cargo run` 启动服务，用 curl 测试所有接口 ,测试完成后关闭
 6. **需求对照** — 对照需求，确认无遗漏
 7. **代码审查** — 检查代码质量、安全性、性能
 8. **提交代码** — 确保 `cargo test` 全部通过后再提交
 
-## Key Conventions
-- 数据库表统一使用 `deleted_at` 软删除
+## Note
+
+- 数据库表统一使用 `delete_time` 软删除, 查询使用 logic_delete_query() 筛选未删除数据 ,eg: statement .order(
+  order_column.asc()).logic_delete_query()
+- 不要忽略result 的 err , eg: 不要使用 result.ok(), 应该 result.inspect_err(|e|warn!(?e)).ok()
+- 一律使用diesel_async 的异步实现 , 不要直接使用diesel 的同步实现
+- Result 都使用 crate::AppRes

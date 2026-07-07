@@ -22,7 +22,6 @@ aide = { git = "https://github.com/tamasfe/aide", features = ["swagger", "scalar
 password-auth = "1"
 tower-http = { version = "0.6", features = ["cors", "fs", "limit", "normalize-path"] }
 http = { version = "1" }
-tower-sessions = { version = "0.15", features = ["memory-store"] }
 url = { version = "2", features = ["serde"] }
 schemars = { version = "1", features = ["rust_decimal1", "chrono04", "uuid1", "url2"] }
 #log =======

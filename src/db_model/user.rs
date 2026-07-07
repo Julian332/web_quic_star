@@ -49,7 +49,7 @@ pub struct User {
     pub username: String,
     /// # password
     /// in eth mode it will be signature
-    #[serde(skip_serializing)]
+    #[serde(skip)]
     pub password: String,
 
     pub group_id: i64,

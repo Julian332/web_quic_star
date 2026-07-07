@@ -4,12 +4,8 @@ use crate::framework::errors::{AppError, NoneError};
 use crate::prelude::IntoResult;
 use crate::schema::users::{table as users, username};
 use crate::schema_view::user_with_group_views::dsl::user_with_group_views;
-use crate::{DB, impl_from};
-use axum_login::tower_sessions::cookie::time::Duration;
-use axum_login::tower_sessions::{Expiry, SessionManagerLayer};
-use axum_login::{
-    AuthManagerLayer, AuthManagerLayerBuilder, AuthUser, AuthnBackend, AuthzBackend, UserId,
-};
+use crate::{CONFIG, DB, impl_from};
+use axum_login::{AuthUser, AuthnBackend, AuthzBackend, JwtConfig, JwtManagerLayer, UserId};
 use diesel::deserialize::{FromSql, FromSqlRow};
 use diesel::serialize::{Output, ToSql};
 use diesel::sql_types::{Text, VarChar};
@@ -22,7 +18,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fmt::{Display, Formatter};
-use tower_sessions::MemoryStore;
+use tracing::warn;
 
 #[allow(dead_code)]
 const LOGIN_MESSAGE: &str = "welcome";
@@ -112,15 +108,17 @@ pub fn test() {
     println!("{}", password_auth::generate_hash("1234qwer"));
 }
 
-pub fn get_auth_layer() -> AuthManagerLayer<AuthBackend, MemoryStore> {
-    let session_store = MemoryStore::default();
-    let session_layer = SessionManagerLayer::new(session_store)
-        .with_secure(false)
-        .with_expiry(Expiry::OnInactivity(Duration::days(1)));
-
+pub fn get_auth_layer() -> JwtManagerLayer<AuthBackend> {
     let backend = AuthBackend::new(DB.clone());
+    let config = JwtConfig::from_secret(b"a-very-secret-key");
+    let config = if CONFIG.is_dev {
+        config.with_secure(false)
+    } else {
+        config
+    };
+    // Allow the cookie over plain HTTP for this local example.
 
-    AuthManagerLayerBuilder::new(backend, session_layer).build()
+    JwtManagerLayer::new(backend, config)
 }
 
 #[derive(Clone)]
@@ -312,6 +310,7 @@ impl AuthnBackend for AuthBackend {
     }
 
     async fn get_user(&self, user_id: &UserId<Self>) -> Result<Option<Self::User>, Self::Error> {
+        warn!("should never call again in jwt");
         match users
             .find(user_id)
             .select(User::as_select())

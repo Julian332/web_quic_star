@@ -87,7 +87,7 @@ pub enum Filter {
 
 impl Default for Filter {
     fn default() -> Self {
-        Filter::And(Vec::new())
+        Filter::Or(vec![])
     }
 }
 
