@@ -17,11 +17,11 @@ pub mod docs;
 pub mod group;
 pub mod upload;
 pub mod user;
+pub const API_PREFIX: &str = "/api/v1";
 
 #[allow(clippy::unwrap_used)]
 pub fn setup_router() -> Router {
     aide::generate::extract_schemas(true);
-
     let app = ApiRouter::new()
         .nest_api_service("/auth", auth::router())
         .nest_api_service("/users", user::user_routes())
@@ -58,5 +58,5 @@ pub fn setup_router() -> Router {
             "pretty docs are accessible at http://127.0.0.1:{server_port}/docs/pretty_doc"
         );
     }
-    set_api_doc(ApiRouter::new().nest_api_service("/api/v1", app))
+    set_api_doc(ApiRouter::new().nest_api_service(API_PREFIX, app))
 }

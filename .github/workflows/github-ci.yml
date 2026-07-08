@@ -111,7 +111,7 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
 
       - name: check --feature-powerset
-        run: cargo hack check --feature-powerset --features postgres --no-dev-deps -p web3_quick
+        run: cargo hack check --feature-powerset --features postgres --no-dev-deps
 
 
   rust-clippy-analyze:

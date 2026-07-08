@@ -1,6 +1,6 @@
 use crate::db_model::user::User;
-use crate::framework::api_doc::default_resp_docs;
-use crate::framework::auth::{AuthBackend, Credentials};
+use crate::framework::api_doc::{default_resp_docs, empty_resp_docs};
+use crate::framework::auth::{AuthBackend, Credentials, REFRESH_PATH};
 use aide::axum::routing::post_with;
 use aide::axum::{ApiRouter, IntoApiResponse};
 use axum::Json;
@@ -8,7 +8,7 @@ use axum::http::StatusCode;
 use axum::response::{IntoResponse, Redirect};
 use axum_login::AuthSession;
 
-pub async fn login(
+async fn login(
     auth_session: AuthSession<AuthBackend>,
     Json(creds): Json<Credentials>,
 ) -> impl IntoApiResponse {
@@ -28,7 +28,11 @@ pub async fn login(
         StatusCode::OK.into_response()
     }
 }
-
+async fn refresh() -> impl IntoApiResponse {
+    StatusCode::OK.into_response()
+}
 pub fn router() -> ApiRouter<()> {
-    ApiRouter::new().api_route("/login", post_with(login, default_resp_docs::<User>))
+    ApiRouter::new()
+        .api_route("/login", post_with(login, default_resp_docs::<User>))
+        .api_route(REFRESH_PATH, post_with(refresh, empty_resp_docs))
 }

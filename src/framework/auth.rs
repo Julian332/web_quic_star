@@ -1,3 +1,4 @@
+use crate::api_router::API_PREFIX;
 use crate::db_model::user::User;
 use crate::framework::db::{ConnPool, DbType};
 use crate::framework::errors::{AppError, NoneError};
@@ -108,10 +109,15 @@ impl FromSql<Text, DbType> for AuthPermission<String> {
 pub fn test() {
     println!("{}", password_auth::generate_hash("1234qwer"));
 }
+pub const REFRESH_PATH: &str = "/refresh";
 
 pub fn get_auth_layer() -> JwtManagerLayer<AuthBackend> {
     let backend = AuthBackend::new(DB.clone());
-    let config = JwtConfig::from_secret(b"a-very-secret-key").with_ttl(Duration::from_hours(36));
+    let config = JwtConfig::from_secret(b"a-very-secret-key")
+        .with_ttl(Duration::from_hours(36))
+        .with_refresh_enabled(true)
+        .with_refresh_ttl(Duration::from_hours(24 * 90))
+        .with_refresh_path(format!("{API_PREFIX}/auth{REFRESH_PATH}"));
     let config = if CONFIG.is_dev {
         config.with_secure(false)
     } else {
@@ -374,9 +380,9 @@ impl AuthzBackend for AuthBackend {
         match &perm {
             AuthPermission::Admin => Ok(perms.contains(&perm)),
             AuthPermission::Read(table) => Ok(perms.contains(&perm)
-                    // || perms.contains(&AuthPermission::Add(table.clone()))
-                    || perms.contains(&AuthPermission::Update(table.clone()))
-                    || perms.contains(&AuthPermission::Delete(table.clone()))),
+                // || perms.contains(&AuthPermission::Add(table.clone()))
+                || perms.contains(&AuthPermission::Update(table.clone()))
+                || perms.contains(&AuthPermission::Delete(table.clone()))),
             AuthPermission::Add(table) => {
                 Ok(perms.contains(&perm) || perms.contains(&AuthPermission::Update(table.clone())))
             }
